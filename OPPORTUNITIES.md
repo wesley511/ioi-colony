@@ -43,9 +43,9 @@ Workers must:
 - date_identified: 2026-03-20
 - description: Repeated customer demand for kids original shorts with low availability on rails.
 
-- leverage_score: 0.65
+- leverage_score: 0.68
 - risk_level: Low
-- confidence: 0.75
+- confidence: 0.84
 
 - score_components:
   - revenue: 0.70
@@ -60,6 +60,8 @@ Workers must:
   - repeated mention in branch reports
   - signal SIG-2026-03-20-0004
   - Continued customer demand for kids original shorts with low rail availability.
+  - signal SIG-2026-03-20-0005
+  - Continued customer demand for kids original shorts with low rail availability.
 
 - rationale: Clear demand-supply gap in a repeatable category. Opportunity to improve sourcing or allocation.
 
@@ -70,4 +72,9 @@ Workers must:
 
 - status: Active
 - review_status: Pending
+
+- last_reinforced:
+  - date: 2026-03-20
+  - delta: 0.03
+  - reason: reinforced by SIG-2026-03-20-0005
 - last_updated: 2026-03-20
