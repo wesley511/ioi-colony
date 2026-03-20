@@ -13,6 +13,38 @@ Workers must:
 ---
 
 ## Active Opportunities
+### [High-Demand Clothing Gap — Kids Shorts Original]
+
+- source: retail observation (TopTown branches)
+- date_identified: 2026-03-20
+- description: Repeated customer demand for kids original shorts with low availability on rails.
+
+- leverage_score: 0.65
+- risk_level: Low
+- confidence: 0.75
+
+- score_components:
+  - revenue: 0.70
+  - scalability: 0.60
+  - ease: 0.70
+  - strategic: 0.65
+  - wellbeing: 0.50
+
+- evidence_sources:
+  - customer requests recorded
+  - stock observed low or empty
+  - repeated mention in branch reports
+
+- rationale: Clear demand-supply gap in a repeatable category. Opportunity to improve sourcing or allocation.
+
+- last_reinforced:
+  - date: 2026-03-20
+  - delta: 0.00
+  - reason: initial entry
+
+- status: Active
+- review_status: Pending
+- last_updated: 2026-03-20
 
 ### [Initial Monitoring State]
 
@@ -56,6 +88,7 @@ Workers must:
 ---
 
 ## Priority Review Queue
+
 
 <!-- Move opportunities here when leverage_score > 0.80 or when prompt human review is recommended -->
 
