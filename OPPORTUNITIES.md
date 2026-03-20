@@ -34,6 +34,7 @@ Workers must:
 - last_updated: 2026-03-20
 
 ---
+
 ### [High-Demand Clothing Gap — Kids Shorts Original]
 
 - source: retail observation (TopTown branches)
