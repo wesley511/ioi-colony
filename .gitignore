@@ -1,0 +1,11 @@
+# OpenClaw runtime
+sessions/
+logs/
+
+# System
+*.log
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
