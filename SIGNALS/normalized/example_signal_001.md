@@ -11,4 +11,4 @@ evidence:
 urgency: high
 confidence: 0.80
 suggested_opportunity: improve sourcing or inter-branch allocation for kids original shorts
-status: new
+status: processed
