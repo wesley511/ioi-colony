@@ -1,11 +1,9 @@
-# OpenClaw runtime
-sessions/
-logs/
+__pycache__/
+LOGS/
+BACKUPS/
+ARCHIVE/
 
-# System
-*.log
-*.tmp
-
-# OS
-.DS_Store
-Thumbs.db
+# runtime state (optional but recommended)
+OPPORTUNITIES.md
+PRIORITY.md
+HEALTH.md
