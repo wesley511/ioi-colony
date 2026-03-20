@@ -1,0 +1,25 @@
+{
+  "weights": {
+    "revenue": 0.30,
+    "scalability": 0.25,
+    "ease": 0.20,
+    "strategic": 0.15,
+    "wellbeing": 0.10
+  },
+  "risk_penalty": {
+    "low": 0.05,
+    "medium": 0.15,
+    "high": 0.30
+  },
+  "reinforcement": {
+    "small": [0.02, 0.05],
+    "strong": [0.06, 0.12],
+    "max_per_cycle": 0.30
+  },
+  "thresholds": {
+    "monitor": 0.20,
+    "explore": 0.40,
+    "meaningful": 0.60,
+    "review": 0.80
+  }
+}
