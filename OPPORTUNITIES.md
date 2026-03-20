@@ -34,7 +34,6 @@ Workers must:
 - last_updated: 2026-03-20
 
 ---
-
 ### [High-Demand Clothing Gap — Kids Shorts Original]
 
 - source: retail observation (TopTown branches)
@@ -61,17 +60,11 @@ Workers must:
   - signal SIG-2026-03-20-0004
   - Continued customer demand for kids original shorts with low rail availability.
   - signal SIG-2026-03-20-0005
-  - Continued customer demand for kids original shorts with low rail availability.
+ 
+
 
 - rationale: Clear demand-supply gap in a repeatable category. Opportunity to improve sourcing or allocation.
 
-- last_reinforced:
-  - date: 2026-03-20
-  - delta: 0.00
-  - reason: merged duplicate signal evidence from SIG-2026-03-20-0004
-
-- status: Active
-- review_status: Pending
 
 - last_reinforced:
   - date: 2026-03-20
