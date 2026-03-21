@@ -1,0 +1,170 @@
+version: 1.0
+last_updated: 2026-03-21
+total_shops: 4
+total_staff: 31
+
+shops:
+  - code: WAI
+    name: TTC Waigani
+    staff_count: 31
+  - code: SHOP2
+    name: TTC Shop 2
+    staff_count: 0
+  - code: SHOP3
+    name: TTC Shop 3
+    staff_count: 0
+  - code: SHOP4
+    name: TTC Shop 4
+    staff_count: 0
+
+staff:
+  - staff_id: STAFF-WAI-ALICE
+    full_name: Alice Koko
+    normalized_name: alice
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: pricing_room
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
+
+  - staff_id: STAFF-WAI-GRACE
+    full_name: Grace Masson
+    normalized_name: grace
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: floor_staff
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
+  - staff_id: STAFF-WAI-FIDELMA
+    full_name: Fidelma Wobilo
+    normalized_name: fidelma
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: cashier
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
+
+  - staff_id: STAFF-WAI-DAVID
+    full_name: David Yaro
+    normalized_name: david
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: monitoring
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
+
+  - staff_id: STAFF-WAI-AGNES
+    full_name: Agnes Timothy
+    normalized_name: agnes
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: pricing_room
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
+
+  - staff_id: STAFF-WAI-MOVIYO
+    full_name: Moviyo Alex
+    normalized_name: moviyo
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: pricing_clerk
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
+
+  - staff_id: STAFF-WAI-SABILLA
+    full_name: Sabilla Seka
+    normalized_name: sabilla
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: floor_staff
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: "normalized from Sabila/Sabilla"
+
+  - staff_id: STAFF-WAI-MITEGE
+    full_name: Mitege Laiken
+    normalized_name: mitege
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: door
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
+
+  - staff_id: STAFF-WAI-XEENA
+    full_name: Xeena Moris
+    normalized_name: xeena
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: floor_staff
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
+
+  - staff_id: STAFF-WAI-ANDREW
+    full_name: Andrew Joseph
+    normalized_name: andrew
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: floor_staff
+    first_seen_date: 2026-03-21
+    last_seen_date: 2026-03-21
+    notes: "not yet linked to section signal"
+  - staff_id: STAFF-WAI-FIDELMA
+    full_name: Fidelma Wobilo
+    normalized_name: fidelma
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: cashier
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
+
+  - staff_id: STAFF-WAI-DAVID
+    full_name: David Yaro
+    normalized_name: david
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: monitoring
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
+  - staff_id: STAFF-WAI-AGNES
+    full_name: Agnes Timothy
+    normalized_name: agnes
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: pricing_room
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
+
+  - staff_id: STAFF-WAI-MOVIYO
+    full_name: Moviyo Alex
+    normalized_name: moviyo
+    shop_code: WAI
+    shop_name: TTC Waigani
+    status: active
+    role_type: pricing_clerk
+    first_seen_date: 2026-03-20
+    last_seen_date: 2026-03-21
+    notes: ""
