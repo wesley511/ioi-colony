@@ -9,3 +9,16 @@ PRIORITY.md
 HEALTH.md
 
 #SIGNALS/normalized/
+
+# Runtime / generated data
+SIGNALS/archive/
+SIGNALS/test_archive/
+COLONY_MEMORY/
+BASELINES/
+
+# Temp inputs
+INPUT/*.bak
+
+# Python cache
+__pycache__/
+*.pyc
