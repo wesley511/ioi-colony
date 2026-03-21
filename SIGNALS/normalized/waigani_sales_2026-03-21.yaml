@@ -1,0 +1,50 @@
+type: sales_day_end
+branch: waigani
+date: 2026-03-21
+
+tills:
+  - till_id: 1
+    name: main_shop
+    cashier: fidelma_wobilo
+    assistant: privian_keiby
+    cash: 7706.00
+    card: 2964.80
+    z_reading: 10711.80
+    variance: 41.00
+    variance_reason: item_return
+
+  - till_id: 2
+    name: main_shop
+    cashier: dorothy_morofa
+    assistant: david_yailo
+    cash: 4018.20
+    card: 3049.60
+    z_reading: 7067.80
+    variance: 0.00
+
+totals:
+  cash: 11724.20
+  card: 6014.40
+  sales: 17738.60
+
+customers:
+  traffic: 537
+  served: 341
+  conversion_rate: 0.635
+
+performance:
+  sales_per_customer: 52.00
+  sales_per_labor_hour: 67.30
+
+supervisor:
+  name: francis_ano
+  issues:
+    staffing: null
+    stock: null
+    pricing: null
+    escalations: null
+
+flags:
+  variance_flag: low
+  performance_flag: strong
+
