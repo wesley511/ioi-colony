@@ -193,9 +193,30 @@ def load_signals(memory_dir: Path, min_confidence: float, verbose: bool = False)
 
 
 def normalize_label(text: str) -> str:
+    if not text:
+        return "unknown"
+
     text = text.strip().lower()
-    text = re.sub(r"\s+", " ", text)
-    return text or "unknown"
+
+    aliases = {
+        "ttc waigani": "waigani",
+        "waigani": "waigani",
+        "ttc lae malaita": "lae_malaita",
+        "lae malaita": "lae_malaita",
+        "ttc bena road": "bena_road",
+        "bena road": "bena_road",
+        "ttc 5th street": "5th_street",
+        "5th street": "5th_street",
+        "5th_street": "5th_street",
+    }
+
+    if text in aliases:
+        return aliases[text]
+
+    text = re.sub(r"^ttc\s+", "", text)
+    text = re.sub(r"\s+(branch|shop|store)$", "", text)
+    text = re.sub(r"\s+", "_", text)
+    return text.strip("_") or "unknown"
 
 
 def advisory_strength(sig: Signal) -> float:
