@@ -1,0 +1,16 @@
+date: 2026-03-21
+day: saturday
+source_type: bale_release_report
+source_name: waigani
+category: inventory_supply
+signal_type: bale_release
+branch: waigani
+bale_no: 5
+item_name: original_shirts
+weight: 40kg
+quantity_released: 150
+amount_released: 1955.00
+value_per_item: 13.0333
+confidence: 0.95
+opportunity_score: 8.41
+status: active

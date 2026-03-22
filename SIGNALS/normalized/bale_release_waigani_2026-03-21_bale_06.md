@@ -1,0 +1,16 @@
+date: 2026-03-21
+day: saturday
+source_type: bale_release_report
+source_name: waigani
+category: inventory_supply
+signal_type: bale_release
+branch: waigani
+bale_no: 6
+item_name: children_sport_shoes_creme
+weight: 25kg
+quantity_released: 63
+amount_released: 1505.00
+value_per_item: 23.8889
+confidence: 0.95
+opportunity_score: 4.90
+status: active

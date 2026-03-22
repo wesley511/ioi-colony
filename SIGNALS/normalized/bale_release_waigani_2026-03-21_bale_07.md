@@ -1,0 +1,16 @@
+date: 2026-03-21
+day: saturday
+source_type: bale_release_report
+source_name: waigani
+category: inventory_supply
+signal_type: bale_release
+branch: waigani
+bale_no: 7
+item_name: chsh_45kg
+weight: 45kg
+quantity_released: 375
+amount_released: 2709.00
+value_per_item: 7.2240
+confidence: 0.95
+opportunity_score: 16.67
+status: active

@@ -1,0 +1,16 @@
+date: 2026-03-21
+day: saturday
+source_type: bale_release_report
+source_name: waigani
+category: inventory_supply
+signal_type: bale_release
+branch: waigani
+bale_no: 3
+item_name: osh_45kg
+weight: 45kg
+quantity_released: 232
+amount_released: 2293.00
+value_per_item: 9.8836
+confidence: 0.95
+opportunity_score: 11.55
+status: active

@@ -1,0 +1,16 @@
+date: 2026-03-21
+day: saturday
+source_type: bale_release_report
+source_name: waigani
+category: inventory_supply
+signal_type: bale_release
+branch: waigani
+bale_no: 2
+item_name: sport_shoes_cr_extra
+weight: 25kg
+quantity_released: 40
+amount_released: 1926.00
+value_per_item: 48.1500
+confidence: 0.95
+opportunity_score: 5.05
+status: active

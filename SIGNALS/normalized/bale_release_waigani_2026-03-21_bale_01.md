@@ -1,0 +1,16 @@
+date: 2026-03-21
+day: saturday
+source_type: bale_release_report
+source_name: waigani
+category: inventory_supply
+signal_type: bale_release
+branch: waigani
+bale_no: 1
+item_name: mixed_items_200kg
+weight: 200kg
+quantity_released: 1022
+amount_released: 8498.00
+value_per_item: 8.3151
+confidence: 0.95
+opportunity_score: 47.66
+status: active

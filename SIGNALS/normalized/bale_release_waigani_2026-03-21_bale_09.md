@@ -1,0 +1,16 @@
+date: 2026-03-21
+day: saturday
+source_type: bale_release_report
+source_name: waigani
+category: inventory_supply
+signal_type: bale_release
+branch: waigani
+bale_no: 9
+item_name: mtsh_45kg
+weight: 45kg
+quantity_released: 234
+amount_released: 2203.00
+value_per_item: 9.4145
+confidence: 0.95
+opportunity_score: 11.43
+status: active
