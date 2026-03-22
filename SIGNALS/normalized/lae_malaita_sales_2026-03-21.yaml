@@ -16,18 +16,11 @@ totals:
 customers:
   traffic: 278
   conversion_rate: 0.622
-  other_entry_guests: 173
 performance:
   sales_per_labor_hour: 20.8
-  sales_per_staff: 177.2
+  sales_per_staff: 4609.0
 supervisor:
   name: renate_norman
-  issues:
-    staffing: null
-    stock: null
-    pricing: null
-    escalations: "1.Reminder notice regarding Manaka Security outstanding payments\
-      \ - Continuous follow-up \n2. Toilet and Signboard maintenance."
 flags:
-  variance_flag: low
-  performance_flag: moderate
+  performance_flag: weak
+confidence: 0.67

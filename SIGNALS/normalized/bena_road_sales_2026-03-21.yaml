@@ -15,17 +15,14 @@ totals:
   sales: 7000.0
 customers:
   traffic: 320
-  conversion_rate: 0.0
+  conversion_rate: 0.6559999999999999
   served: 210
 performance:
+  sales_per_customer: 33.33
   sales_per_labor_hour: 45.0
+  sales_per_staff: 7000.0
 supervisor:
   name: example_supervisor
-  issues:
-    staffing: null
-    stock: null
-    pricing: null
-    escalations: null
 flags:
-  variance_flag: low
   performance_flag: moderate
+confidence: 1.0

@@ -1,0 +1,12 @@
+date: 2026-03-21
+day: saturday
+source_type: staff_report
+source_name: bena_road
+signal_type: productivity_signal
+staff_id: staff-bena-linda_mati
+section: cream_rails
+items_moved: 73
+assisting_count: 9
+confidence: 0.9
+opportunity_score: 68
+status: active
