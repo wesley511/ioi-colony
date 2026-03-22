@@ -25,17 +25,14 @@ totals:
   sales: 17738.6
 customers:
   traffic: 537
-  conversion_rate: 0.0
+  conversion_rate: 0.635
   served: 341
 performance:
+  sales_per_customer: 52.0
   sales_per_labor_hour: 67.3
+  sales_per_staff: 8869.3
 supervisor:
   name: francis_ano
-  issues:
-    staffing: 'Stock issues affecting sales:'
-    stock: 'Pricing or system issues:'
-    pricing: 'Exceptions escalated to Ops Manager:'
-    escalations: null
 flags:
-  variance_flag: low
   performance_flag: strong
+confidence: 1.0

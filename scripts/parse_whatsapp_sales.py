@@ -1,8 +1,18 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import re
-import yaml
+import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
+import yaml
+
+
+# ----------------------------
+# Helpers
+# ----------------------------
 
 def slugify(value: str) -> str:
     value = value.strip().lower()
@@ -10,26 +20,45 @@ def slugify(value: str) -> str:
     return value.strip("_")
 
 
-def extract_value(pattern, text, default=0.0, flags=re.IGNORECASE | re.MULTILINE):
+def extract_value(
+    pattern: str,
+    text: str,
+    default: float = 0.0,
+    flags: int = re.IGNORECASE | re.MULTILINE,
+) -> float:
     match = re.search(pattern, text, flags)
     if not match:
         return default
     raw = match.group(1).replace(",", "").strip()
-    return float(raw)
+    try:
+        return float(raw)
+    except ValueError:
+        return default
 
 
-def extract_text(pattern, text, default=None, flags=re.IGNORECASE | re.MULTILINE):
+def extract_text(
+    pattern: str,
+    text: str,
+    default: Optional[str] = None,
+    flags: int = re.IGNORECASE | re.MULTILINE,
+) -> Optional[str]:
     match = re.search(pattern, text, flags)
     return match.group(1).strip() if match else default
 
 
+# ----------------------------
+# Core Parsing
+# ----------------------------
+
 def parse_date(text: str) -> str:
-    # Supports:
-    # Date: 21/03/26
-    # Date: Saturday 21/03/26
-    match = re.search(r"Date:\s*(?:[A-Za-z]+\s+)?(\d{2}/\d{2}/\d{2})", text, re.IGNORECASE)
+    match = re.search(
+        r"Date:\s*(?:[A-Za-z]+\s+)?(\d{2}/\d{2}/\d{2})(?:\s+[A-Za-z]+)?",
+        text,
+        re.IGNORECASE,
+    )
     if not match:
         raise ValueError("Could not find report date")
+
     raw_date = datetime.strptime(match.group(1), "%d/%m/%y")
     return raw_date.strftime("%Y-%m-%d")
 
@@ -41,13 +70,17 @@ def parse_branch(text: str) -> str:
     return slugify(match.group(1))
 
 
-def parse_tills(text: str):
-    tills = []
+# ----------------------------
+# Tills
+# ----------------------------
+
+def parse_tills(text: str) -> List[Dict[str, Any]]:
+    tills: List[Dict[str, Any]] = []
 
     till_pattern = re.compile(
         r"Till#\s*(\d+)\s*:\s*(.*?)\n"
         r"(.*?)(?=\nTill#\s*\d+\s*:|\nTOTALS\b)",
-        re.IGNORECASE | re.DOTALL
+        re.IGNORECASE | re.DOTALL,
     )
 
     for match in till_pattern.finditer(text):
@@ -62,7 +95,7 @@ def parse_tills(text: str):
         card = extract_value(r"T/Card:\s*K\s*([\d,\.]+)", block)
         z_reading = extract_value(r"Z/Reading:\s*K\s*([\d,\.]+)", block)
 
-        balance_text = extract_text(r"Balance:\s*(.+)", block, default="")
+        balance_text = extract_text(r"Balance:\s*(.+)", block, default="") or ""
         variance = 0.0
         variance_reason = None
 
@@ -70,11 +103,12 @@ def parse_tills(text: str):
             amount_match = re.search(r"K\s*([\d,\.]+)", balance_text, re.IGNORECASE)
             if amount_match:
                 variance = float(amount_match.group(1).replace(",", ""))
+
             reason_match = re.search(r"\((.*?)\)", balance_text)
             if reason_match:
                 variance_reason = slugify(reason_match.group(1))
 
-        till_entry = {
+        till_entry: Dict[str, Any] = {
             "till_id": till_id,
             "name": till_name,
             "cashier": slugify(cashier) if cashier else None,
@@ -94,7 +128,11 @@ def parse_tills(text: str):
     return tills
 
 
-def parse_totals(text: str):
+# ----------------------------
+# Totals
+# ----------------------------
+
+def parse_totals(text: str) -> Dict[str, float]:
     return {
         "cash": extract_value(r"Total\s+Ca(?:sh|ssh):\s*K\s*([\d,\.]+)", text),
         "card": extract_value(r"Total\s+Card:\s*K\s*([\d,\.]+)", text),
@@ -102,94 +140,147 @@ def parse_totals(text: str):
     }
 
 
-def parse_customers(text: str):
-    customers = {
+# ----------------------------
+# Customers (UPDATED ✔)
+# ----------------------------
+
+def parse_customers(text: str) -> Dict[str, Any]:
+    customers: Dict[str, Any] = {
         "traffic": int(extract_value(r"Main\s+Door:\s*(\d+)", text)),
-        "conversion_rate": extract_value(r"Conversion\s+Rate\s*:?\s*([\d\.]+)%?", text) / 100,
+        "conversion_rate": extract_value(
+            r"Conversion\s+rate\s*[:=]+\s*([\d\.]+)%?",
+            text,
+        ) / 100,
     }
 
-    served = re.search(r"(?:Guest/\s*)?Customer\s+served:\s*(\d+)", text, re.IGNORECASE)
-    other_entry = re.search(r"Other\s+Entry/Guests:\s*(\d+)", text, re.IGNORECASE)
+    served = re.search(
+        r"(?:Guest/\s*)?Customer\s+served:\s*(\d+)",
+        text,
+        re.IGNORECASE,
+    )
 
     if served:
         customers["served"] = int(served.group(1))
-    if other_entry:
-        customers["other_entry_guests"] = int(other_entry.group(1))
+
+    # fallback conversion
+    if customers["conversion_rate"] == 0:
+        fallback = re.search(r"(\d+\.?\d*)\s*%", text)
+        if fallback:
+            customers["conversion_rate"] = float(fallback.group(1)) / 100
 
     return customers
 
 
-def parse_performance(text: str):
-    perf = {}
+# ----------------------------
+# Performance (UPDATED ✔)
+# ----------------------------
 
-    sales_per_customer = re.search(r"Sale\s+per\s+customer\s*[:=]\s*K?\s*([\d\.]+)", text, re.IGNORECASE)
+def parse_performance(text: str) -> Dict[str, float]:
+    perf: Dict[str, float] = {}
+
+    sales_per_customer = re.search(
+        r"Sale\s+per\s+customer\s*[:=]+\s*K?\s*([\d\.]+)",
+        text,
+        re.IGNORECASE,
+    )
     if sales_per_customer:
         perf["sales_per_customer"] = float(sales_per_customer.group(1))
 
-    sales_per_labor_hour = re.search(r"Sales\s+Per\s+Labor\s+Hour\s*[:=]\s*K?\s*([\d\.]+)", text, re.IGNORECASE)
+    sales_per_labor_hour = re.search(
+        r"Sales\s+per\s+labor\s+hour\s*[:=]+\s*K?\s*([\d\.]+)",
+        text,
+        re.IGNORECASE,
+    )
     if sales_per_labor_hour:
         perf["sales_per_labor_hour"] = float(sales_per_labor_hour.group(1))
-
-    sales_per_staff = re.search(r"Sales\s+Per\s+Staff\s*:\s*K?\s*([\d\.]+)", text, re.IGNORECASE)
-    if sales_per_staff:
-        perf["sales_per_staff"] = float(sales_per_staff.group(1))
 
     return perf
 
 
-def parse_supervisor_section(text: str):
-    supervisor = {
-        "name": None,
-        "issues": {
-            "staffing": None,
-            "stock": None,
-            "pricing": None,
-            "escalations": None,
-        }
-    }
+# ----------------------------
+# Derived KPIs (NEW 🔥)
+# ----------------------------
+
+def derive_kpis(data: Dict[str, Any]) -> None:
+    totals = data.get("totals", {})
+    customers = data.get("customers", {})
+    perf = data.get("performance", {})
+
+    sales = totals.get("sales", 0)
+    served = customers.get("served")
+    traffic = customers.get("traffic")
+
+    # fallback: sales per customer
+    if "sales_per_customer" not in perf:
+        if served and served > 0:
+            perf["sales_per_customer"] = round(sales / served, 2)
+
+    # fallback: sales per staff (proxy)
+    if "sales_per_staff" not in perf:
+        staff_count = len(data.get("tills", []))
+        if staff_count > 0:
+            perf["sales_per_staff"] = round(sales / staff_count, 2)
+
+    # fallback: conversion
+    if customers.get("conversion_rate", 0) == 0 and served and traffic:
+        customers["conversion_rate"] = round(served / traffic, 3)
+
+    data["performance"] = perf
+    data["customers"] = customers
+
+
+# ----------------------------
+# Supervisor
+# ----------------------------
+
+def parse_supervisor_section(text: str) -> Dict[str, Any]:
+    supervisor: Dict[str, Any] = {"name": None}
 
     name = extract_text(r"Supervisor:\s*(.+)", text)
     if name:
         supervisor["name"] = slugify(name)
 
-    staffing = extract_text(r"Staffing\s+issues:\s*(.+)", text)
-    stock = extract_text(r"Stock\s+issues\s+affecting\s+sales:\s*(.+)", text)
-    pricing = extract_text(r"Pricing\s+or\s+system\s+issues:\s*(.+)", text)
-
-    if staffing and staffing.lower() != "none":
-        supervisor["issues"]["staffing"] = staffing
-    if stock and stock.lower() != "none":
-        supervisor["issues"]["stock"] = stock
-    if pricing and pricing.lower() != "none":
-        supervisor["issues"]["pricing"] = pricing
-
-    escalations_match = re.search(
-        r"Exceptions\s+escalated\s+to\s+Ops\s+Manager:\s*(.*?)(?:Supervisor\s+confirmation:|$)",
-        text,
-        re.IGNORECASE | re.DOTALL
-    )
-    if escalations_match:
-        escalations = escalations_match.group(1).strip()
-        if escalations:
-            supervisor["issues"]["escalations"] = escalations
-
     return supervisor
 
 
-def derive_flags(data):
-    flags = {}
+# ----------------------------
+# Flags + Confidence
+# ----------------------------
 
-    total_variance = sum(t.get("variance", 0.0) for t in data.get("tills", []))
-    flags["variance_flag"] = "low" if total_variance <= 50 else "high"
+def derive_flags(data: Dict[str, Any]) -> Dict[str, str]:
+    flags: Dict[str, str] = {}
 
-    total_sales = data.get("totals", {}).get("sales", 0.0)
-    flags["performance_flag"] = "strong" if total_sales >= 10000 else "moderate"
+    total_sales = data.get("totals", {}).get("sales", 0)
+
+    if total_sales >= 10000:
+        flags["performance_flag"] = "strong"
+    elif total_sales >= 5000:
+        flags["performance_flag"] = "moderate"
+    else:
+        flags["performance_flag"] = "weak"
 
     return flags
 
 
-def parse_sales_report(text):
-    data = {
+def derive_confidence(data: Dict[str, Any]) -> float:
+    score = 0
+
+    if data.get("totals", {}).get("sales", 0) > 0:
+        score += 1
+    if data.get("customers", {}).get("conversion_rate", 0) > 0:
+        score += 1
+    if data.get("performance", {}).get("sales_per_customer"):
+        score += 1
+
+    return round(score / 3, 2)
+
+
+# ----------------------------
+# Main Parse
+# ----------------------------
+
+def parse_sales_report(text: str) -> Dict[str, Any]:
+    data: Dict[str, Any] = {
         "type": "sales_day_end",
         "branch": parse_branch(text),
         "date": parse_date(text),
@@ -200,22 +291,38 @@ def parse_sales_report(text):
         "supervisor": parse_supervisor_section(text),
     }
 
+    derive_kpis(data)
+
     data["flags"] = derive_flags(data)
+    data["confidence"] = derive_confidence(data)
+
     return data
 
 
-def save_yaml(data):
-    filename = f"{data['branch']}_sales_{data['date']}.yaml"
-    path = Path("SIGNALS/normalized") / filename
+# ----------------------------
+# Save
+# ----------------------------
 
-    with open(path, "w") as f:
+def save_yaml(data: Dict[str, Any], output_dir: str = "SIGNALS/normalized") -> Path:
+    filename = f"{data['branch']}_sales_{data['date']}.yaml"
+
+    path = Path(output_dir) / filename
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(path, "w", encoding="utf-8") as f:
         yaml.dump(data, f, sort_keys=False, allow_unicode=True)
 
     print(f"Saved: {path}")
+    return path
 
 
-if __name__ == "__main__":
-    print("Paste WhatsApp report below. Press CTRL+D when done:\n")
+# ----------------------------
+# CLI
+# ----------------------------
+
+def main() -> int:
+    print("Paste WhatsApp report below. CTRL+D when done:\n")
+
     text = ""
     try:
         while True:
@@ -223,5 +330,25 @@ if __name__ == "__main__":
     except EOFError:
         pass
 
-    parsed = parse_sales_report(text)
-    save_yaml(parsed)
+    if not text.strip():
+        print("No input received.", file=sys.stderr)
+        return 1
+
+    try:
+        parsed = parse_sales_report(text)
+        save_yaml(parsed)
+
+        print("\nSummary:")
+        print(f"- Sales: {parsed['totals']['sales']}")
+        print(f"- Conversion: {parsed['customers'].get('conversion_rate')}")
+        print(f"- Confidence: {parsed['confidence']}")
+
+        return 0
+
+    except Exception as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
