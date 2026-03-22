@@ -1,0 +1,48 @@
+📦 DAILY BALE RELEASE SUMMARY
+
+Branch: TTC LAE MALAITA
+Date: 2026-03-21
+Day: Saturday
+
+BALE DETAILS
+
+1. Bale No: 1
+Item: mens_tshirts_2
+Weight: 40kg
+Quantity: 200
+Amount: 1796.00
+
+2. Bale No: 2
+Item: cargo_shorts
+Weight: 40kg
+Quantity: 100
+Amount: 3572.00
+
+3. Bale No: 3
+Item: boys_tshirts
+Weight: 40kg
+Quantity: 316
+Amount: 1861.00
+
+4. Bale No: 4
+Item: army_clothing
+Weight: 40kg
+Quantity: 109
+Amount: 2376.00
+
+5. Bale No: 5
+Item: boys_pants
+Weight: 40kg
+Quantity: 114
+Amount: 1427.00
+
+SUMMARY
+
+Total Bales: 5
+Bales Released to Rail: 5
+Bales Not Yet Released: 0
+Total Quantity: 839
+Total Amount: 11032.00
+
+Prepared by: [Name]
+Role: Pricing Clerk
