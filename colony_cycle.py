@@ -1,77 +1,140 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+from __future__ import annotations
 
-from pathlib import Path
-from datetime import datetime
+import shutil
 import subprocess
 import sys
+from datetime import datetime
+from pathlib import Path
 
-POST_PREFIX = "[IOI Colony Cycle]"
+
+ROOT = Path(__file__).resolve().parent
+REPORTS_DIR = ROOT / "REPORTS"
+SIGNALS_DIR = ROOT / "SIGNALS" / "normalized"
+STAFF_MEMORY_DIR = ROOT / "COLONY_MEMORY" / "staff_signals"
+RULES_FILE = ROOT / "COLONY_RULES.md"
+
+SALES_SCRIPT = ROOT / "scripts" / "ingest_whatsapp_sales_batch.py"
 
 
-def run_step(cmd: list[str], label: str) -> None:
-    print(f"{POST_PREFIX} Running: {label}")
+def now_timestamp() -> str:
+    return datetime.now().strftime("%Y-%m-%d_%H%M%S")
 
-    result = subprocess.run(cmd, text=True, capture_output=True)
 
+def run_command(cmd: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        cmd,
+        cwd=str(ROOT),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+
+def print_output(result: subprocess.CompletedProcess[str]) -> None:
     if result.stdout:
-        print(result.stdout)
+        print(result.stdout.rstrip())
+    if result.returncode != 0 and result.stderr:
+        print(result.stderr.rstrip(), file=sys.stderr)
+
+
+def emit_staff_signals() -> int:
+    STAFF_MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+
+    copied = 0
+    for src in sorted(SIGNALS_DIR.glob("staff-*.md")):
+        dst = STAFF_MEMORY_DIR / src.name
+        shutil.copy2(src, dst)
+        copied += 1
+
+    print(f"[IOI Colony Cycle] Emitted {copied} staff signal(s) to colony memory")
+    return copied
+
+
+def run_sales_ingestion() -> None:
+    if not SALES_SCRIPT.exists():
+        raise FileNotFoundError(f"Sales ingestion script not found: {SALES_SCRIPT}")
+
+    print("[IOI Colony Cycle] Running: batch sales ingestion")
+    result = run_command([sys.executable, str(SALES_SCRIPT)])
+    print_output(result)
 
     if result.returncode != 0:
-        print(f"{POST_PREFIX} ERROR in {label}:\n{result.stderr}", file=sys.stderr)
-        raise RuntimeError(f"{label} failed")
+        raise RuntimeError(f"Sales ingestion failed with exit code {result.returncode}")
+
+
+def run_staff_analyzer(ts: str) -> Path:
+    print("[IOI Colony Cycle] Running: staff colony analyzer")
+
+    advisory_path = REPORTS_DIR / f"advisory_{ts}.md"
+
+    cmd = [
+        sys.executable,
+        "-m",
+        "scripts.colony_analyzer",
+        "--memory-dir",
+        str(STAFF_MEMORY_DIR),
+        "--rules-file",
+        str(RULES_FILE),
+        "--output",
+        str(advisory_path),
+    ]
+
+    result = run_command(cmd)
+    print_output(result)
+
+    if result.returncode != 0:
+        raise RuntimeError(f"Staff analyzer failed with exit code {result.returncode}")
+
+    return advisory_path
+
+
+def run_fusion_analyzer(ts: str) -> Path:
+    print("[IOI Colony Cycle] Running: fusion analyzer")
+
+    fusion_path = REPORTS_DIR / f"fusion_{ts}.md"
+
+    cmd = [
+        sys.executable,
+        "-m",
+        "scripts.colony_fusion_analyzer",
+        "--output",
+        str(fusion_path),
+    ]
+
+    result = run_command(cmd)
+    print_output(result)
+
+    if result.returncode != 0:
+        raise RuntimeError(f"Fusion analyzer failed with exit code {result.returncode}")
+
+    return fusion_path
 
 
 def main() -> int:
-    root = Path(__file__).resolve().parent
-    python = sys.executable
+    try:
+        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        STAFF_MEMORY_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Ensure REPORTS dir exists
-    reports_dir = root / "REPORTS"
-    reports_dir.mkdir(exist_ok=True)
+        ts = now_timestamp()
 
-    run_stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        run_sales_ingestion()
 
-    advisory_out = reports_dir / f"advisory_{run_stamp}.md"
-    fusion_out = reports_dir / f"fusion_{run_stamp}.md"
+        print("[IOI Colony Cycle] Running: staff signal emitter")
+        emit_staff_signals()
 
-    # 1. Batch sales ingestion
-    run_step(
-        [python, str(root / "scripts" / "ingest_whatsapp_sales_batch.py")],
-        "batch sales ingestion",
-    )
+        advisory_path = run_staff_analyzer(ts)
+        fusion_path = run_fusion_analyzer(ts)
 
-    # 2. Staff analyzer
-    run_step(
-        [
-            python,
-            str(root / "scripts" / "colony_analyzer.py"),
-            "--min-confidence",
-            "0.5",
-            "--output",
-            str(advisory_out),
-        ],
-        "staff colony analyzer",
-    )
+        print("[IOI Colony Cycle] Cycle complete")
+        print(f"[IOI Colony Cycle] Advisory: {advisory_path}")
+        print(f"[IOI Colony Cycle] Fusion: {fusion_path}")
+        print(f"[IOI Colony Cycle] Timestamp: {datetime.now()}")
+        return 0
 
-    # 3. Fusion analyzer
-    run_step(
-        [
-            python,
-            "-m",
-            "scripts.colony_fusion_analyzer",
-            "--output",
-            str(fusion_out),
-        ],
-        "fusion analyzer",
-    )
-
-    print(f"{POST_PREFIX} Cycle complete")
-    print(f"{POST_PREFIX} Advisory: {advisory_out}")
-    print(f"{POST_PREFIX} Fusion: {fusion_out}")
-    print(f"{POST_PREFIX} Timestamp: {datetime.now()}")
-
-    return 0
+    except Exception as exc:
+        print(f"[IOI Colony Cycle] ERROR: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
