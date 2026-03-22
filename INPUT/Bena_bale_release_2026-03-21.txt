@@ -1,0 +1,55 @@
+📦 DAILY BALE RELEASE SUMMARY
+
+Branch: TTC BENA ROAD
+Date: 2026-03-21
+Day: Saturday
+
+BALE DETAILS
+
+1. Bale No: 1
+Item: mix_clothing
+Weight: 45kg
+Quantity: 157
+Amount: 1532.00
+
+2. Bale No: 2
+Item: kids_boys_pants
+Weight: 40kg
+Quantity: 146
+Amount: 2704.00
+
+3. Bale No: 3
+Item: mix_clothing
+Weight: 45kg
+Quantity: 156
+Amount: 1417.00
+
+4. Bale No: 4
+Item: mix_clothing
+Weight: 45kg
+Quantity: 158
+Amount: 1442.00
+
+5. Bale No: 5
+Item: mix_clothing
+Weight: 45kg
+Quantity: 157
+Amount: 1436.00
+
+6. Bale No: 6
+Item: mix_clothing
+Weight: 45kg
+Quantity: 155
+Amount: 1516.00
+
+SUMMARY
+
+Total Bales: 6
+Bales Released to Rail: 5
+Bales Not Yet Released: 1
+Reason Not Released: shortage_of_clips
+Total Quantity: 929
+Total Amount: 10047.00
+
+Prepared by: Erick Tobby
+Role: Pricing Clerk

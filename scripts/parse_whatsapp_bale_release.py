@@ -74,13 +74,21 @@ def normalize_item_name(raw_item: str) -> tuple[str, str]:
 
 
 def extract_date(text: str) -> str:
+    # Supports DD/MM/YY or DD/MM/YYYY
     m = re.search(r"(\d{1,2})/(\d{1,2})/(\d{2,4})", text)
-    if not m:
-        raise ValueError("Could not find report date in input file.")
-    day, month, year = m.groups()
-    if len(year) == 2:
-        year = f"20{year}"
-    return f"{year}-{int(month):02d}-{int(day):02d}"
+    if m:
+        day, month, year = m.groups()
+        if len(year) == 2:
+            year = f"20{year}"
+        return f"{year}-{int(month):02d}-{int(day):02d}"
+
+    # Supports YYYY-MM-DD
+    m = re.search(r"(\d{4})-(\d{1,2})-(\d{1,2})", text)
+    if m:
+        year, month, day = m.groups()
+        return f"{year}-{int(month):02d}-{int(day):02d}"
+
+    raise ValueError("Could not find report date in input file.")
 
 
 def extract_day(text: str) -> str:
