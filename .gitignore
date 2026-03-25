@@ -1,24 +1,36 @@
+# Python
 __pycache__/
+*.pyc
+
+# Logs / runtime
 LOGS/
+*.log
+*.pid
+
+# Backups / temp
 BACKUPS/
 ARCHIVE/
+*.bak
+*.save
 
-# runtime state (optional but recommended)
+# Runtime state
 OPPORTUNITIES.md
 PRIORITY.md
 HEALTH.md
+ALERTS.md
+ANOMALIES.md
 
-#SIGNALS/normalized/
-
-# Runtime / generated data
-SIGNALS/archive/
-SIGNALS/test_archive/
+# Generated colony data
+REPORTS/
 COLONY_MEMORY/
 BASELINES/
+SIGNALS/archive/
+SIGNALS/test_archive/
+SIGNALS/normalized/
+SIGNALS/bales/
 
-# Temp inputs
+# Temp / raw inputs that should not be versioned
 INPUT/*.bak
 
-# Python cache
-__pycache__/
-*.pyc
+# Optional local artifacts
+.env

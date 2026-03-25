@@ -10,6 +10,31 @@ from typing import Any, Dict, List, Optional
 import yaml
 
 
+def extract_explicit_conversion_rate(text: str) -> Optional[float]:
+    """
+    Extract explicitly reported conversion rate from report text.
+
+    Supports:
+    - Conversion rate: 19.7%
+    - Conversion rate = 66.6
+    - Conversation rate =45%
+    """
+    match = re.search(
+        r"\bconver(?:sion|sation)\s*rate\b\s*[:=]?\s*([0-9]+(?:\.[0-9]+)?)\s*%?",
+        text,
+        re.IGNORECASE,
+    )
+    if not match:
+        return None
+
+    rate = float(match.group(1))
+
+    # Safety: normalize decimal-form values to percent
+    if 0 < rate <= 1:
+        rate *= 100
+
+    return round(rate, 1)
+
 # ----------------------------
 # Helpers
 # ----------------------------
@@ -147,29 +172,38 @@ def parse_totals(text: str) -> Dict[str, float]:
 def parse_customers(text: str) -> Dict[str, Any]:
     customers: Dict[str, Any] = {
         "traffic": int(extract_value(r"Main\s+Door:\s*(\d+)", text)),
-        "conversion_rate": extract_value(
-            r"Conversion\s+rate\s*[:=]+\s*([\d\.]+)%?",
-            text,
-        ) / 100,
+        "conversion_rate": 0.0,
     }
 
-    served = re.search(
+    served_match = re.search(
         r"(?:Guest/\s*)?Customer\s+served:\s*(\d+)",
         text,
         re.IGNORECASE,
     )
 
-    if served:
-        customers["served"] = int(served.group(1))
+    if served_match:
+        customers["served"] = int(served_match.group(1))
 
-    # fallback conversion
-    if customers["conversion_rate"] == 0:
-        fallback = re.search(r"(\d+\.?\d*)\s*%", text)
-        if fallback:
-            customers["conversion_rate"] = float(fallback.group(1)) / 100
+    traffic = customers.get("traffic", 0)
+    served = customers.get("served", 0)
+
+    explicit_conversion = extract_explicit_conversion_rate(text)
+
+    # 1. PRIORITY: use reported value
+    if explicit_conversion is not None:
+        customers["conversion_rate"] = explicit_conversion
+
+    # 2. FALLBACK: compute only if missing
+    elif served and traffic:
+        customers["conversion_rate"] = round((served / traffic) * 100, 1)
+
+    # 3. SAFETY: normalize decimals if any slip through
+    if customers.get("conversion_rate") is not None:
+        rate = customers["conversion_rate"]
+        if 0 < rate <= 1:
+            customers["conversion_rate"] = round(rate * 100, 1)
 
     return customers
-
 
 # ----------------------------
 # Performance (UPDATED ✔)
@@ -221,9 +255,6 @@ def derive_kpis(data: Dict[str, Any]) -> None:
         if staff_count > 0:
             perf["sales_per_staff"] = round(sales / staff_count, 2)
 
-    # fallback: conversion
-    if customers.get("conversion_rate", 0) == 0 and served and traffic:
-        customers["conversion_rate"] = round(served / traffic, 3)
 
     data["performance"] = perf
     data["customers"] = customers

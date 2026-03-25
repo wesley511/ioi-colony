@@ -1,403 +1,568 @@
-#!/usr/bin/env python3
-"""
-IOI Colony Analyzer
-Governed by COLONY_RULES.md — advisory only, no execution.
-
-Purpose:
-- Read persistent signal memory from COLONY_MEMORY/
-- Detect patterns across staff performance signals
-- Rank opportunity areas using evidence from historical signals
-- Produce advisory output only
-
-This script MUST NOT:
-- execute business actions
-- contact external parties
-- score staff for HR control
-- modify operational systems
-
-Safe output:
-- stdout
-- optional advisory report file (e.g. RECOMMENDATIONS.md)
-"""
-
 from __future__ import annotations
 
-import argparse
 import re
-import sys
 from collections import defaultdict
-from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import DefaultDict, Dict, List, Tuple
+
+from scripts.section_master_data import resolve_section_from_master_data
 
 
-POST_PREFIX = "[IOI Colony Advisory]"
+STAFF_SIGNALS_DIR = Path("COLONY_MEMORY/staff_signals")
+REPORTS_DIR = Path("REPORTS")
 
 
-@dataclass
-class Signal:
-    source_file: Path
-    date: str
-    day: str
-    source_type: str
-    source_name: str
-    category: str
-    signal_type: str
-    staff_id: str
-    section: str
-    products: str
-    items_moved: float
-    assisting_count: float
-    description: str
-    confidence: float
-    opportunity_score: float
-    status: str
+def parse_signal_file(path: Path) -> dict:
+    """
+    Parse flat markdown signals of the form:
 
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Analyze colony memory and produce advisory-only recommendations."
-    )
-    parser.add_argument(
-        "--memory-dir",
-        default="COLONY_MEMORY/staff_signals",
-        help="Directory containing dated memory folders (default: COLONY_MEMORY/staff_signals)",
-    )
-    parser.add_argument(
-        "--rules-file",
-        default="COLONY_RULES.md",
-        help="Governance file to verify before analysis (default: COLONY_RULES.md)",
-    )
-    parser.add_argument(
-        "--output",
-        default="",
-        help="Optional output file path for advisory report (example: RECOMMENDATIONS.md)",
-    )
-    parser.add_argument(
-        "--limit",
-        type=int,
-        default=5,
-        help="Maximum number of top items per branch/section in the report (default: 5)",
-    )
-    parser.add_argument(
-        "--min-confidence",
-        type=float,
-        default=0.0,
-        help="Minimum confidence threshold for including signals (default: 0.0)",
-    )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Show additional parsing diagnostics",
-    )
-    return parser.parse_args()
-
-
-def ensure_governance(rules_file: Path) -> None:
-    if not rules_file.exists():
-        raise RuntimeError(f"Governance file not found: {rules_file}")
-
-    text = rules_file.read_text(encoding="utf-8", errors="ignore")
-    required_phrases = [
-        "READ-ONLY",
-        "ANALYSIS-ONLY",
-        "ADVISORY",
-        "The colony informs. Humans decide.",
-    ]
-
-    missing = [phrase for phrase in required_phrases if phrase not in text]
-    if missing:
-        raise RuntimeError(
-            f"Governance verification failed. Missing phrases in {rules_file}: {missing}"
-        )
-
-
-def coerce_float(value: str, default: float = 0.0) -> float:
-    try:
-        return float(value.strip())
-    except Exception:
-        return default
-
-
-def parse_key_value_file(path: Path) -> Dict[str, str]:
-    data: Dict[str, str] = {}
-    for raw_line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+    key: value
+    """
+    data: dict[str, str] = {}
+    for raw_line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         line = raw_line.strip()
         if not line or ":" not in line:
             continue
         key, value = line.split(":", 1)
         data[key.strip()] = value.strip()
+    data["_path"] = str(path)
     return data
 
 
-def build_signal(path: Path) -> Signal | None:
-    data = parse_key_value_file(path)
+def parse_float(value: str | None, default: float = 0.0) -> float:
+    if value is None:
+        return default
+    try:
+        return float(str(value).strip())
+    except (TypeError, ValueError):
+        return default
 
-    required_keys = [
-        "date",
-        "signal_type",
-        "staff_id",
-        "items_moved",
-        "assisting_count",
-        "confidence",
-        "opportunity_score",
+
+def parse_int(value: str | None, default: int = 0) -> int:
+    if value is None:
+        return default
+    try:
+        return int(float(str(value).strip()))
+    except (TypeError, ValueError):
+        return default
+
+
+def clean_token(text: str) -> str:
+    text = (text or "").strip().lower()
+    text = text.replace("&", " and ")
+    text = text.replace("#", "_")
+    text = re.sub(r"[^a-z0-9]+", "_", text)
+    text = re.sub(r"_+", "_", text).strip("_")
+    return text or "unknown"
+
+
+def pretty_branch(branch_slug: str) -> str:
+    return clean_token(branch_slug).upper()
+
+
+def infer_branch_slug_from_path(signal: dict) -> str:
+    path = str(signal.get("_path", ""))
+    name = Path(path).name.lower()
+
+    if "waigani" in name:
+        return "waigani"
+    if "bena_road" in name or "staff-bena-" in name or "staff-bena-road-" in name:
+        return "bena_road"
+    if "5th_street" in name or "fifth_street" in name or "staff-5th-" in name:
+        return "fifth_street"
+    if "mataita" in name:
+        return "mataita_street"
+    if "lae_malaita" in name or "malaita" in name:
+        return "lae_malaita"
+
+    return "unknown_branch"
+
+
+def infer_staff_name_from_path(signal: dict) -> str:
+    explicit = (signal.get("staff_name") or "").strip()
+    if explicit:
+        return explicit
+
+    path = str(signal.get("_path", ""))
+    name = Path(path).stem.lower()
+
+    prefixes = [
+        "staff-bena-road-",
+        "staff-bena-",
+        "staff-waigani-",
+        "staff-fifth-street-",
+        "staff-5th-street-",
+        "staff-5th-",
+        "staff-mataita-street-",
+        "staff-lae-malaita-",
     ]
-    if any(k not in data for k in required_keys):
-        return None
 
-    return Signal(
-        source_file=path,
-        date=data.get("date", ""),
-        day=data.get("day", ""),
-        source_type=data.get("source_type", ""),
-        source_name=data.get("source_name", ""),
-        category=data.get("category", ""),
-        signal_type=data.get("signal_type", ""),
-        staff_id=data.get("staff_id", ""),
-        section=data.get("section", ""),
-        products=data.get("products", ""),
-        items_moved=coerce_float(data.get("items_moved", "0")),
-        assisting_count=coerce_float(data.get("assisting_count", "0")),
-        description=data.get("description", ""),
-        confidence=coerce_float(data.get("confidence", "0")),
-        opportunity_score=coerce_float(data.get("opportunity_score", "0")),
-        status=data.get("status", ""),
+    for prefix in prefixes:
+        if name.startswith(prefix):
+            remainder = name[len(prefix):]
+            remainder = re.sub(r"_\d{4}-\d{2}-\d{2}$", "", remainder)
+            return remainder
+
+    return "unknown_staff"
+
+
+def infer_staff_key(signal: dict) -> str:
+    branch_slug = clean_token(
+        signal.get("source_slug")
+        or signal.get("branch_slug")
+        or signal.get("branch")
+        or infer_branch_slug_from_path(signal)
+    )
+    staff_name = clean_token(
+        signal.get("staff_name")
+        or infer_staff_name_from_path(signal)
+    )
+    return f"staff-{branch_slug}-{staff_name}"
+
+
+def normalize_section_key(signal: dict) -> tuple[str, str]:
+    """
+    Returns:
+      (section_key, section_type)
+
+    section_type ∈ {product, operational, mixed, unknown}
+    """
+    branch_slug = clean_token(
+        signal.get("source_slug")
+        or signal.get("branch_slug")
+        or signal.get("branch")
+        or infer_branch_slug_from_path(signal)
     )
 
+    raw_section = (
+        signal.get("grouped_section")
+        or signal.get("section_canonical")
+        or signal.get("section")
+        or signal.get("raw_section")
+        or "unknown_section"
+    )
 
-def load_signals(memory_dir: Path, min_confidence: float, verbose: bool = False) -> List[Signal]:
-    if not memory_dir.exists():
-        raise RuntimeError(f"Memory directory not found: {memory_dir}")
+    match = resolve_section_from_master_data(raw_section, branch_slug)
+    if match:
+        return clean_token(match.canonical), clean_token(match.section_type)
 
-    signals: List[Signal] = []
-    for path in sorted(memory_dir.rglob("*.md")):
-        lowered = path.name.lower()
-        if lowered in {"metadata.md", "recommendations.md"}:
+    cleaned = clean_token(str(raw_section))
+    return cleaned or "unknown_section", "unknown"
+
+
+def infer_signal_strength(signal: dict) -> float:
+    """
+    Deterministic staff-strength score using fields already present in normalized files.
+    """
+    arrangement = parse_float(signal.get("arrangement"))
+    display = parse_float(signal.get("display"))
+    performance = parse_float(signal.get("performance"))
+    items_moved = parse_float(signal.get("items_moved"))
+    confidence = parse_float(signal.get("confidence"), 0.50)
+
+    rating_sum = arrangement + display + performance
+    rating_component = rating_sum * 2.4 if rating_sum > 0 else 0.0
+    movement_component = items_moved * 1.6
+    confidence_component = confidence * 10.0
+
+    return round(rating_component + movement_component + confidence_component, 2)
+
+
+def load_staff_signals(signals_dir: Path = STAFF_SIGNALS_DIR) -> list[dict]:
+    if not signals_dir.exists():
+        return []
+
+    signals: list[dict] = []
+    for path in sorted(signals_dir.glob("*.md")):
+        try:
+            signals.append(parse_signal_file(path))
+        except Exception:
             continue
-
-        sig = build_signal(path)
-        if sig is None:
-            if verbose:
-                print(f"SKIP unparsable: {path}", file=sys.stderr)
-            continue
-
-        if sig.confidence < min_confidence:
-            continue
-
-        signals.append(sig)
-
-    if not signals:
-        raise RuntimeError(f"No valid signal files found under: {memory_dir}")
-
     return signals
 
 
-def normalize_label(text: str) -> str:
-    if not text:
-        return "unknown"
+def aggregate_signal(signal: dict, bucket: dict) -> None:
+    strength = infer_signal_strength(signal)
+    staff_key = infer_staff_key(signal)
+    section_key, section_type = normalize_section_key(signal)
 
-    text = text.strip().lower()
+    bucket["signal_count"] += 1
+    bucket["total_strength"] += strength
+    bucket["staff_scores"][staff_key] += strength
+    bucket["section_scores"][section_key] += strength
 
-    aliases = {
-        "ttc waigani": "waigani",
-        "waigani": "waigani",
-        "ttc lae malaita": "lae_malaita",
-        "lae malaita": "lae_malaita",
-        "ttc bena road": "bena_road",
-        "bena road": "bena_road",
-        "ttc 5th street": "5th_street",
-        "5th street": "5th_street",
-        "5th_street": "5th_street",
-    }
-
-    if text in aliases:
-        return aliases[text]
-
-    text = re.sub(r"^ttc\s+", "", text)
-    text = re.sub(r"\s+(branch|shop|store)$", "", text)
-    text = re.sub(r"\s+", "_", text)
-    return text.strip("_") or "unknown"
+    if section_type == "product":
+        bucket["product_section_scores"][section_key] += strength
+    elif section_type == "operational":
+        bucket["operational_section_scores"][section_key] += strength
+    elif section_type == "mixed":
+        bucket["mixed_section_scores"][section_key] += strength
+    else:
+        bucket["unknown_section_scores"][section_key] += strength
 
 
-def advisory_strength(sig: Signal) -> float:
-    return (
-        sig.opportunity_score * 0.6
-        + sig.items_moved * 0.2
-        + sig.assisting_count * 0.2
-    )
+def build_branch_data(signals: list[dict]) -> Dict[str, Dict]:
+    branch_data: Dict[str, Dict] = {}
 
+    for signal in signals:
+        branch_slug = clean_token(
+            signal.get("source_slug")
+            or signal.get("branch_slug")
+            or signal.get("branch")
+            or infer_branch_slug_from_path(signal)
+        )
 
-def aggregate_by_branch(signals: List[Signal]) -> Dict[str, Dict]:
-    branch_data: Dict[str, Dict] = defaultdict(
-        lambda: {
-            "total_strength": 0.0,
-            "count": 0,
-            "staff": defaultdict(float),
-            "sections": defaultdict(float),
-            "signals": [],
-        }
-    )
+        if branch_slug not in branch_data:
+            branch_data[branch_slug] = {
+                "signal_count": 0,
+                "total_strength": 0.0,
+                "staff_scores": defaultdict(float),
+                "section_scores": defaultdict(float),
+                "product_section_scores": defaultdict(float),
+                "operational_section_scores": defaultdict(float),
+                "mixed_section_scores": defaultdict(float),
+                "unknown_section_scores": defaultdict(float),
+                "advisory_strength_avg": 0.0,
+                "strongest_staff": [],
+                "strongest_sections": [],
+            }
 
-    for sig in signals:
-        branch = normalize_label(sig.source_name or "unknown")
-        section = normalize_label(sig.section or "unknown")
-        staff = normalize_label(sig.staff_id or "unknown")
-        strength = advisory_strength(sig)
+        aggregate_signal(signal, branch_data[branch_slug])
 
-        branch_data[branch]["total_strength"] += strength
-        branch_data[branch]["count"] += 1
-        branch_data[branch]["staff"][staff] += strength
-        branch_data[branch]["sections"][section] += strength
-        branch_data[branch]["signals"].append(sig)
+    for branch_slug, bucket in branch_data.items():
+        signal_count = bucket["signal_count"]
+        avg_strength = bucket["total_strength"] / signal_count if signal_count else 0.0
+        bucket["advisory_strength_avg"] = round(avg_strength, 2)
+
+        bucket["strongest_staff"] = sorted(
+            bucket["staff_scores"].items(),
+            key=lambda x: x[1],
+            reverse=True,
+        )[:5]
+
+        bucket["strongest_sections"] = sorted(
+            bucket["section_scores"].items(),
+            key=lambda x: x[1],
+            reverse=True,
+        )[:5]
 
     return branch_data
-
-
-def rank_branches(branch_data: Dict[str, Dict]) -> List[Tuple[str, float]]:
-    rankings: List[Tuple[str, float]] = []
-
-    for branch, data in branch_data.items():
-        avg = data["total_strength"] / max(data["count"], 1)
-        rankings.append((branch, avg))
-
-    return sorted(rankings, key=lambda x: x[1], reverse=True)
 
 
 def detect_weak_sections(branch_data: Dict[str, Dict]) -> Dict[str, List[str]]:
     weak: Dict[str, List[str]] = {}
 
     for branch, data in branch_data.items():
-        sections = data["sections"]
+        sections: dict = data.get("section_scores", {})
         if not sections:
             continue
 
-        avg = sum(sections.values()) / len(sections)
-        weak_sections = [sec for sec, val in sections.items() if val < avg * 0.6]
+        values = list(sections.values())
+        avg = sum(values) / len(values) if values else 0.0
+        threshold = avg * 0.6 if avg > 0 else 0.0
 
+        weak_sections = [sec for sec, val in sections.items() if val < threshold]
         if weak_sections:
             weak[branch] = sorted(weak_sections)
 
     return weak
 
 
-def top_items(mapping: Dict[str, float], limit: int) -> List[Tuple[str, float]]:
-    return sorted(mapping.items(), key=lambda x: x[1], reverse=True)[:limit]
+def build_issues(weak_sections: Dict[str, List[str]]) -> Dict[str, List[str]]:
+    issues: Dict[str, List[str]] = {}
+    for branch, sections in weak_sections.items():
+        issues[branch] = [f"Weak section: {sec}" for sec in sections]
+    return issues
 
 
-def generate_report(
-    rankings: List[Tuple[str, float]],
-    weak_sections: Dict[str, List[str]],
+def build_recommendations(weak_sections: Dict[str, List[str]]) -> List[str]:
+    recs: List[str] = []
+    for branch, sections in weak_sections.items():
+        for sec in sections:
+            recs.append(f"Improve display, support, and engagement in {branch} -> {sec}")
+    return recs
+
+def ensure_governance(value) -> str:
+    """
+    Backward-compatible governance helper.
+
+    Supports either:
+    1. report text -> appends governance footer if missing
+    2. Path / file path -> verifies the rules file exists and returns its text
+    """
+    governance_line = "[IOI Colony Advisory] Advisory only. The colony informs. Humans decide."
+
+    def append_governance(report_text: str) -> str:
+        if governance_line in report_text:
+            return report_text
+        if not report_text.endswith("\n"):
+            report_text += "\n"
+        return report_text + "\n" + governance_line + "\n"
+
+    # Real Path object from fusion analyzer
+    if isinstance(value, Path):
+        if not value.exists():
+            raise FileNotFoundError(f"Governance file not found: {value}")
+        return value.read_text(encoding="utf-8", errors="replace")
+
+    # String input: decide whether it is report text or a file path
+    if isinstance(value, str):
+        text = value
+
+        # If it clearly looks like report content, do NOT treat it as a path
+        if "\n" in text or "=== COLONY" in text or len(text) > 240:
+            return append_governance(text)
+
+        # Only then try path-like handling
+        possible_path = Path(text)
+        if possible_path.exists() and possible_path.is_file():
+            return possible_path.read_text(encoding="utf-8", errors="replace")
+
+        return append_governance(text)
+
+    # Fallback
+    return append_governance(str(value))
+
+
+def render_section_block(title: str, items: List[Tuple[str, float]]) -> list[str]:
+    lines: list[str] = []
+    if items:
+        lines.append(f"- {title}:")
+        for name, score in items[:5]:
+            lines.append(f"  - {name}: {score:.2f}")
+    return lines
+
+
+def render_named_list(title: str, items: List[str]) -> list[str]:
+    lines: list[str] = []
+    if items:
+        lines.append(f"- {title}:")
+        for item in items:
+            lines.append(f"  - {item}")
+    return lines
+
+
+def generate_report_text(
     branch_data: Dict[str, Dict],
-    limit: int,
+    weak_sections: Dict[str, List[str]],
+    recommendations: List[str],
+    issues_detected: Dict[str, List[str]],
 ) -> str:
-    lines: List[str] = []
-    lines.append(f"{POST_PREFIX} === COLONY INTELLIGENCE REPORT ===")
+    branch_ranking = sorted(
+        branch_data.items(),
+        key=lambda x: x[1].get("advisory_strength_avg", 0.0),
+        reverse=True,
+    )
+
+    branches_analyzed = len(branch_data)
+    signals_analyzed = sum(x["signal_count"] for x in branch_data.values())
+    top_performer = pretty_branch(branch_ranking[0][0]) if branch_ranking else "N/A"
+    weakest_branch = pretty_branch(branch_ranking[-1][0]) if branch_ranking else "N/A"
+
+    lines: list[str] = []
+    lines.append("=== COLONY INTELLIGENCE REPORT ===")
     lines.append("")
-
-    lines.append(f"Branches analyzed: {len(rankings)}")
-    lines.append(f"Signals analyzed: {sum(v['count'] for v in branch_data.values())}")
+    lines.append(f"Branches analyzed: {branches_analyzed}")
+    lines.append(f"Signals analyzed: {signals_analyzed}")
     lines.append("")
-
-    if rankings:
-        lines.append(f"TOP PERFORMER: {rankings[0][0].upper()}")
-        lines.append(f"WEAKEST BRANCH: {rankings[-1][0].upper()}")
-        lines.append("")
-
+    lines.append(f"TOP PERFORMER: {top_performer}")
+    lines.append(f"WEAKEST BRANCH: {weakest_branch}")
+    lines.append("")
     lines.append("=== BRANCH RANKING ===")
     lines.append("")
-    for i, (branch, score) in enumerate(rankings, 1):
-        count = branch_data[branch]["count"]
-        lines.append(f"{i}. {branch.upper()}  | avg_strength={score:.2f} | signals={count}")
-    lines.append("")
 
+    for idx, (branch, data) in enumerate(branch_ranking, start=1):
+        lines.append(
+            f"{idx}. {pretty_branch(branch)}  | "
+            f"avg_strength={data['advisory_strength_avg']:.2f} | "
+            f"signals={data['signal_count']}"
+        )
+
+    lines.append("")
     lines.append("=== BRANCH DETAIL ===")
     lines.append("")
-    for branch, score in rankings:
-        data = branch_data[branch]
-        lines.append(f"{branch.upper()}")
-        lines.append(f"- advisory_strength_avg: {score:.2f}")
-        lines.append(f"- signal_count: {data['count']}")
 
-        top_staff = top_items(data["staff"], limit)
-        if top_staff:
+    for branch, data in branch_ranking:
+        lines.append(pretty_branch(branch))
+        lines.append(f"- advisory_strength_avg: {data['advisory_strength_avg']:.2f}")
+        lines.append(f"- signal_count: {data['signal_count']}")
+
+        if data.get("strongest_staff"):
             lines.append("- strongest_staff:")
-            for staff_id, staff_score in top_staff:
-                lines.append(f"  - {staff_id}: {staff_score:.2f}")
+            for staff_name, score in data["strongest_staff"]:
+                lines.append(f"  - {staff_name}: {score:.2f}")
 
-        top_sections = top_items(data["sections"], limit)
-        if top_sections:
+        if data.get("strongest_sections"):
             lines.append("- strongest_sections:")
-            for section, section_score in top_sections:
-                lines.append(f"  - {section}: {section_score:.2f}")
+            for sec, score in data["strongest_sections"]:
+                lines.append(f"  - {sec}: {score:.2f}")
+
+        product_scores = sorted(
+            data.get("product_section_scores", {}).items(),
+            key=lambda x: x[1],
+            reverse=True,
+        )[:5]
+        lines.extend(render_section_block("strongest_product_sections", product_scores))
+
+        operational_scores = sorted(
+            data.get("operational_section_scores", {}).items(),
+            key=lambda x: x[1],
+            reverse=True,
+        )[:5]
+        lines.extend(render_section_block("strongest_operational_sections", operational_scores))
+
+        mixed_scores = sorted(
+            data.get("mixed_section_scores", {}).items(),
+            key=lambda x: x[1],
+            reverse=True,
+        )[:5]
+        lines.extend(render_section_block("strongest_mixed_sections", mixed_scores))
+
+        unknown_scores = sorted(
+            data.get("unknown_section_scores", {}).items(),
+            key=lambda x: x[1],
+            reverse=True,
+        )[:5]
+        lines.extend(render_section_block("unresolved_sections", unknown_scores))
 
         weak = weak_sections.get(branch, [])
-        if weak:
-            lines.append("- weak_sections:")
-            for section in weak[:limit]:
-                lines.append(f"  - {section}")
-
+        lines.extend(render_named_list("weak_sections", weak))
         lines.append("")
 
     lines.append("=== ISSUES DETECTED ===")
     lines.append("")
-    if weak_sections:
-        for branch, sections in weak_sections.items():
-            lines.append(f"{branch.upper()}")
-            for sec in sections[:limit]:
-                lines.append(f"  - Weak section: {sec}")
+    if issues_detected:
+        for branch, issues in issues_detected.items():
+            lines.append(pretty_branch(branch))
+            for issue in issues:
+                lines.append(f"  - {issue}")
             lines.append("")
     else:
-        lines.append("No weak sections detected from current advisory thresholds.")
+        lines.append("No major issues detected")
         lines.append("")
 
     lines.append("=== RECOMMENDATIONS ===")
     lines.append("")
-    if weak_sections:
-        for branch, sections in weak_sections.items():
-            for sec in sections[:limit]:
-                lines.append(f"- Improve display, support, and engagement in {branch} -> {sec}")
+    if recommendations:
+        for rec in recommendations:
+            lines.append(f"- {rec}")
     else:
-        lines.append("- Continue collecting more signals for stronger trend detection.")
-        lines.append("- Maintain current observation cadence and review new weak areas daily.")
-
+        lines.append("- Continue monitoring section performance")
     lines.append("")
-    lines.append(f"{POST_PREFIX} Advisory only. The colony informs. Humans decide.")
-    return "\n".join(lines)
+
+    report_text = "\n".join(lines)
+    return ensure_governance(report_text)
 
 
-def main() -> None:
-    args = parse_args()
+def save_report(report_text: str, reports_dir: Path = REPORTS_DIR) -> Path:
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    path = reports_dir / f"advisory_{timestamp}.md"
+    path.write_text(report_text, encoding="utf-8")
+    return path
 
-    ensure_governance(Path(args.rules_file))
 
-    signals = load_signals(
-        Path(args.memory_dir),
-        args.min_confidence,
-        args.verbose,
-    )
+def summarize_branch_scores(branch_data: Dict[str, Dict]) -> Dict[str, float]:
+    """
+    Compatibility helper for fusion analyzer.
+    Returns advisory avg by branch slug.
+    """
+    return {
+        branch: float(data.get("advisory_strength_avg", 0.0))
+        for branch, data in branch_data.items()
+    }
 
-    branch_data = aggregate_by_branch(signals)
-    rankings = rank_branches(branch_data)
+
+def run_analysis(
+    signals_dir: Path = STAFF_SIGNALS_DIR,
+    reports_dir: Path = REPORTS_DIR,
+) -> tuple[str, Path | None, Dict[str, Dict]]:
+    signals = load_staff_signals(signals_dir)
+    if not signals:
+        report = ensure_governance(
+            "=== COLONY INTELLIGENCE REPORT ===\n\n"
+            "Branches analyzed: 0\n"
+            "Signals analyzed: 0\n\n"
+            "No staff signals found.\n"
+        )
+        return report, None, {}
+
+    branch_data = build_branch_data(signals)
     weak_sections = detect_weak_sections(branch_data)
-
-    report = generate_report(
-        rankings=rankings,
-        weak_sections=weak_sections,
+    issues_detected = build_issues(weak_sections)
+    recommendations = build_recommendations(weak_sections)
+    report_text = generate_report_text(
         branch_data=branch_data,
-        limit=args.limit,
+        weak_sections=weak_sections,
+        recommendations=recommendations,
+        issues_detected=issues_detected,
     )
+    report_path = save_report(report_text, reports_dir=reports_dir)
+    return report_text, report_path, branch_data
 
-    print(report)
+def load_signals(
+    signals_dir: Path = STAFF_SIGNALS_DIR,
+    min_confidence: float = 0.0,
+    **kwargs,
+) -> list[dict]:
+    """
+    Backward-compatible alias expected by colony_fusion_analyzer.
 
-    if args.output:
-        output_path = Path(args.output)
-        output_path.write_text(report, encoding="utf-8")
-        print(f"\nSaved report to {output_path}")
+    Supports legacy keyword arguments like min_confidence without breaking.
+    """
+    signals = load_staff_signals(signals_dir)
+
+    if min_confidence and min_confidence > 0:
+        filtered: list[dict] = []
+        for signal in signals:
+            confidence = parse_float(signal.get("confidence"), 0.0)
+            if confidence >= min_confidence:
+                filtered.append(signal)
+        return filtered
+
+    return signals
+
+
+def analyze_signals(signals: list[dict]) -> Dict[str, Dict]:
+    """
+    Backward-compatible analyzer entrypoint expected by other modules.
+    """
+    return build_branch_data(signals)
+
+
+def build_branch_summary(branch_data: Dict[str, Dict]) -> Dict[str, Dict]:
+    """
+    Backward-compatible alias for already-built branch metrics.
+    """
+    return branch_data
+
+def aggregate_by_branch(signals: list[dict]) -> Dict[str, Dict]:
+    """
+    Backward-compatible alias expected by colony_fusion_analyzer.
+    """
+    return build_branch_data(signals)
+
+def aggregate_by_branch(signals: list[dict]) -> Dict[str, Dict]:
+    """
+    Backward-compatible alias expected by colony_fusion_analyzer.
+    Maps to current build_branch_data implementation.
+    """
+    return build_branch_data(signals)
+
+def normalize_label(text: str) -> str:
+    """
+    Backward-compatible alias expected by colony_fusion_analyzer.
+    """
+    return clean_token(text)
+
+def main() -> int:
+    report_text, report_path, _branch_data = run_analysis()
+    print("[IOI Colony Advisory] " + report_text)
+    if report_path:
+        print(f"Saved report to {report_path.resolve()}")
+    return 0
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as exc:
-        print(f"{POST_PREFIX} ERROR: {exc}", file=sys.stderr)
-        sys.exit(1)
+    raise SystemExit(main())

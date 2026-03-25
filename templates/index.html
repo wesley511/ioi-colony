@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>IOI Colony Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #141b2d;
+      --panel-2: #1a2238;
+      --line: #2c3654;
+      --text: #eef3ff;
+      --muted: #9eb0d3;
+      --accent: #6ee7b7;
+      --accent-2: #60a5fa;
+      --warn: #fbbf24;
+      --danger: #f87171;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, Arial, sans-serif;
+      background: linear-gradient(180deg, #0a0f1f 0%, #10182d 100%);
+      color: var(--text);
+    }
+
+    .container {
+      width: min(1400px, calc(100% - 24px));
+      margin: 18px auto 40px;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding: 18px 20px;
+      background: rgba(20, 27, 45, 0.95);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    .title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .status-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px rgba(110, 231, 183, 0.8);
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .cards {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      margin-bottom: 16px;
+    }
+
+    .signals {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-bottom: 16px;
+    }
+
+    .main {
+      grid-template-columns: 340px minmax(0, 1fr);
+    }
+
+    .panel {
+      background: rgba(20, 27, 45, 0.96);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .panel-header h2,
+    .panel-header h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .panel-header p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .panel-body {
+      padding: 16px 18px;
+    }
+
+    .metric-title {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+
+    .metric-value {
+      white-space: pre-wrap;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .card-accent {
+      border-top: 3px solid var(--accent-2);
+    }
+
+    .signal-list,
+    .feed {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .signal-item,
+    .feed-item {
+      padding: 12px 14px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .feed-query {
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .feed-time {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: var(--accent-2);
+      background: #1d2740;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #2563eb, #0ea5e9);
+      border: none;
+    }
+
+    .primary:hover {
+      background: linear-gradient(135deg, #1d4ed8, #0284c7);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #0e1528;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .response-box {
+      min-height: 180px;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #0d1427;
+      white-space: pre-wrap;
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .branch-buttons {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    @media (max-width: 1180px) {
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .signals { grid-template-columns: 1fr; }
+      .main { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 680px) {
+      .cards { grid-template-columns: 1fr; }
+      .button-grid { grid-template-columns: 1fr; }
+      .input-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="topbar">
+      <div class="title">
+        <h1>IOI Colony Dashboard</h1>
+        <p>Signal-first operational intelligence console for branch performance, alerts, anomalies, and branch drilldown.</p>
+      </div>
+      <div class="status-group">
+        <div class="pill"><span class="dot"></span><span id="statusText">Colony online</span></div>
+        <div class="pill">Last snapshot: <span id="snapshotTime">loading...</span></div>
+        <button id="refreshBtn">Refresh snapshot</button>
+      </div>
+    </section>
+
+    <section class="grid cards">
+      <div class="panel card-accent">
+        <div class="panel-body">
+          <div class="metric-title">Summary</div>
+          <div class="metric-value" id="cardSummary">Loading...</div>
+        </div>
+      </div>
+      <div class="panel card-accent">
+        <div class="panel-body">
+          <div class="metric-title">Top Branch</div>
+          <div class="metric-value" id="cardTopBranch">Loading...</div>
+        </div>
+      </div>
+      <div class="panel card-accent">
+        <div class="panel-body">
+          <div class="metric-title">Weakest Branch</div>
+          <div class="metric-value" id="cardWeakestBranch">Loading...</div>
+        </div>
+      </div>
+      <div class="panel card-accent">
+        <div class="panel-body">
+          <div class="metric-title">Highest Sales</div>
+          <div class="metric-value" id="cardHighestSales">Loading...</div>
+        </div>
+      </div>
+      <div class="panel card-accent">
+        <div class="panel-body">
+          <div class="metric-title">Most Traffic</div>
+          <div class="metric-value" id="cardMostTraffic">Loading...</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid signals">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Health</h2>
+          <p>Lifecycle and reinforcement state</p>
+        </div>
+        <div class="panel-body">
+          <div class="signal-list" id="healthList"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Alerts</h2>
+          <p>Operational warnings requiring attention</p>
+        </div>
+        <div class="panel-body">
+          <div class="signal-list" id="alertsList"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Anomalies</h2>
+          <p>Unexpected pattern or stability breaks</p>
+        </div>
+        <div class="panel-body">
+          <div class="signal-list" id="anomaliesList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid main">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Command Console</h2>
+          <p>Manual operator queries preserve swarm flexibility without hardcoding all intelligence into the UI.</p>
+        </div>
+        <div class="panel-body controls">
+          <div class="button-grid">
+            <button data-query="summary">summary</button>
+            <button data-query="top branch">top branch</button>
+            <button data-query="weakest branch">weakest branch</button>
+            <button data-query="highest sales">highest sales</button>
+            <button data-query="most traffic">most traffic</button>
+            <button data-query="alerts">alerts</button>
+            <button data-query="anomalies">anomalies</button>
+            <button data-query="recommendations">recommendations</button>
+          </div>
+
+          <div class="branch-buttons">
+            <button data-query="show waigani">show waigani</button>
+            <button data-query="show bena road">show bena road</button>
+            <button data-query="show lae malaita">show lae malaita</button>
+          </div>
+
+          <div class="input-row">
+            <input id="queryInput" type="text" placeholder="Type your question here...">
+            <button id="sendBtn" class="primary">Send</button>
+          </div>
+
+          <div>
+            <div class="metric-title">Latest Response</div>
+            <div class="response-box" id="responseBox">Ready.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Response Feed</h2>
+          <p>Timestamped operator interactions with the colony.</p>
+        </div>
+        <div class="panel-body">
+          <div class="feed" id="feed"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const snapshotTime = document.getElementById("snapshotTime");
+    const responseBox = document.getElementById("responseBox");
+    const feed = document.getElementById("feed");
+    const queryInput = document.getElementById("queryInput");
+
+    function renderList(containerId, items) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = "";
+
+      if (!items || !items.length) {
+        container.innerHTML = `<div class="signal-item muted">No data available.</div>`;
+        return;
+      }
+
+      for (const item of items) {
+        const div = document.createElement("div");
+        div.className = "signal-item";
+        div.textContent = item;
+        container.appendChild(div);
+      }
+    }
+
+    function pushFeed(query, answer, answeredAt) {
+      const item = document.createElement("div");
+      item.className = "feed-item";
+      item.innerHTML = `
+        <div class="feed-query">${query || "snapshot"}</div>
+        <div>${escapeHtml(answer)}</div>
+        <div class="feed-time">${answeredAt || new Date().toISOString()}</div>
+      `;
+      feed.prepend(item);
+
+      while (feed.children.length > 12) {
+        feed.removeChild(feed.lastChild);
+      }
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    async function runQuery(query) {
+      if (!query || !query.trim()) return;
+
+      responseBox.textContent = "Running query...";
+      try {
+        const res = await fetch("/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query }),
+        });
+        const data = await res.json();
+        responseBox.textContent = data.answer || "No response.";
+        pushFeed(data.query, data.answer, data.answered_at);
+      } catch (err) {
+        responseBox.textContent = `Request failed: ${err}`;
+      }
+    }
+
+    async function loadSnapshot() {
+      try {
+        const res = await fetch("/dashboard_snapshot");
+        const data = await res.json();
+
+        snapshotTime.textContent = new Date(data.generated_at).toLocaleString();
+
+        document.getElementById("cardSummary").textContent = data.cards.summary || "n/a";
+        document.getElementById("cardTopBranch").textContent = data.cards.top_branch || "n/a";
+        document.getElementById("cardWeakestBranch").textContent = data.cards.weakest_branch || "n/a";
+        document.getElementById("cardHighestSales").textContent = data.cards.highest_sales || "n/a";
+        document.getElementById("cardMostTraffic").textContent = data.cards.most_traffic || "n/a";
+
+        renderList("healthList", data.health?.bullets || []);
+        renderList("alertsList", data.alerts?.bullets || []);
+        renderList("anomaliesList", data.anomalies?.bullets || []);
+      } catch (err) {
+        responseBox.textContent = `Snapshot load failed: ${err}`;
+      }
+    }
+
+    document.getElementById("sendBtn").addEventListener("click", () => {
+      runQuery(queryInput.value);
+    });
+
+    queryInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        runQuery(queryInput.value);
+      }
+    });
+
+    document.getElementById("refreshBtn").addEventListener("click", loadSnapshot);
+
+    for (const btn of document.querySelectorAll("[data-query]")) {
+      btn.addEventListener("click", () => {
+        const query = btn.getAttribute("data-query");
+        queryInput.value = query;
+        runQuery(query);
+      });
+    }
+
+    loadSnapshot();
+    setInterval(loadSnapshot, 60000);
+  </script>
+</body>
+</html>
