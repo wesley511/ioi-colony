@@ -7,10 +7,10 @@ This file is the colony's staff intelligence layer, generated from the canonical
 ```yaml
 total_shops: 4
 total_staff_tracked: 106
-top_performers: 2
-strong_staff: 16
-average_staff: 76
-weak_zones: 7
+top_performers: 0
+strong_staff: 0
+average_staff: 101
+weak_zones: 0
 critical_attention: 1
 new_staff_watch: 4
 ```
@@ -2134,27 +2134,27 @@ notes: present in attendance report
 staff_id: STAFF-WAI-AGNES
 staff_name: Agnes Timothy
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: pricing_room
-sections: pricing room
-products: all incoming inventory
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
-avg_performance: 5.00
+avg_performance: n/a
 latest_arrangement: n/a
 latest_display: n/a
-latest_performance: 5
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 8
-recommended_action: maintain
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2162,27 +2162,27 @@ notes:
 staff_id: STAFF-WAI-ALICE
 staff_name: Alice Koko
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: pricing_room
-sections: pricing room
-products: all incoming inventory
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
-avg_performance: 5.00
+avg_performance: n/a
 latest_arrangement: n/a
 latest_display: n/a
-latest_performance: 5
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 8
-recommended_action: maintain
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2218,96 +2218,12 @@ notes: not yet linked to section signal
 staff_id: STAFF-WAI-ANITA
 staff_name: Anita Tangoi
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: monitoring
-sections: door, monitoring
-products: store-wide
-reports_count: 1
-avg_arrangement: n/a
-avg_display: n/a
-avg_performance: 5.00
-latest_arrangement: n/a
-latest_display: n/a
-latest_performance: 5
-avg_items_moved: n/a
-avg_assisting_count: n/a
-latest_items_moved: n/a
-latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 8
-recommended_action: maintain
-notes: 
-```
-
-```yaml
-staff_id: STAFF-WAI-BETHSIAN
-staff_name: Bethsian Ken
-shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
-role_type: floor_staff
-sections: boys wear, mens shoes, pacific shirts, mens office pants, ladies jeans, ladies shorts
-products: boys wear, mens footwear, shirts, ladies fashion items
-reports_count: 1
-avg_arrangement: 5.00
-avg_display: 5.00
-avg_performance: 5.00
-latest_arrangement: 5
-latest_display: 5
-latest_performance: 5
-avg_items_moved: n/a
-avg_assisting_count: n/a
-latest_items_moved: n/a
-latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 9
-recommended_action: maintain
-notes: normalized from Bethsien
-```
-
-```yaml
-staff_id: STAFF-WAI-DAVID
-staff_name: David Yaro
-shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
-role_type: monitoring
-sections: door, monitoring
-products: store-wide
-reports_count: 1
-avg_arrangement: n/a
-avg_display: n/a
-avg_performance: 5.00
-latest_arrangement: n/a
-latest_display: n/a
-latest_performance: 5
-avg_items_moved: n/a
-avg_assisting_count: n/a
-latest_items_moved: n/a
-latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 8
-recommended_action: maintain
-notes: 
-```
-
-```yaml
-staff_id: STAFF-WAI-DEBRAH
-staff_name: Debrah Wotavo
-shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
-role_type: floor_staff
-sections: mens shirts, ladies kids, dresses, blouse, grips
-products: mixed apparel
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
 avg_performance: n/a
@@ -2318,11 +2234,95 @@ avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: needs_support
+trend: stable_mid
 staff_type: unknown
-status: weak_zone
-opportunity_score: 4
-recommended_action: coach_display
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
+notes: 
+```
+
+```yaml
+staff_id: STAFF-WAI-BETHSIAN
+staff_name: Bethsian Ken
+shop_name: TTC Waigani
+latest_report_date: 2026-03-21
+latest_report_day: n/a
+role_type: floor_staff
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
+avg_items_moved: n/a
+avg_assisting_count: n/a
+latest_items_moved: n/a
+latest_assisting_count: n/a
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
+notes: normalized from Bethsien
+```
+
+```yaml
+staff_id: STAFF-WAI-DAVID
+staff_name: David Yaro
+shop_name: TTC Waigani
+latest_report_date: 2026-03-21
+latest_report_day: n/a
+role_type: monitoring
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
+avg_items_moved: n/a
+avg_assisting_count: n/a
+latest_items_moved: n/a
+latest_assisting_count: n/a
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
+notes: 
+```
+
+```yaml
+staff_id: STAFF-WAI-DEBRAH
+staff_name: Debrah Wotavo
+shop_name: TTC Waigani
+latest_report_date: 2026-03-21
+latest_report_day: n/a
+role_type: floor_staff
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
+avg_items_moved: n/a
+avg_assisting_count: n/a
+latest_items_moved: n/a
+latest_assisting_count: n/a
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2330,27 +2330,27 @@ notes:
 staff_id: STAFF-WAI-DOROTHY
 staff_name: Dorothy Morofa
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: cashier
-sections: cashier
-products: all transactions
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
-avg_performance: 5.00
+avg_performance: n/a
 latest_arrangement: n/a
 latest_display: n/a
-latest_performance: 5
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 8
-recommended_action: maintain
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2358,12 +2358,12 @@ notes:
 staff_id: STAFF-WAI-EPU
 staff_name: Epu Yasa
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: floor_staff
-sections: mens shirts, ladies kids, dresses, blouse, grips; soccer shorts, grips, mens shorts
-products: mixed apparel; soccer shorts, grips, mens shorts
-reports_count: 2
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
 avg_performance: n/a
@@ -2386,27 +2386,27 @@ notes: joined 2026-03-20
 staff_id: STAFF-WAI-FIDELMA
 staff_name: Fidelma Wobilo
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: cashier
-sections: cashier
-products: all transactions
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
-avg_performance: 5.00
+avg_performance: n/a
 latest_arrangement: n/a
 latest_display: n/a
-latest_performance: 5
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 8
-recommended_action: maintain
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2414,24 +2414,24 @@ notes:
 staff_id: STAFF-WAI-FLORIDA
 staff_name: Florida Dava
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: floor_staff
-sections: soccer shorts and shirts; soccer shorts, grips, mens shorts
-products: soccer shorts, soccer shirts; soccer shorts, grips, mens shorts
-reports_count: 2
-avg_arrangement: 4.00
-avg_display: 4.00
-avg_performance: 4.00
-latest_arrangement: 4
-latest_display: 4
-latest_performance: 4
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
 trend: new_staff
-staff_type: balanced
+staff_type: unknown
 status: new_staff_watch
 opportunity_score: 5
 recommended_action: onboarding_support
@@ -2470,27 +2470,27 @@ notes: not yet linked to section signal
 staff_id: STAFF-WAI-GASSI
 staff_name: Gassi Panagu
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: floor_staff
-sections: mens cotton pants, army pants, mens shorts, button shirts
-products: cotton pants, army wear, mens shirts
-reports_count: 1
-avg_arrangement: 4.00
-avg_display: 5.00
-avg_performance: 5.00
-latest_arrangement: 4
-latest_display: 5
-latest_performance: 5
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: needs_support
-staff_type: quality
-status: weak_zone
-opportunity_score: 4
-recommended_action: coach_display
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: normalized from Gassy
 ```
 
@@ -2498,27 +2498,27 @@ notes: normalized from Gassy
 staff_id: STAFF-WAI-GRACE
 staff_name: Grace Masson
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: floor_staff
-sections: boys wear, mens shoes, pacific shirts, mens office pants, ladies jeans, ladies shorts
-products: boys wear, mens footwear, shirts, ladies fashion items
-reports_count: 1
-avg_arrangement: 5.00
-avg_display: 5.00
-avg_performance: 5.00
-latest_arrangement: 5
-latest_display: 5
-latest_performance: 5
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 9
-recommended_action: maintain
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2526,27 +2526,27 @@ notes:
 staff_id: STAFF-WAI-HENRY
 staff_name: Henry Ambiu
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: pricing_room
-sections: pricing room
-products: all incoming inventory
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
-avg_performance: 5.00
+avg_performance: n/a
 latest_arrangement: n/a
 latest_display: n/a
-latest_performance: 5
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 8
-recommended_action: maintain
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: normalized from Hendry
 ```
 
@@ -2582,27 +2582,27 @@ notes: not yet linked to section signal
 staff_id: STAFF-WAI-KIMSON
 staff_name: Kimson David
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: floor_staff
-sections: mens cotton pants, army pants, mens shorts, button shirts
-products: cotton pants, army wear, mens shirts
-reports_count: 1
-avg_arrangement: 4.00
-avg_display: 5.00
-avg_performance: 5.00
-latest_arrangement: 4
-latest_display: 5
-latest_performance: 5
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: needs_support
-staff_type: quality
-status: weak_zone
-opportunity_score: 4
-recommended_action: coach_display
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2610,12 +2610,12 @@ notes:
 staff_id: STAFF-WAI-MATTHEW
 staff_name: Matthew Gene
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: floor_staff
-sections: mens shirts, ladies kids, dresses, blouse, grips
-products: mixed apparel
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
 avg_performance: n/a
@@ -2626,11 +2626,11 @@ avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: needs_support
+trend: stable_mid
 staff_type: unknown
-status: weak_zone
-opportunity_score: 4
-recommended_action: coach_display
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: normalized from Mathew
 ```
 
@@ -2638,68 +2638,12 @@ notes: normalized from Mathew
 staff_id: STAFF-WAI-MICHAEL
 staff_name: Michael Peter
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: pricing_room
-sections: pricing room
-products: all incoming inventory
-reports_count: 1
-avg_arrangement: n/a
-avg_display: n/a
-avg_performance: 5.00
-latest_arrangement: n/a
-latest_display: n/a
-latest_performance: 5
-avg_items_moved: n/a
-avg_assisting_count: n/a
-latest_items_moved: n/a
-latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 8
-recommended_action: maintain
-notes: normalized from Micheal
-```
-
-```yaml
-staff_id: STAFF-WAI-MILFORD
-staff_name: Milford Timothy
-shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
-role_type: floor_staff
-sections: boys wear, mens shoes, pacific shirts, mens office pants, ladies jeans, ladies shorts
-products: boys wear, mens footwear, shirts, ladies fashion items
-reports_count: 1
-avg_arrangement: 5.00
-avg_display: 5.00
-avg_performance: 5.00
-latest_arrangement: 5
-latest_display: 5
-latest_performance: 5
-avg_items_moved: n/a
-avg_assisting_count: n/a
-latest_items_moved: n/a
-latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 9
-recommended_action: maintain
-notes: 
-```
-
-```yaml
-staff_id: STAFF-WAI-MITEGE
-staff_name: Mitege Laiken
-shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
-role_type: door
-sections: door
-products: store-wide
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
 avg_performance: n/a
@@ -2710,11 +2654,67 @@ avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
+trend: stable_mid
 staff_type: unknown
-status: strong
-opportunity_score: 7
-recommended_action: maintain
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
+notes: normalized from Micheal
+```
+
+```yaml
+staff_id: STAFF-WAI-MILFORD
+staff_name: Milford Timothy
+shop_name: TTC Waigani
+latest_report_date: 2026-03-21
+latest_report_day: n/a
+role_type: floor_staff
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
+avg_items_moved: n/a
+avg_assisting_count: n/a
+latest_items_moved: n/a
+latest_assisting_count: n/a
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
+notes: 
+```
+
+```yaml
+staff_id: STAFF-WAI-MITEGE
+staff_name: Mitege Laiken
+shop_name: TTC Waigani
+latest_report_date: 2026-03-21
+latest_report_day: n/a
+role_type: door
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
+avg_items_moved: n/a
+avg_assisting_count: n/a
+latest_items_moved: n/a
+latest_assisting_count: n/a
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2722,27 +2722,27 @@ notes:
 staff_id: STAFF-WAI-MOVIYO
 staff_name: Moviyo Alex
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: pricing_clerk
-sections: pricing room
-products: all incoming inventory
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
-avg_performance: 5.00
+avg_performance: n/a
 latest_arrangement: n/a
 latest_display: n/a
-latest_performance: 5
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 8
-recommended_action: maintain
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2750,27 +2750,27 @@ notes:
 staff_id: STAFF-WAI-NICK
 staff_name: Nick Sioh
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: door
-sections: door; door, monitoring
-products: store-wide
-reports_count: 2
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
-avg_performance: 5.00
+avg_performance: n/a
 latest_arrangement: n/a
 latest_display: n/a
-latest_performance: 5
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: top_performer
-opportunity_score: 8
-recommended_action: replicate_standard
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2778,27 +2778,27 @@ notes:
 staff_id: STAFF-WAI-NIM
 staff_name: Nim Jonnah
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: floor_staff
-sections: mens cotton pants, army pants, mens shorts, button shirts
-products: cotton pants, army wear, mens shirts
-reports_count: 1
-avg_arrangement: 4.00
-avg_display: 5.00
-avg_performance: 5.00
-latest_arrangement: 4
-latest_display: 5
-latest_performance: 5
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: needs_support
-staff_type: quality
-status: weak_zone
-opportunity_score: 4
-recommended_action: coach_display
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2834,27 +2834,27 @@ notes: normalized first name to Priscilla
 staff_id: STAFF-WAI-PRIVIEN
 staff_name: Privien Keiby
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: assistant
-sections: cashier
-products: all transactions
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
-avg_performance: 5.00
+avg_performance: n/a
 latest_arrangement: n/a
 latest_display: n/a
-latest_performance: 5
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 8
-recommended_action: maintain
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: assisting cashier
 ```
 
@@ -2862,27 +2862,27 @@ notes: assisting cashier
 staff_id: STAFF-WAI-REBECCA
 staff_name: Rebecca Bob
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: floor_staff
-sections: boys wear, mens shoes, pacific shirts, mens office pants, ladies jeans, ladies shorts
-products: boys wear, mens footwear, shirts, ladies fashion items
-reports_count: 1
-avg_arrangement: 5.00
-avg_display: 5.00
-avg_performance: 5.00
-latest_arrangement: 5
-latest_display: 5
-latest_performance: 5
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 9
-recommended_action: maintain
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: normalized from Rebeca
 ```
 
@@ -2890,27 +2890,27 @@ notes: normalized from Rebeca
 staff_id: STAFF-WAI-RICKY
 staff_name: Ricky Lomutopa
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: door
-sections: door; door, monitoring
-products: store-wide
-reports_count: 2
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
-avg_performance: 5.00
+avg_performance: n/a
 latest_arrangement: n/a
 latest_display: n/a
-latest_performance: 5
+latest_performance: n/a
 avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: top_performer
-opportunity_score: 8
-recommended_action: replicate_standard
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```
 
@@ -2918,12 +2918,12 @@ notes:
 staff_id: STAFF-WAI-SABILLA
 staff_name: Sabilla Seka
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: floor_staff
-sections: mens shirts, ladies kids, dresses, blouse, grips
-products: mixed apparel
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
 avg_performance: n/a
@@ -2934,11 +2934,11 @@ avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: needs_support
+trend: stable_mid
 staff_type: unknown
-status: weak_zone
-opportunity_score: 4
-recommended_action: coach_display
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: normalized from Sabila/Sabilla
 ```
 
@@ -2946,40 +2946,12 @@ notes: normalized from Sabila/Sabilla
 staff_id: STAFF-WAI-STANLEY
 staff_name: Stanley Mathias
 shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
+latest_report_date: 2026-03-21
+latest_report_day: n/a
 role_type: floor_staff
-sections: boys wear, mens shoes, pacific shirts, mens office pants, ladies jeans, ladies shorts
-products: boys wear, mens footwear, shirts, ladies fashion items
-reports_count: 1
-avg_arrangement: 5.00
-avg_display: 5.00
-avg_performance: 5.00
-latest_arrangement: 5
-latest_display: 5
-latest_performance: 5
-avg_items_moved: n/a
-avg_assisting_count: n/a
-latest_items_moved: n/a
-latest_assisting_count: n/a
-trend: stable_high
-staff_type: quality
-status: strong
-opportunity_score: 9
-recommended_action: maintain
-notes: normalized from Stanly
-```
-
-```yaml
-staff_id: STAFF-WAI-XEENA
-staff_name: Xeena Moris
-shop_name: TTC Waigani
-latest_report_date: 2026-03-20
-latest_report_day: Friday
-role_type: floor_staff
-sections: mens shirts, ladies kids, dresses, blouse, grips
-products: mixed apparel
-reports_count: 1
+sections: n/a
+products: n/a
+reports_count: 0
 avg_arrangement: n/a
 avg_display: n/a
 avg_performance: n/a
@@ -2990,10 +2962,38 @@ avg_items_moved: n/a
 avg_assisting_count: n/a
 latest_items_moved: n/a
 latest_assisting_count: n/a
-trend: needs_support
+trend: stable_mid
 staff_type: unknown
-status: weak_zone
-opportunity_score: 4
-recommended_action: coach_display
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
+notes: normalized from Stanly
+```
+
+```yaml
+staff_id: STAFF-WAI-XEENA
+staff_name: Xeena Moris
+shop_name: TTC Waigani
+latest_report_date: 2026-03-21
+latest_report_day: n/a
+role_type: floor_staff
+sections: n/a
+products: n/a
+reports_count: 0
+avg_arrangement: n/a
+avg_display: n/a
+avg_performance: n/a
+latest_arrangement: n/a
+latest_display: n/a
+latest_performance: n/a
+avg_items_moved: n/a
+avg_assisting_count: n/a
+latest_items_moved: n/a
+latest_assisting_count: n/a
+trend: stable_mid
+staff_type: unknown
+status: average
+opportunity_score: 6
+recommended_action: coach_targeted
 notes: 
 ```

@@ -360,7 +360,7 @@ def split_staff_blocks(text: str) -> list[str]:
     """
     text = text.replace("\r\n", "\n")
     pattern = re.compile(
-        r"^\s*\d+\s*[\.\)]*\s*[A-Z][A-Z\s'\-\.]{1,60}\s*[\.\)]*\s*$",
+        r"^\s*\d+\s*[\.\)]*\s*[A-Za-z][A-Za-z\s'\-\.]{1,60}\s*[\.\)]*\s*$",
         re.MULTILINE,
     )
     starts = list(pattern.finditer(text))

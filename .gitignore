@@ -32,5 +32,21 @@ SIGNALS/bales/
 # Temp / raw inputs that should not be versioned
 INPUT/*.bak
 
-# Optional local artifacts
-.env
+# Runtime / generated
+RAW_INPUT/
+SIGNALS/
+LOGS/
+DATA/
+__pycache__/
+*.pyc
+
+# Env / secrets
+.env*
+
+# Temp / backups
+*.backup_*
+normalized
+unknown.backup_*
+
+# Large / binaries
+*.zip
