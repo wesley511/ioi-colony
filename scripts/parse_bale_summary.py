@@ -13,6 +13,10 @@ try:
     from scripts.utils_normalization import normalize_branch as shared_normalize_branch
 except ModuleNotFoundError:
     from utils_normalization import normalize_branch as shared_normalize_branch
+try:
+    from scripts.whatsapp_report_sections import extract_selected_report_text
+except ModuleNotFoundError:
+    from whatsapp_report_sections import extract_selected_report_text
 
 def utc_today_iso() -> str:
     return datetime.now(timezone.utc).date().isoformat()
@@ -109,11 +113,16 @@ def normalize_item_name(name: str) -> str:
 
 
 def canonical_item_token(name: str) -> str:
-    value = normalize_item_name(name)
+    value = normalize_item_name(name).lower()
     value = value.replace("/", "_")
     value = re.sub(r"\s+", "_", value)
     value = re.sub(r"_+", "_", value)
     return value.strip("_")
+
+
+def is_total_like_item(name: str) -> bool:
+    cleaned = normalize_item_name(name).lower()
+    return cleaned == "total" or cleaned.startswith("total ")
 
 
 def parse_status(value: str | None) -> str:
@@ -159,6 +168,8 @@ def extract_structured_bale_blocks(text: str) -> list[dict[str, Any]]:
         amount = parse_float(total_amount)
 
         if bale_no is None and not item_name:
+            continue
+        if is_total_like_item(item_name or ""):
             continue
 
         avg_unit_price = 0.0
@@ -224,6 +235,8 @@ def extract_legacy_bale_blocks(text: str) -> list[dict[str, Any]]:
 
         bale_no = int(match.group(1))
         item_name = normalize_item_name(match.group(2))
+        if is_total_like_item(item_name):
+            continue
 
         qty_match = re.search(r"\bqty\s*:\s*([0-9,]+)", block_text, flags=re.IGNORECASE)
         amt_match = re.search(r"\bamt\s*:\s*K?\s*([0-9,]+(?:\.[0-9]+)?)", block_text, flags=re.IGNORECASE)
@@ -255,6 +268,29 @@ def extract_legacy_bale_blocks(text: str) -> list[dict[str, Any]]:
         )
 
     return parsed
+
+
+def extract_flat_item_rows(text: str) -> list[dict[str, Any]]:
+    item_name = extract_line_value(text, "Item", "Item Name", "Item_Name")
+    qty = parse_int(extract_line_value(text, "Qty", "Total Qty", "Total_Qty"))
+    amount = parse_float(extract_line_value(text, "Amount", "Amt", "Total Amount", "Total_Amount"))
+    if not item_name or is_total_like_item(item_name) or qty is None or amount is None:
+        return []
+    avg_unit_price = round(amount / qty, 2) if qty > 0 else 0.0
+    return [
+        {
+            "bale_no": 0,
+            "item_name": normalize_item_name(item_name),
+            "item_token": canonical_item_token(item_name),
+            "qty": qty,
+            "amount": round(amount, 2),
+            "status": "",
+            "weight_kg": None,
+            "avg_unit_price": avg_unit_price,
+            "source_block_type": "flat",
+            "raw_block_preview": normalize_spaces(text)[:220],
+        }
+    ]
 
 
 def merge_bale_blocks(structured: list[dict[str, Any]], legacy: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -377,12 +413,15 @@ def derive_flags(
 
 
 def parse_bale_summary(text: str) -> dict[str, Any]:
+    text = extract_selected_report_text(text, expected_report_type="bale_summary")
     branch = extract_branch(text)
     signal_date = extract_report_date(text)
 
     structured_blocks = extract_structured_bale_blocks(text)
     legacy_blocks = extract_legacy_bale_blocks(text)
     bales = merge_bale_blocks(structured_blocks, legacy_blocks)
+    if not bales:
+        bales = extract_flat_item_rows(text)
 
     total_bales = extract_total_bales(text)
     total_qty = extract_total_qty(text)
@@ -418,6 +457,8 @@ def parse_bale_summary(text: str) -> dict[str, Any]:
         block_format = "structured"
     elif legacy_blocks:
         block_format = "legacy"
+    elif bales:
+        block_format = "flat"
 
     return {
         "type": "bale_release_summary",

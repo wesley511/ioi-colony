@@ -74,6 +74,7 @@ POLL_SECONDS = int(os.getenv("WHATSAPP_PROCESS_POLL_SECONDS", "5"))
 ENV_CMD_BY_REPORT_TYPE = {
     "sales": os.getenv("WHATSAPP_CMD_SALES", "").strip(),
     "staff_performance": os.getenv("WHATSAPP_CMD_STAFF_PERFORMANCE", "").strip(),
+    "staff_attendance": os.getenv("WHATSAPP_CMD_STAFF_ATTENDANCE", "").strip(),
     "bale_summary": os.getenv("WHATSAPP_CMD_BALE_SUMMARY", "").strip(),
     "monitoring": os.getenv("WHATSAPP_CMD_MONITORING", "").strip(),
     "gap": os.getenv("WHATSAPP_CMD_GAP", "").strip(),
@@ -86,12 +87,16 @@ ENV_CMD_BY_REPORT_TYPE = {
 DEFAULT_CMD_BY_REPORT_TYPE = {
     "sales": 'python3 -m scripts.parse_whatsapp_sales "{txt}"',
     "staff_performance": 'python3 -m scripts.parse_whatsapp_staff "{txt}"',
+    "staff_attendance": 'python3 -m scripts.parse_whatsapp_attendance "{txt}"',
     "bale_summary": 'python3 -m scripts.parse_bale_summary "{txt}"',
 }
 
 REPORT_TYPE_ALIASES = {
     "sales_report": "sales",
     "staff_report": "staff_performance",
+    "staff_attendance_report": "staff_attendance",
+    "supervisor_control": "staff_attendance",
+    "supervisor_report": "staff_attendance",
     "bale_report": "bale_summary",
 }
 
@@ -299,6 +304,8 @@ def business_key(msg: AcceptedMessage) -> str:
         return f"sales:{branch}:{report_date}"
     if report_type == "staff_performance":
         return f"staff:{branch}:{report_date}"
+    if report_type == "staff_attendance":
+        return f"staff_attendance:{branch}:{report_date}"
     if report_type == "bale_summary":
         payload_hash = msg.meta.get("message_sha256") or msg.meta.get("raw_sha256") or msg.file_id
         return f"bale:{branch}:{report_date}:{payload_hash}"
@@ -353,6 +360,8 @@ def build_normalized_envelope(msg: AcceptedMessage) -> dict[str, Any]:
     resolved_branch = validation_branch(msg.validation, msg)
     resolved_type = validation_report_type(msg.validation, msg)
     resolved_date = validation_date(msg.validation, msg)
+    validation_lane = str(msg.validation.lane if msg.validation else "quarantine")
+    validation_warnings = list(msg.validation.warnings if msg.validation else [])
     return {
         "kind": "whatsapp_accepted_dispatch",
         "schema_version": "1.0",
@@ -386,6 +395,10 @@ def build_normalized_envelope(msg: AcceptedMessage) -> dict[str, Any]:
         "validation": {
             "ok": bool(msg.validation and msg.validation.ok),
             "errors": list(msg.validation.errors if msg.validation else []),
+            "warnings": validation_warnings,
+            "lane": validation_lane,
+            "accepted_with_warnings": validation_lane == "accepted_with_warnings",
+            "warning_count": len(validation_warnings),
         },
         "meta": msg.meta,
     }
@@ -422,6 +435,7 @@ def resolve_command_template(report_type: str) -> str | None:
     module_to_file = {
         "sales": "scripts/parse_whatsapp_sales.py",
         "staff_performance": "scripts/parse_whatsapp_staff.py",
+        "staff_attendance": "scripts/parse_whatsapp_attendance.py",
         "bale_summary": "scripts/parse_bale_summary.py",
     }
     needed_file = module_to_file.get(report_type)
@@ -549,6 +563,8 @@ def process_one(msg: AcceptedMessage, state: dict[str, Any], mark_processed_even
         "branch_slug": validation_branch(msg.validation, msg),
         "report_type": validation_report_type(msg.validation, msg),
         "report_date": validation_date(msg.validation, msg),
+        "validation_lane": str(msg.validation.lane if msg.validation else "quarantine"),
+        "validation_warnings": list(msg.validation.warnings if msg.validation else []),
         "business_key": business_key(msg),
         "received_at": msg.received_at,
         "parser": parser_result,
@@ -568,7 +584,7 @@ def process_one(msg: AcceptedMessage, state: dict[str, Any], mark_processed_even
 
     log(
         f"processed file={msg.txt_path.name} "
-        f"branch={record['branch_slug']} type={record['report_type']} "
+        f"branch={record['branch_slug']} type={record['report_type']} lane={record['validation_lane']} "
         f"dispatch={dispatch_path} parser_status={parser_result['status']}"
     )
     return True
@@ -592,6 +608,7 @@ def choose_messages(messages: list[AcceptedMessage]) -> tuple[list[AcceptedMessa
                 "count": len(group),
                 "selected_file": selected.txt_path.name,
                 "selected_received_at": selected.received_at,
+                "selected_validation_lane": str(selected.validation.lane if selected.validation else "quarantine"),
                 "files": [item.txt_path.name for item in sorted(group, key=lambda item: item.txt_path.name)],
             }
         )
@@ -605,6 +622,9 @@ def write_duplicate_audit(audit_rows: list[dict[str, Any]]) -> None:
         "accepted_root": str(RAW_ACCEPTED_ROOT),
         "groups": audit_rows,
         "duplicate_group_count": sum(1 for row in audit_rows if row["count"] > 1),
+        "accepted_with_warnings_group_count": sum(
+            1 for row in audit_rows if row.get("selected_validation_lane") == "accepted_with_warnings"
+        ),
     }
     save_json(WORKSPACE_ROOT / "DATA" / "whatsapp_duplicate_audit.json", report)
 

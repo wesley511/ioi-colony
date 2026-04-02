@@ -68,6 +68,24 @@ class WhatsAppPipelineTests(unittest.TestCase):
         self.assertEqual(resolve_command_template("bale_summary"), 'python3 -m scripts.parse_bale_summary "{txt}"')
         self.assertEqual(classify_report_type(BALE_SAMPLE.read_text(encoding="utf-8"))[0], "bale_summary")
 
+    def test_gatekeeper_accepts_daily_bale_summary_alias(self) -> None:
+        text = """DAILY BALE SUMMARY
+Branch: Waigani
+Date: 01/04/26
+Released By: Wesley
+Bale ID: 1
+Section: kids_boys
+Qty: 10
+Amount: 100
+Status: Released
+Total Qty: 10
+Total Amount: 100
+"""
+        result = validate_message(text)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.report_type, "bale_report")
+        self.assertEqual(result.normalized["report_type"], "bale_report")
+
     def test_malformed_staff_sample_is_quarantined_with_reason(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -386,6 +404,39 @@ Supervisor Confirmed: YES
         self.assertIn("customers_served_invalid", result.normalized["flags"])
         self.assertIn("staff_on_duty_invalid", result.normalized["flags"])
         self.assertIn("cash_variance_invalid", result.normalized["flags"])
+
+    def test_process_envelope_marks_accepted_with_warnings(self) -> None:
+        text = """DAY-END SALES REPORT
+Branch: bena_road
+Date: 31/03/26
+Z Reading: 5738.00
+Cash Sales: 5161.00
+EFTPOS Sales: 577.00
+Total Customers (Traffic): 468
+Customers Served: NA
+Staff on Duty: -
+Cash Variance: 0
+Over/Short Reason: NONE
+Supervisor Confirmed: YES
+"""
+        validation = validate_message(text)
+        self.assertTrue(validation.ok)
+        self.assertEqual(validation.lane, "accepted_with_warnings")
+        msg = accepted_processor.AcceptedMessage(
+            txt_path=Path("warning.txt"),
+            meta_path=Path("warning.meta.json"),
+            text=text,
+            meta={"received_at": "2026-03-31T17:35:35+00:00"},
+            branch_slug="bena_road",
+            report_type="sales",
+            received_at="2026-03-31T17:35:35+00:00",
+            file_id="warning",
+            validation=validation,
+        )
+        envelope = accepted_processor.build_normalized_envelope(msg)
+        self.assertEqual(envelope["validation"]["lane"], "accepted_with_warnings")
+        self.assertTrue(envelope["validation"]["accepted_with_warnings"])
+        self.assertGreater(envelope["validation"]["warning_count"], 0)
 
     def test_sales_parser_multitill_aggregation_precedence(self) -> None:
         explicit_text = """DAY-END SALES REPORT

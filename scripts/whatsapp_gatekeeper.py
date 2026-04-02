@@ -4,7 +4,7 @@ import argparse
 import hashlib
 import json
 import re
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -18,6 +18,14 @@ try:
     from scripts.section_normalizer import canonical_sections as canonical_section_names, normalize_section_name
 except ModuleNotFoundError:
     from section_normalizer import canonical_sections as canonical_section_names, normalize_section_name
+try:
+    from scripts.whatsapp_report_sections import (
+        extract_selected_report_text,
+        iter_attendance_rows,
+        select_report_block,
+    )
+except ModuleNotFoundError:
+    from whatsapp_report_sections import extract_selected_report_text, iter_attendance_rows, select_report_block
 
 
 # ============================================================
@@ -69,8 +77,12 @@ CLASSIFIERS = {
     "INVENTORY AVAILABILITY REPORT": "inventory_report",
     "DAILY BALE SUMMARY – RELEASED TO RAIL": "bale_report",
     "DAILY BALE SUMMARY - RELEASED TO RAIL": "bale_report",
+    "DAILY BALE SUMMARY": "bale_report",
     "STAFF PERFORMANCE REPORT": "staff_report",
-    "SUPERVISOR CONTROL REPORT": "supervisor_report",
+    "STAFF ATTENDANCE REPORT": "staff_attendance_report",
+    "DAILY STAFF ATTENDANCE REPORT": "staff_attendance_report",
+    "SUPERVISOR CONTROL REPORT": "staff_attendance_report",
+    "SUPERVISOR CONTROL SUMMARY": "staff_attendance_report",
 }
 
 DATE_RE = re.compile(r"^\d{2}/\d{2}/\d{2}$")
@@ -82,6 +94,17 @@ STAFF_NAME_RE = re.compile(r"^\s*\d+[\.\)]*\s*(.+?)\s*$")
 STAFF_FIELD_ALIASES = {
     "Arrangements": "Arrangement",
     "Assisting Customers": "Customers Assisted",
+}
+NULL_NUMERIC_VALUES = {"", "-", "NA", "N/A"}
+ATTENDANCE_STATUS_MAP = {
+    "✔": "Present",
+    "PRESENT": "Present",
+    "ABSENT": "Absent",
+    "OFF": "Off Duty",
+    "OFF DUTY": "Off Duty",
+    "LEAVE": "On Leave",
+    "ANNUAL LEAVE": "On Leave",
+    "SICK LEAVE": "On Leave",
 }
 
 
@@ -96,6 +119,8 @@ class ValidationResult:
     report_type: str | None
     errors: list[str]
     normalized: dict[str, Any] | None
+    warnings: list[str] = field(default_factory=list)
+    lane: str = "quarantine"
 
 
 # ============================================================
@@ -159,7 +184,87 @@ def to_number(value: str) -> float:
 
 
 def to_int(value: str) -> int:
-    return int(value)
+    number = float(value)
+    if not number.is_integer():
+        raise ValueError(f"Value is not an integer: {value}")
+    return int(number)
+
+
+def normalize_label(key: str) -> str:
+    value = re.sub(r"[^a-z0-9]+", "_", (key or "").strip().lower())
+    return re.sub(r"_+", "_", value).strip("_")
+
+
+def lane_for(errors: list[str], warnings: list[str]) -> str:
+    if errors:
+        return "quarantine"
+    if warnings:
+        return "accepted_with_warnings"
+    return "accepted"
+
+
+def coerce_numeric_value(
+    fields: dict[str, str],
+    key: str,
+    *,
+    integer: bool = False,
+    required: bool = False,
+    warnings: list[str],
+    errors: list[str],
+    flags: list[str],
+) -> int | float | None:
+    raw = str(fields.get(key, "")).strip()
+    if raw.upper() in NULL_NUMERIC_VALUES:
+        if required:
+            errors.append(f"Missing required numeric field: {key}")
+        else:
+            warnings.append(f"{key} missing; stored as null")
+            flags.append(f"{normalize_label(key)}_null")
+        return None
+    if not raw:
+        if required:
+            errors.append(f"Missing required numeric field: {key}")
+        else:
+            warnings.append(f"{key} missing; stored as null")
+            flags.append(f"{normalize_label(key)}_null")
+        return None
+    if not is_number(raw):
+        if required:
+            errors.append(f"Field must be numeric: {key}")
+        else:
+            warnings.append(f"{key} not numeric; stored as null")
+            flags.append(f"{normalize_label(key)}_invalid")
+        return None
+    try:
+        return to_int(raw) if integer else to_number(raw)
+    except ValueError:
+        if required:
+            errors.append(f"Field must be integer: {key}")
+        else:
+            warnings.append(f"{key} not integer; stored as null")
+            flags.append(f"{normalize_label(key)}_invalid")
+        return None
+
+
+def parse_delimited_names(value: str) -> list[str]:
+    names: list[str] = []
+    for raw in re.split(r"[;,/]|(?:\band\b)", value, flags=re.IGNORECASE):
+        cleaned = re.sub(r"\s+", " ", raw).strip(" .")
+        if cleaned:
+            names.append(cleaned)
+    return names
+
+
+def unique_name_count(values: list[str]) -> int:
+    seen: set[str] = set()
+    count = 0
+    for value in values:
+        token = normalize_label(value)
+        if not token or token in seen:
+            continue
+        seen.add(token)
+        count += 1
+    return count
 
 
 def normalize_branch(value: str) -> str:
@@ -329,6 +434,8 @@ def quarantine_duplicate(raw_text: str, raw_hash: str, existing_meta: dict[str, 
 
 def validate_sales_report(lines: list[str]) -> ValidationResult:
     errors: list[str] = []
+    warnings: list[str] = []
+    flags: list[str] = []
     fields: dict[str, str] = {}
 
     for line in lines:
@@ -342,10 +449,6 @@ def validate_sales_report(lines: list[str]) -> ValidationResult:
         "Z Reading",
         "Cash Sales",
         "EFTPOS Sales",
-        "Total Customers (Traffic)",
-        "Customers Served",
-        "Staff on Duty",
-        "Cash Variance",
         "Over/Short Reason",
         "Supervisor Confirmed",
     ]
@@ -361,35 +464,96 @@ def validate_sales_report(lines: list[str]) -> ValidationResult:
     if report_date and not validate_date(report_date):
         errors.append("Invalid date format; expected DD/MM/YY")
 
-    numeric_fields = [
-        "Z Reading",
-        "Cash Sales",
-        "EFTPOS Sales",
-        "Total Customers (Traffic)",
+    traffic_value = None
+    traffic_source = None
+    for label in ("Main Door", "Traffic", "Total Customers (Traffic)", "Door Count"):
+        if label in fields:
+            traffic_value = fields[label]
+            traffic_source = label
+            break
+    if traffic_value is None:
+        warnings.append("Traffic missing; stored as null")
+        flags.append("traffic_null")
+    elif str(traffic_value).strip().upper() in NULL_NUMERIC_VALUES or not str(traffic_value).strip():
+        warnings.append("Traffic missing; stored as null")
+        flags.append("traffic_null")
+    elif not is_number(str(traffic_value).strip()):
+        warnings.append("Traffic not numeric; stored as null")
+        flags.append("traffic_invalid")
+
+    customers_served = coerce_numeric_value(
+        fields,
         "Customers Served",
+        integer=True,
+        required=False,
+        warnings=warnings,
+        errors=errors,
+        flags=flags,
+    )
+    staff_on_duty = coerce_numeric_value(
+        fields,
         "Staff on Duty",
+        integer=True,
+        required=False,
+        warnings=warnings,
+        errors=errors,
+        flags=flags,
+    )
+    cash_variance = coerce_numeric_value(
+        fields,
         "Cash Variance",
-    ]
-    for key in numeric_fields:
-        value = fields.get(key, "")
-        if value and not is_number(value):
-            errors.append(f"Field must be numeric: {key}")
+        integer=False,
+        required=False,
+        warnings=warnings,
+        errors=errors,
+        flags=flags,
+    )
+    z_reading = coerce_numeric_value(
+        fields,
+        "Z Reading",
+        integer=False,
+        required=True,
+        warnings=warnings,
+        errors=errors,
+        flags=flags,
+    )
+    cash_sales = coerce_numeric_value(
+        fields,
+        "Cash Sales",
+        integer=False,
+        required=True,
+        warnings=warnings,
+        errors=errors,
+        flags=flags,
+    )
+    eftpos_sales = coerce_numeric_value(
+        fields,
+        "EFTPOS Sales",
+        integer=False,
+        required=True,
+        warnings=warnings,
+        errors=errors,
+        flags=flags,
+    )
+    traffic = None
+    if traffic_value is not None and str(traffic_value).strip().upper() not in NULL_NUMERIC_VALUES and is_number(str(traffic_value).strip()):
+        try:
+            traffic = to_int(str(traffic_value).strip())
+        except ValueError:
+            warnings.append("Traffic not integer; stored as null")
+            flags.append("traffic_invalid")
 
     if not errors:
-        z_reading = to_number(fields["Z Reading"])
-        cash_sales = to_number(fields["Cash Sales"])
-        eftpos_sales = to_number(fields["EFTPOS Sales"])
-        traffic = to_int(fields["Total Customers (Traffic)"])
-        served = to_int(fields["Customers Served"])
-        staff_on_duty = to_int(fields["Staff on Duty"])
-
-        if served > traffic:
+        if customers_served is not None and traffic is not None and customers_served > traffic:
             errors.append("Customers Served cannot exceed Total Customers (Traffic)")
-        if staff_on_duty < 0:
+        if staff_on_duty is not None and staff_on_duty < 0:
             errors.append("Staff on Duty cannot be negative")
 
-        difference = abs((cash_sales + eftpos_sales) - z_reading)
-        if difference > 1.0:
+        if None not in {cash_sales, eftpos_sales, z_reading}:
+            difference = abs((cash_sales + eftpos_sales) - z_reading)
+        else:
+            difference = 0.0
+        if None not in {cash_sales, eftpos_sales, z_reading} and difference > 1.0:
             errors.append(
                 f"Z Reading mismatch: Cash Sales + EFTPOS Sales differs from Z Reading by {difference:.2f}"
             )
@@ -406,24 +570,28 @@ def validate_sales_report(lines: list[str]) -> ValidationResult:
             "branch": branch,
             "date": report_date,
             "report_type": "sales_report",
+            "validation_lane": lane_for(errors, warnings),
             "totals": {
-                "z_reading": to_number(fields["Z Reading"]),
-                "cash_sales": to_number(fields["Cash Sales"]),
-                "eftpos_sales": to_number(fields["EFTPOS Sales"]),
-                "cash_variance": to_number(fields["Cash Variance"]),
+                "z_reading": z_reading,
+                "cash_sales": cash_sales,
+                "eftpos_sales": eftpos_sales,
+                "cash_variance": cash_variance,
             },
             "traffic": {
-                "total_customers": to_int(fields["Total Customers (Traffic)"]),
-                "customers_served": to_int(fields["Customers Served"]),
+                "traffic_source": traffic_source,
+                "total_customers": traffic,
+                "customers_served": customers_served,
             },
             "staffing": {
-                "staff_on_duty": to_int(fields["Staff on Duty"]),
+                "staff_on_duty": staff_on_duty,
             },
             "control": {
                 "over_short_reason": fields["Over/Short Reason"],
                 "supervisor_confirmed": fields["Supervisor Confirmed"].upper(),
             },
             "notes": notes,
+            "flags": list(flags),
+            "warnings": list(warnings),
         }
 
     return ValidationResult(
@@ -432,6 +600,8 @@ def validate_sales_report(lines: list[str]) -> ValidationResult:
         report_type="sales_report",
         errors=errors,
         normalized=normalized,
+        warnings=warnings,
+        lane=lane_for(errors, warnings),
     )
 
 
@@ -658,6 +828,7 @@ def validate_bale_report(lines: list[str]) -> ValidationResult:
 
 def validate_staff_report(lines: list[str]) -> ValidationResult:
     errors: list[str] = []
+    warnings: list[str] = []
     branch = ""
     report_date = ""
     notes = ""
@@ -809,48 +980,59 @@ def validate_staff_report(lines: list[str]) -> ValidationResult:
         report_type="staff_report",
         errors=errors,
         normalized=normalized,
+        warnings=warnings,
+        lane=lane_for(errors, warnings),
     )
 
 
-def validate_supervisor_report(lines: list[str]) -> ValidationResult:
+def normalize_attendance_status(raw_value: str) -> str | None:
+    cleaned = re.sub(r"\s+", " ", (raw_value or "").strip()).upper()
+    return ATTENDANCE_STATUS_MAP.get(cleaned)
+
+
+def validate_staff_attendance_report(lines: list[str], classifier_line: str = "STAFF ATTENDANCE REPORT") -> ValidationResult:
     errors: list[str] = []
+    warnings: list[str] = []
     branch = ""
     report_date = ""
-    supervisor_confirmed = ""
-    current: dict[str, str] = {}
-    blocks: list[dict[str, str]] = []
-
-    def flush_current() -> None:
-        nonlocal current
-        if current:
-            blocks.append(current)
-            current = {}
+    summary_fields: dict[str, int] = {}
+    attendance_rows: list[dict[str, str]] = []
 
     for line in lines:
         kv = parse_key_value_line(line)
-        if not kv:
-            errors.append(f"Invalid line format: {line}")
+        if kv:
+            key, value = kv
+            normalized_key = normalize_label(key)
+            if key == "Branch":
+                branch = normalize_branch(value)
+                continue
+            if key == "Date":
+                report_date = value
+                continue
+            if normalized_key in {
+                "present",
+                "absent",
+                "off",
+                "off_duty",
+                "leave",
+                "annual_leave",
+                "sick_leave",
+                "staff_on_duty",
+                "total_staff",
+            }:
+                if is_int(value):
+                    summary_fields[normalized_key] = int(value)
+                elif value.strip().upper() not in NULL_NUMERIC_VALUES:
+                    warnings.append(f"Attendance total not numeric: {key}")
+                continue
+            canonical_status = normalize_attendance_status(value)
+            parsed_name = parse_staff_name_line(key) or key.strip()
+            if canonical_status is not None and re.fullmatch(r"[A-Za-z .'-]+", parsed_name):
+                attendance_rows.append({"staff_name": parsed_name, "raw_status": value.strip()})
             continue
 
-        key, value = kv
-
-        if key == "Branch":
-            branch = normalize_branch(value)
-            continue
-        if key == "Date":
-            report_date = value
-            continue
-        if key == "Supervisor Confirmed":
-            supervisor_confirmed = value.strip().upper()
-            flush_current()
-            continue
-
-        if key == "Exception Type" and current:
-            flush_current()
-
-        current[key] = value
-
-    flush_current()
+        for staff_name, raw_status in iter_attendance_rows(line):
+            attendance_rows.append({"staff_name": staff_name, "raw_status": raw_status})
 
     if not branch:
         errors.append("Missing required field: Branch")
@@ -862,71 +1044,102 @@ def validate_supervisor_report(lines: list[str]) -> ValidationResult:
     elif not validate_date(report_date):
         errors.append("Invalid date format; expected DD/MM/YY")
 
-    if supervisor_confirmed not in {"YES", "NO"}:
-        errors.append("Supervisor Confirmed must be YES or NO")
+    if not attendance_rows:
+        errors.append("At least one attendance row is required")
 
-    if not blocks:
-        errors.append("At least one exception block is required")
+    normalized_rows: list[dict[str, Any]] = []
+    computed_totals = {
+        "present": 0,
+        "absent": 0,
+        "off_duty": 0,
+        "on_leave": 0,
+    }
+    seen_staff: set[str] = set()
 
-    normalized_blocks: list[dict[str, Any]] = []
+    for idx, row in enumerate(attendance_rows, start=1):
+        staff_name = row["staff_name"].strip()
+        raw_status = row["raw_status"].strip()
+        canonical_status = normalize_attendance_status(raw_status)
+        if not staff_name:
+            errors.append(f"Attendance row {idx}: missing staff name")
+            continue
+        if canonical_status is None:
+            warnings.append(f"Attendance row {idx}: unsupported status {raw_status!r}")
+            canonical_status = "Unknown"
 
-    for idx, block in enumerate(blocks, start=1):
-        required = [
-            "Exception Type",
-            "Details",
-            "Action Taken",
-            "Escalated By",
-            "Time",
-        ]
-        for key in required:
-            if key not in block:
-                errors.append(f"Exception block {idx}: missing {key}")
+        staff_key = normalize_label(staff_name)
+        if staff_key in seen_staff:
+            warnings.append(f"Duplicate attendance row for {staff_name}")
+        seen_staff.add(staff_key)
 
-        exception_type = block.get("Exception Type", "").strip().upper()
-        details = block.get("Details", "").strip()
-        action_taken = block.get("Action Taken", "").strip()
-        escalated_by = block.get("Escalated By", "").strip()
-        time_value = block.get("Time", "").strip()
+        if canonical_status == "Present":
+            computed_totals["present"] += 1
+        elif canonical_status == "Absent":
+            computed_totals["absent"] += 1
+        elif canonical_status == "Off Duty":
+            computed_totals["off_duty"] += 1
+        elif canonical_status == "On Leave":
+            computed_totals["on_leave"] += 1
 
-        if exception_type and exception_type not in ALLOWED_EXCEPTION_TYPES:
-            errors.append(f"Exception block {idx}: invalid Exception Type {exception_type}")
-        if details == "":
-            errors.append(f"Exception block {idx}: Details cannot be empty")
-        if action_taken == "":
-            errors.append(f"Exception block {idx}: Action Taken cannot be empty")
-        if escalated_by == "":
-            errors.append(f"Exception block {idx}: Escalated By cannot be empty")
-        if time_value and not validate_time(time_value):
-            errors.append(f"Exception block {idx}: invalid time {time_value}; expected HH:MM")
+        normalized_rows.append(
+            {
+                "staff_name": staff_name,
+                "attendance_status": canonical_status,
+                "raw_attendance_value": raw_status,
+            }
+        )
 
-        if all([exception_type, details, action_taken, escalated_by, time_value]) and not errors:
-            normalized_blocks.append(
-                {
-                    "exception_type": exception_type,
-                    "details": details,
-                    "action_taken": action_taken,
-                    "escalated_by": escalated_by,
-                    "time": time_value,
-                }
-            )
+    declared_map = {
+        "present": summary_fields.get("present"),
+        "absent": summary_fields.get("absent"),
+        "off_duty": summary_fields.get("off") if "off" in summary_fields else summary_fields.get("off_duty"),
+        "on_leave": next((summary_fields.get(key) for key in ("leave", "annual_leave", "sick_leave") if key in summary_fields), None),
+        "staff_on_duty": summary_fields.get("staff_on_duty"),
+        "total_staff": summary_fields.get("total_staff"),
+    }
+
+    for key, declared in declared_map.items():
+        if declared is None:
+            continue
+        if key == "staff_on_duty" and declared != computed_totals["present"]:
+            warnings.append(f"Declared staff on duty {declared} does not match computed present count {computed_totals['present']}")
+        elif key == "total_staff":
+            computed_total = sum(computed_totals.values())
+            if declared != computed_total:
+                warnings.append(f"Declared total staff {declared} does not match computed total {computed_total}")
+        elif key in computed_totals and declared != computed_totals[key]:
+            warnings.append(f"Declared {key.replace('_', ' ')} {declared} does not match computed total {computed_totals[key]}")
 
     normalized = None
     if not errors:
         normalized = {
-            "signal_type": "supervisor_control_report",
+            "signal_type": "staff_attendance_report",
             "branch": branch,
             "date": report_date,
-            "report_type": "supervisor_report",
-            "exceptions": normalized_blocks,
-            "supervisor_confirmed": supervisor_confirmed,
+            "report_type": "staff_attendance_report",
+            "validation_lane": lane_for(errors, warnings),
+            "attendance_records": normalized_rows,
+            "attendance_totals": {
+                "present": computed_totals["present"],
+                "absent": computed_totals["absent"],
+                "off_duty": computed_totals["off_duty"],
+                "on_leave": computed_totals["on_leave"],
+                "staff_on_duty": computed_totals["present"],
+                "total_staff": sum(computed_totals.values()),
+            },
+            "declared_totals": declared_map,
+            "warnings": list(warnings),
+            "legacy_classifier": classifier_line,
         }
 
     return ValidationResult(
         ok=not errors,
-        classifier="SUPERVISOR CONTROL REPORT",
-        report_type="supervisor_report",
+        classifier=classifier_line,
+        report_type="staff_attendance_report",
         errors=errors,
         normalized=normalized,
+        warnings=warnings,
+        lane=lane_for(errors, warnings),
     )
 
 
@@ -935,7 +1148,29 @@ def validate_supervisor_report(lines: list[str]) -> ValidationResult:
 # ============================================================
 
 def validate_message(raw_text: str) -> ValidationResult:
-    lines = split_nonempty_lines(raw_text)
+    selected, _, ambiguous = select_report_block(raw_text)
+    if ambiguous:
+        return ValidationResult(
+            ok=False,
+            classifier=None,
+            report_type=None,
+            errors=["Ambiguous report selection across mixed WhatsApp sections"],
+            normalized=None,
+            lane="quarantine",
+        )
+
+    selected_text = extract_selected_report_text(raw_text)
+    if selected is not None:
+        contextual_lines = split_nonempty_lines(selected.contextual_text)
+        section_lines = split_nonempty_lines(selected.section_text)
+        if section_lines:
+            try:
+                header_index = contextual_lines.index(section_lines[0])
+            except ValueError:
+                header_index = 0
+            preface_lines = contextual_lines[:header_index]
+            selected_text = "\n".join([section_lines[0], *preface_lines, *section_lines[1:]])
+    lines = split_nonempty_lines(selected_text)
     classifier_line, report_type, remaining = extract_header(lines)
 
     if not classifier_line:
@@ -945,15 +1180,19 @@ def validate_message(raw_text: str) -> ValidationResult:
             report_type=None,
             errors=["Empty message"],
             normalized=None,
+            lane="quarantine",
         )
 
     if not report_type:
+        if selected and selected.report_type == "staff_attendance":
+            return validate_staff_attendance_report(lines, classifier_line=selected.header)
         return ValidationResult(
             ok=False,
             classifier=classifier_line,
             report_type=None,
             errors=[f"Unknown classifier line: {classifier_line}"],
             normalized=None,
+            lane="quarantine",
         )
 
     if report_type == "sales_report":
@@ -964,8 +1203,8 @@ def validate_message(raw_text: str) -> ValidationResult:
         return validate_bale_report(remaining)
     if report_type == "staff_report":
         return validate_staff_report(remaining)
-    if report_type == "supervisor_report":
-        return validate_supervisor_report(remaining)
+    if report_type == "staff_attendance_report":
+        return validate_staff_attendance_report(remaining, classifier_line=classifier_line)
 
     return ValidationResult(
         ok=False,
@@ -973,6 +1212,7 @@ def validate_message(raw_text: str) -> ValidationResult:
         report_type=report_type,
         errors=[f"No validator registered for report type: {report_type}"],
         normalized=None,
+        lane="quarantine",
     )
 
 
@@ -1038,6 +1278,8 @@ def ingest_file(path: Path, strict: bool = True) -> dict[str, Any]:
         "sha256": raw_hash,
         "ingested_at": utc_now_iso(),
         "strict_mode": strict,
+        "validation_lane": validation.lane,
+        "validation_warnings": list(validation.warnings),
     }
 
     branch = normalized["branch"]
@@ -1050,7 +1292,7 @@ def ingest_file(path: Path, strict: bool = True) -> dict[str, Any]:
     save_json(out_path, normalized)
 
     seen_hashes[raw_hash] = {
-        "status": "accepted",
+        "status": validation.lane,
         "classifier": validation.classifier,
         "report_type": report_type,
         "branch": branch,
@@ -1061,12 +1303,13 @@ def ingest_file(path: Path, strict: bool = True) -> dict[str, Any]:
     save_state(state)
 
     return {
-        "status": "accepted",
+        "status": validation.lane,
         "output_file": str(out_path),
         "report_type": report_type,
         "branch": branch,
         "date": report_date,
         "sha256": raw_hash,
+        "warnings": list(validation.warnings),
     }
 
 
