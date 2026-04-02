@@ -13,6 +13,10 @@ try:
     from scripts.utils_normalization import normalize_branch as shared_normalize_branch
 except ModuleNotFoundError:
     from utils_normalization import normalize_branch as shared_normalize_branch
+try:
+    from scripts.whatsapp_report_sections import extract_selected_report_text
+except ModuleNotFoundError:
+    from whatsapp_report_sections import extract_selected_report_text
 
 def utc_today_iso() -> str:
     return datetime.now(timezone.utc).date().isoformat()
@@ -66,6 +70,14 @@ def extract_first_number(text: str, patterns: list[str]) -> float | None:
     return None
 
 
+def extract_all_line_values(text: str, *labels: str) -> list[str]:
+    values: list[str] = []
+    for label in labels:
+        pattern = rf"^\s*{re.escape(label)}\s*[:=]\s*(.+?)\s*$"
+        values.extend(normalize_spaces(match.group(1)) for match in re.finditer(pattern, text, flags=re.IGNORECASE | re.MULTILINE))
+    return values
+
+
 def normalize_branch(raw_branch: str | None) -> str:
     if not raw_branch:
         return "unknown"
@@ -105,11 +117,105 @@ def extract_report_date(text: str) -> str:
     return utc_today_iso()
 
 
-def split_sales_and_supervisor(text: str) -> tuple[str, str]:
-    parts = re.split(r"^\s*SUPERVISOR CONTROL REPORT\s*$", text, flags=re.IGNORECASE | re.MULTILINE, maxsplit=1)
-    if len(parts) == 2:
-        return parts[0].strip(), parts[1].strip()
-    return text.strip(), ""
+def extract_till_totals(text: str) -> dict[str, Any]:
+    header_re = re.compile(r"^\s*Till\s*#?\s*(\d+)\s*[:=]\s*(.+?)\s*$", flags=re.IGNORECASE | re.MULTILINE)
+    matches = list(header_re.finditer(text))
+    tills: list[dict[str, Any]] = []
+    for index, match in enumerate(matches):
+        start = match.start()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        block = text[start:end]
+        tills.append(
+            {
+                "till_number": int(match.group(1)),
+                "till_name": normalize_spaces(match.group(2)),
+                "cash": round(
+                    extract_first_number(block, [r"^\s*T/?Cash\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$"]) or 0.0,
+                    2,
+                ),
+                "card": round(
+                    extract_first_number(block, [r"^\s*T/?Card\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$"]) or 0.0,
+                    2,
+                ),
+                "z_reading": round(
+                    extract_first_number(block, [r"^\s*Z/?Reading\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$"]) or 0.0,
+                    2,
+                ),
+                "cashier": extract_line_value(block, "Cashier") or "",
+                "assistant": extract_line_value(block, "Assistant") or "",
+            }
+        )
+    return {
+        "tills": tills,
+        "cash": round(sum(item["cash"] for item in tills), 2),
+        "card": round(sum(item["card"] for item in tills), 2),
+        "z_reading": round(sum(item["z_reading"] for item in tills), 2),
+    }
+
+
+def choose_traffic_value(text: str) -> tuple[int | None, str | None]:
+    label_groups = [
+        ("Main Door", ("Main Door", "Main_Door")),
+        ("Traffic", ("Traffic",)),
+        ("Total Customers (Traffic)", ("Total Customers (Traffic)", "Total Customers", "Total Customer")),
+        ("Door Count", ("Door Count", "Door_Count")),
+    ]
+    for source_label, labels in label_groups:
+        value = parse_int(extract_line_value(text, *labels))
+        if value is not None:
+            return value, source_label
+    return None, None
+
+
+def parse_notes_kpis(notes: str) -> tuple[dict[str, float | None], list[str]]:
+    parsed = {
+        "sales_per_labor_hour": None,
+        "sales_per_customer": None,
+        "conversion_rate": None,
+    }
+    warnings: list[str] = []
+    if not notes:
+        return parsed, warnings
+    for token in [part.strip() for part in notes.split(";") if part.strip()]:
+        if "=" not in token:
+            warnings.append(f"malformed_note:{token}")
+            continue
+        key, value = [part.strip() for part in token.split("=", 1)]
+        key_token = slugify(key)
+        parsed_value = parse_float(value)
+        if key_token in {"sales_per_labor_hour", "sales_per_labor_hours"}:
+            parsed["sales_per_labor_hour"] = parsed_value
+        elif key_token in {"sales_per_customer", "sale_per_customer"}:
+            parsed["sales_per_customer"] = parsed_value
+        elif key_token == "conversion_rate":
+            parsed["conversion_rate"] = parsed_value
+        else:
+            warnings.append(f"unknown_note_key:{key_token}")
+    return parsed, warnings
+
+
+def parse_staff_on_duty_value(value: str | None) -> int | None:
+    raw = normalize_spaces(value or "")
+    if not raw:
+        return None
+    if "," in raw or ";" in raw or "/" in raw or " and " in raw.lower():
+        names = {
+            slugify(name)
+            for name in re.split(r"[;,/]|(?:\band\b)", raw, flags=re.IGNORECASE)
+            if slugify(name)
+        }
+        return len(names) or None
+    return parse_int(raw)
+
+
+def derive_staff_on_duty(text: str, till_totals: dict[str, Any]) -> tuple[int | None, str]:
+    explicit = parse_staff_on_duty_value(extract_line_value(text, "Staff on Duty"))
+    if explicit is not None:
+        return explicit, "reported_staff_on_duty"
+    cashier_names = [item["cashier"] for item in till_totals.get("tills", []) if item.get("cashier")]
+    if cashier_names:
+        return len({slugify(name) for name in cashier_names if slugify(name)}), "unique_cashiers"
+    return None, "unavailable"
 
 
 def detect_sales_format(text: str) -> str:
@@ -120,7 +226,11 @@ def detect_sales_format(text: str) -> str:
 
 
 def extract_branch(text: str) -> str:
-    return normalize_branch(extract_line_value(text, "Branch", "Shop", "Location"))
+    explicit = extract_line_value(text, "Branch", "Shop", "Location")
+    if explicit:
+        return normalize_branch(explicit)
+    first_line = next((line.strip() for line in text.splitlines() if line.strip()), "")
+    return normalize_branch(first_line)
 
 
 def extract_explicit_conversion_rate(text: str) -> float | None:
@@ -234,61 +344,57 @@ def derive_flags(
 
 
 def parse_sales_report(text: str) -> dict[str, Any]:
-    sales_text, supervisor_text = split_sales_and_supervisor(text)
+    sales_text = extract_selected_report_text(text, expected_report_type="sales")
     sales_format = detect_sales_format(sales_text)
 
     branch = extract_branch(sales_text)
     signal_date = extract_report_date(sales_text)
+    till_totals = extract_till_totals(sales_text)
 
     explicit_total_cash = extract_first_number(
         sales_text,
-        [r"^\s*Total_Cash\s*[:=]\s*([0-9,]+(?:\.[0-9]+)?)\s*$"],
+        [r"^\s*Total[_ ]Ca(?:sh|ssh)\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$"],
     )
     explicit_total_card = extract_first_number(
         sales_text,
-        [r"^\s*Total_Card\s*[:=]\s*([0-9,]+(?:\.[0-9]+)?)\s*$"],
+        [r"^\s*Total[_ ]Card\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$"],
     )
     explicit_total_sales = extract_first_number(
         sales_text,
-        [r"^\s*Total_Sales\s*[:=]\s*([0-9,]+(?:\.[0-9]+)?)\s*$"],
+        [r"^\s*Total[_ ]Sales\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$"],
     )
 
     z_reading = extract_first_number(
         sales_text,
-        [r"^\s*Z[ _]?Reading\s*[:=]\s*([0-9,]+(?:\.[0-9]+)?)\s*$"],
+        [r"^\s*Z[ /_]?Reading\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$"],
     )
 
     cash_sales = explicit_total_cash
     if cash_sales is None:
-        cash_sales = extract_first_number(
+        cash_sales = till_totals["cash"] or extract_first_number(
             sales_text,
             [
-                r"^\s*T_Cash\s*[:=]\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
-                r"^\s*Cash Sales\s*[:=]\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
+                r"^\s*T/?Cash\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
+                r"^\s*Cash Sales\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
             ],
         )
 
     card_sales = explicit_total_card
     if card_sales is None:
-        card_sales = extract_first_number(
+        card_sales = till_totals["card"] or extract_first_number(
             sales_text,
             [
-                r"^\s*T_Card\s*[:=]\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
-                r"^\s*EFTPOS Sales\s*[:=]\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
-                r"^\s*Card Sales\s*[:=]\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
-                r"^\s*POS Sales\s*[:=]\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
+                r"^\s*T/?Card\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
+                r"^\s*EFTPOS Sales\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
+                r"^\s*Card Sales\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
+                r"^\s*POS Sales\s*[:=]\s*K?\s*([0-9,]+(?:\.[0-9]+)?)\s*$",
             ],
         )
 
-    traffic = parse_int(
-        extract_line_value(
-            sales_text,
-            "Total Customers (Traffic)",
-            "Traffic",
-            "Total Customers",
-            "Main_Door",
-        )
-    )
+    if z_reading is None and till_totals["z_reading"] > 0:
+        z_reading = till_totals["z_reading"]
+
+    traffic, traffic_source = choose_traffic_value(sales_text)
 
     served = parse_int(
         extract_line_value(
@@ -297,19 +403,17 @@ def parse_sales_report(text: str) -> dict[str, Any]:
             "Guest Served",
             "Guests Served",
             "Guest_Customer_Serve",
+            "Guest/ Customer served",
         )
     )
 
-    staff_on_duty = parse_int(extract_line_value(sales_text, "Staff on Duty"))
+    staff_on_duty, staff_on_duty_source = derive_staff_on_duty(sales_text, till_totals)
     notes = extract_line_value(sales_text, "Notes")
     over_short_reason = extract_line_value(sales_text, "Over/Short Reason")
     supervisor_confirmed = extract_line_value(sales_text, "Supervisor Confirmed")
-
-    cashier = extract_line_value(sales_text, "Cashier")
-    assistant = extract_line_value(sales_text, "Assistant")
-    till_1 = extract_line_value(sales_text, "Till_1", "Till 1", "Till")
     balanced = extract_line_value(sales_text, "Balance", "Balanced")
     balanced_by = extract_line_value(sales_text, "Balanced_By", "Balanced By")
+    notes_kpis, note_warnings = parse_notes_kpis(notes or "")
 
     sales_per_labor_hours = parse_float(
         extract_line_value(sales_text, "Sales_Per_Labor_Hours", "Sales Per Labor Hours")
@@ -319,46 +423,27 @@ def parse_sales_report(text: str) -> dict[str, Any]:
     )
     explicit_conversion_rate = extract_explicit_conversion_rate(sales_text)
 
-    supervisor_branch = extract_branch(supervisor_text) if supervisor_text else ""
-
-    supervisor = {
-        "branch": supervisor_branch,
-        "branch_slug": supervisor_branch or branch,
-        "date": extract_report_date(supervisor_text) if supervisor_text else "",
-        "supervisor": extract_line_value(supervisor_text, "Supervisor") or "",
-        "cash_variance_reported": extract_line_value(supervisor_text, "Cash_Variance", "Cash Variance") or "",
-        "staffing_issues": extract_line_value(supervisor_text, "Staffing_Issues", "Staffing Issues") or "",
-        "stock_issues_affecting_sales": extract_line_value(
-            supervisor_text,
-            "Stock_Issues_Affecting_Sales",
-            "Stock Issues Affecting Sales",
-        ) or "",
-        "pricing_or_system_issues": extract_line_value(
-            supervisor_text,
-            "Pricing_Or_System_Issues",
-            "Pricing Or System Issues",
-        ) or "",
-        "exceptions_escalated_to_ops_manager": extract_line_value(
-            supervisor_text,
-            "Exceptions_Escalated_To_Ops_Manager",
-            "Exceptions Escalated To Ops Manager",
-        ) or "",
-        "supervisor_confirmation": extract_line_value(
-            supervisor_text,
-            "Supervisor_Confirmation",
-            "Supervisor Confirmation",
-        ) or "",
-    }
-
     cash_variance_numeric = parse_float(extract_line_value(sales_text, "Cash Variance"))
-    total_sales = compute_total_sales(
-        z_reading=z_reading,
-        cash_sales=cash_sales,
-        card_sales=card_sales,
-        explicit_total_sales=explicit_total_sales,
+    if explicit_total_sales is not None and explicit_total_sales > 0:
+        total_sales = round(explicit_total_sales, 2)
+        total_sales_source = "explicit_total_sales"
+    elif till_totals["tills"]:
+        total_sales = round(till_totals["cash"] + till_totals["card"], 2)
+        total_sales_source = "summed_tills"
+    elif z_reading is not None and z_reading > 0:
+        total_sales = round(z_reading or 0.0, 2)
+        total_sales_source = "z_reading_fallback"
+    else:
+        total_sales = round((cash_sales or 0.0) + (card_sales or 0.0), 2)
+        total_sales_source = "cash_card_fallback"
+
+    effective_conversion_rate = notes_kpis["conversion_rate"] if notes_kpis["conversion_rate"] is not None else explicit_conversion_rate
+    conversion_rate = compute_conversion_rate(traffic, served, effective_conversion_rate)
+    sales_per_customer = compute_sales_per_customer(
+        total_sales,
+        served,
+        notes_kpis["sales_per_customer"] if notes_kpis["sales_per_customer"] is not None else sales_per_customer_reported,
     )
-    conversion_rate = compute_conversion_rate(traffic, served, explicit_conversion_rate)
-    sales_per_customer = compute_sales_per_customer(total_sales, served, sales_per_customer_reported)
     confidence = compute_confidence(branch, total_sales, cash_sales, card_sales, z_reading, traffic, served)
 
     flags = derive_flags(
@@ -370,10 +455,11 @@ def parse_sales_report(text: str) -> dict[str, Any]:
         traffic=traffic,
         served=served,
         explicit_total_sales=explicit_total_sales,
-        explicit_conversion_rate=explicit_conversion_rate,
+        explicit_conversion_rate=effective_conversion_rate,
         computed_conversion_rate=conversion_rate,
         cash_variance=cash_variance_numeric,
     )
+    flags.extend(note_warnings)
 
     return {
         "type": "sales_day_end",
@@ -384,6 +470,7 @@ def parse_sales_report(text: str) -> dict[str, Any]:
         "date": signal_date,
         "totals": {
             "sales": round(total_sales, 2),
+            "sales_source": total_sales_source,
             "cash": round(cash_sales or 0.0, 2),
             "card": round(card_sales or 0.0, 2),
             "z_reading": round(z_reading or 0.0, 2),
@@ -391,30 +478,30 @@ def parse_sales_report(text: str) -> dict[str, Any]:
             "reported_total_cash": round(explicit_total_cash or 0.0, 2),
             "reported_total_card": round(explicit_total_card or 0.0, 2),
             "cash_variance": round(cash_variance_numeric or 0.0, 2),
+            "tills": till_totals["tills"],
         },
         "customers": {
             "traffic": traffic if traffic is not None else None,
+            "traffic_source": traffic_source,
             "served": served if served is not None else None,
             "conversion_rate": conversion_rate,
-            "reported_conversion_rate": explicit_conversion_rate,
+            "reported_conversion_rate": effective_conversion_rate,
         },
         "performance": {
             "sales_per_customer": sales_per_customer,
-            "sales_per_labor_hours": round(sales_per_labor_hours or 0.0, 2),
+            "sales_per_labor_hours": round(notes_kpis["sales_per_labor_hour"] or sales_per_labor_hours or 0.0, 2),
             "reported_sales_per_customer": round(sales_per_customer_reported or 0.0, 2),
+            "parsed_notes_kpis": notes_kpis,
         },
         "operations": {
             "staff_on_duty": staff_on_duty,
-            "cashier": cashier or "",
-            "assistant": assistant or "",
-            "till_1": till_1 or "",
+            "staff_on_duty_source": staff_on_duty_source,
             "balanced": (balanced or "").upper(),
             "balanced_by": balanced_by or "",
             "over_short_reason": over_short_reason or "",
             "supervisor_confirmed": (supervisor_confirmed or "").upper(),
             "notes": notes or "",
         },
-        "supervisor_control_report": supervisor,
         "flags": flags,
         "confidence": confidence,
         "source_format": "whatsapp_day_end_sales",
