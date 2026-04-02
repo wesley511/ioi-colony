@@ -1,0 +1,76 @@
+{
+  "summary_type": "sales_staff_fusion_summary",
+  "branch": "5th_street",
+  "report_date": "2026-03-26",
+  "fusion_score": 2.54,
+  "fusion_band": "weak",
+  "sales": {
+    "available": true,
+    "branch": "5th_street",
+    "report_date": "2026-03-26",
+    "cash": 2627.0,
+    "card": 949.0,
+    "z_reading": 3576.0,
+    "total_sales": 3576.0,
+    "balanced": true,
+    "foot_traffic": 296.0,
+    "served_customers": 113.0,
+    "sales_per_labor_hour": 35.1,
+    "sales_per_customer": 31.7,
+    "conversion_rate_pct": 38.2,
+    "staffing_issues": true,
+    "stock_issues_affecting_sales": false,
+    "pricing_or_system_issues": false,
+    "cash_variance": false,
+    "exceptions_escalated": "All material issues have been escalated.",
+    "labels": [
+      "sales",
+      "daily",
+      "structured_report"
+    ]
+  },
+  "staff": {
+    "available": false,
+    "branch": null,
+    "report_date": null,
+    "events_count": 0,
+    "staff_count": 0,
+    "section_count": 0,
+    "overall_avg_score": null,
+    "overall_band": null,
+    "arrangement_avg": null,
+    "display_avg": null,
+    "performance_avg": null,
+    "strongest_dimension": null,
+    "weakest_dimension": null,
+    "top_staff": [],
+    "bottom_staff": [],
+    "weakest_sections": [],
+    "strongest_sections": []
+  },
+  "diagnostics": {
+    "findings": [
+      {
+        "type": "conversion",
+        "severity": "high",
+        "message": "Conversion rate is low at 38.2%."
+      },
+      {
+        "type": "staffing",
+        "severity": "high",
+        "message": "Supervisor flagged staffing issues in the sales report."
+      },
+      {
+        "type": "service_coverage",
+        "severity": "medium",
+        "message": "Only 113.0 served customers from 296.0 foot traffic."
+      }
+    ],
+    "recommended_actions": [
+      "Investigate why customer traffic is not converting into purchases.",
+      "Review roster coverage and customer assistance during peak traffic periods.",
+      "Increase visible customer assistance and conversion follow-through on the floor."
+    ]
+  },
+  "summary_text": "Sales data available: total_sales=3576.0, conversion_rate=38.2% | Staff data unavailable | Findings=3"
+}

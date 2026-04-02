@@ -56,7 +56,7 @@ def resolve_section_from_master_data(raw_section: str, branch_slug: str) -> Sect
 
     for section in data["sections"]:
         canonical = _clean(section.get("canonical", ""))
-        section_type = (section.get("section_type") or "unknown").strip().lower()
+        section_type = (section.get("section_type") or "resolved").strip().lower()
         product_families = section.get("product_families") or []
         aliases = section.get("aliases") or []
 
@@ -74,7 +74,7 @@ def resolve_section_from_master_data(raw_section: str, branch_slug: str) -> Sect
     # soft containment fallback
     for section in data["sections"]:
         canonical = _clean(section.get("canonical", ""))
-        section_type = (section.get("section_type") or "unknown").strip().lower()
+        section_type = (section.get("section_type") or "resolved").strip().lower()
         product_families = section.get("product_families") or []
         aliases = section.get("aliases") or []
 

@@ -9,6 +9,11 @@ from pathlib import Path
 
 import re
 
+try:
+    from scripts.utils_normalization import normalize_branch as shared_normalize_branch
+except ModuleNotFoundError:
+    from utils_normalization import normalize_branch as shared_normalize_branch
+
 def clean_section_name(section):
     # remove leading numbers like "20.", "10_", "3 "
     section = re.sub(r'^\d+[\.\s_]*', '', section)
@@ -73,22 +78,24 @@ def slugify(text: str) -> str:
 
 
 def normalize_branch(branch: str) -> str:
-    b = branch.strip().lower()
-    aliases = {
-        "ttc bena road": "bena_road",
-        "bena road": "bena_road",
-        "bena_road": "bena_road",
-        "ttc waigani": "waigani",
-        "waigani": "waigani",
-        "ttc lae 5th street": "5th_street",
-        "ttc 5th street": "5th_street",
-        "5th street": "5th_street",
-        "5th_street": "5th_street",
-        "ttc lae malaita": "lae_malaita",
-        "lae malaita": "lae_malaita",
-        "lae_malaita": "lae_malaita",
-    }
-    return aliases.get(b, slugify(b))
+    normalized = shared_normalize_branch(
+        branch,
+        style="legacy_short_slug",
+        fallback="slugify",
+        match_substring=False,
+        profile="legacy_short_exact",
+    )
+    return str(normalized or "unknown")
+
+
+def canonical_branch_slug(branch: str) -> str:
+    normalized = shared_normalize_branch(
+        branch,
+        style="canonical_slug",
+        fallback="unknown",
+        match_substring=True,
+    )
+    return str(normalized or "unknown")
 
 
 def normalize_section(section: str) -> str:
@@ -263,6 +270,7 @@ def split_entries(text: str) -> list[str]:
 def write_signal_file(
     outdir: Path,
     branch_code: str,
+    branch_slug: str,
     source_name: str,
     report_date: str,
     day_name: str,
@@ -295,6 +303,7 @@ def write_signal_file(
 day: {day_name}
 source_type: staff_sales_report
 source_name: {source_name}
+branch_slug: {branch_slug}
 category: staff_sales
 signal_type: {signal_type}
 staff_id: {staff_id}
@@ -347,6 +356,7 @@ def main() -> int:
     header_branch = extract_branch_header(text)
     source_name = args.source_name.strip() or normalize_branch(header_branch)
     branch_code = args.branch.strip() or normalize_branch(header_branch)
+    branch_slug = canonical_branch_slug(args.branch.strip() or header_branch)
 
     outdir.mkdir(parents=True, exist_ok=True)
 
@@ -376,6 +386,7 @@ def main() -> int:
         write_signal_file(
             outdir=outdir,
             branch_code=branch_code,
+            branch_slug=branch_slug,
             source_name=source_name,
             report_date=report_date,
             day_name=day_name,

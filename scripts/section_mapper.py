@@ -8,6 +8,11 @@ from typing import Any
 
 import yaml
 
+try:
+    from scripts.branch_resolution import canonical_branch_display, resolve_branch_slug
+except ModuleNotFoundError:
+    from branch_resolution import canonical_branch_display, resolve_branch_slug
+
 BRANCH_ALIASES = {
     "waigani": "WAIGANI",
     "ttc waigani": "WAIGANI",
@@ -37,16 +42,11 @@ SIGNALS_BALES_DIR = ROOT / "SIGNALS" / "bales"
 REPORTS_DIR = ROOT / "REPORTS"
 
 def normalize_branch_name(branch: str) -> str:
+    resolved = resolve_branch_slug(candidates=[branch], fallback="")
+    if resolved:
+        return canonical_branch_display(resolved)
     raw = str(branch or "").strip()
-    if not raw:
-        return ""
-
-    key = raw.lower().strip()
-
-    if key in BRANCH_ALIASES:
-        return BRANCH_ALIASES[key]
-
-    return raw.upper()
+    return raw.upper() if raw else ""
 
 
 def slugify(text: str) -> str:
@@ -198,7 +198,7 @@ def map_item_to_section(item_name: str, sections: list[SectionRecord]) -> dict[s
 
 def map_bale_signal(path: Path, branch_sections: dict[str, list[SectionRecord]]) -> dict[str, Any]:
     data = load_yaml(path)
-    branch = normalize_branch_name(data.get("branch", ""))
+    branch = normalize_branch_name(data.get("branch_slug") or data.get("branch", ""))
     date = str(data.get("date", "")).strip()
     sections = branch_sections.get(branch, [])
 
@@ -264,7 +264,7 @@ def build_section_metrics(signals: list[dict], branch_sections: dict[str, list[S
     }))
 
     for s in signals:
-        branch = normalize_branch_name(s.get("branch", ""))
+        branch = normalize_branch_name(s.get("branch_slug") or s.get("branch", ""))
         item = str(s.get("item", "")).strip()
 
         if not branch or not item:

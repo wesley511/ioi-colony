@@ -13,6 +13,11 @@ from typing import Any
 
 from flask import Flask, jsonify, request
 
+try:
+    from scripts.utils_normalization import normalize_branch as shared_normalize_branch
+except ModuleNotFoundError:
+    from utils_normalization import normalize_branch as shared_normalize_branch
+
 app = Flask(__name__)
 
 # -----------------------------------------------------------------------------
@@ -42,58 +47,6 @@ ACCEPTED_DIRNAME = "accepted"
 QUARANTINE_DIRNAME = "quarantine"
 
 MAX_TEXT_PREVIEW = 160
-
-# -----------------------------------------------------------------------------
-# Branch canonicalization
-# -----------------------------------------------------------------------------
-
-BRANCH_ALIASES: dict[str, tuple[str, ...]] = {
-    "waigani": (
-        "waigani",
-        "ttc waigani",
-        "pom waigani",
-        "pom waigani branch",
-        "ttc pom waigani branch",
-        "ttc waigani branch",
-        "waigani branch",
-        "port moresby waigani",
-        "ncd waigani",
-    ),
-    "bena_road": (
-        "bena road",
-        "ttc bena road",
-        "ttc bena road goroka",
-        "goroka bena road",
-        "bena road goroka",
-        "goroka",
-        "ttc goroka",
-        "ttc bena",
-    ),
-    "lae_5th_street": (
-        "lae 5th street",
-        "5th street",
-        "ttc 5th street lae",
-        "ttc lae 5th street",
-        "lae fifth street",
-        "fifth street lae",
-        "5th st lae",
-    ),
-    "lae_malaita": (
-        "lae malaita",
-        "malaita",
-        "malaita street",
-        "lae malaita street",
-        "ttc malaita",
-        "ttc lae malaita",
-        "ttc malaita street",
-    ),
-}
-
-_ALIAS_TO_BRANCH: dict[str, str] = {}
-for branch_slug, aliases in BRANCH_ALIASES.items():
-    _ALIAS_TO_BRANCH[branch_slug] = branch_slug
-    for alias in aliases:
-        _ALIAS_TO_BRANCH[alias] = branch_slug
 
 # -----------------------------------------------------------------------------
 # Strict first-line classifier mapping
@@ -272,32 +225,16 @@ def first_nonempty_line(text: str) -> str:
     return ""
 
 
-def normalize_branch_token(value: str) -> str:
-    text = (value or "").strip().lower()
-    text = text.replace("&", " and ")
-    text = text.replace("/", " ")
-    text = re.sub(r"[_\-]+", " ", text)
-    text = re.sub(r"\bbranch\b", " ", text)
-    text = re.sub(r"\bttc\b", " ", text)
-    text = re.sub(r"\bpom\b", " port moresby ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    return text
-
-
 def branch_from_alias(value: str | None) -> str | None:
     if not value:
         return None
-
-    raw = normalize_branch_token(value)
-
-    if raw in _ALIAS_TO_BRANCH:
-        return _ALIAS_TO_BRANCH[raw]
-
-    for alias, branch in _ALIAS_TO_BRANCH.items():
-        if alias in raw or raw in alias:
-            return branch
-
-    return None
+    normalized = shared_normalize_branch(
+        value,
+        style="canonical_slug",
+        fallback="none",
+        match_substring=True,
+    )
+    return str(normalized) if normalized else None
 
 
 def extract_branch_from_text(text: str) -> str | None:
@@ -317,12 +254,13 @@ def infer_branch_from_text(text: str) -> str | None:
     explicit = extract_branch_from_text(text)
     if explicit:
         return explicit
-
-    lowered = normalize_branch_token(text)
-    for alias, branch in _ALIAS_TO_BRANCH.items():
-        if alias in lowered:
-            return branch
-    return None
+    normalized = shared_normalize_branch(
+        text,
+        style="canonical_slug",
+        fallback="none",
+        match_substring=True,
+    )
+    return str(normalized) if normalized else None
 
 
 def parse_date_token(raw: str) -> str | None:
@@ -354,10 +292,19 @@ def normalize_title_for_classifier(line: str) -> str:
     return value
 
 
+def classifier_lookup_candidates(title: str) -> list[str]:
+    candidates = [title]
+    compact_hyphen = re.sub(r"\s*-\s*", "-", title).strip()
+    if compact_hyphen and compact_hyphen not in candidates:
+        candidates.append(compact_hyphen)
+    return candidates
+
+
 def classify_report_type(text: str) -> tuple[str, str, str]:
     title = normalize_title_for_classifier(first_nonempty_line(text))
-    if title in CLASSIFIER_MAP:
-        return CLASSIFIER_MAP[title], "first_line_exact", title
+    for candidate in classifier_lookup_candidates(title):
+        if candidate in CLASSIFIER_MAP:
+            return CLASSIFIER_MAP[candidate], "first_line_exact", title
 
     lowered = (text or "").lower()
     best_type = "unknown"
@@ -556,12 +503,17 @@ def extract_text_candidates(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return results
 
 
-def choose_storage_root(quarantine_reason: str | None, report_kind: str) -> Path:
+def choose_storage_root(
+    quarantine_reason: str | None,
+    report_kind: str,
+    report_date: str | None,
+) -> Path:
+    dated_folder = report_date or utc_now().strftime("%Y-%m-%d")
     if quarantine_reason:
-        return RAW_ROOT / QUARANTINE_DIRNAME / utc_now().strftime("%Y-%m-%d")
+        return RAW_ROOT / QUARANTINE_DIRNAME / dated_folder
     if report_kind == "unknown":
         return RAW_ROOT / "unknown"
-    return RAW_ROOT / ACCEPTED_DIRNAME / utc_now().strftime("%Y-%m-%d")
+    return RAW_ROOT / ACCEPTED_DIRNAME / dated_folder
 
 
 def build_storage_stem(
@@ -619,6 +571,7 @@ def store_message(
 ) -> dict[str, Any]:
     report_kind, classifier_reason, classifier_title = classify_report_type(text)
     branch_slug = infer_branch_from_text(text)
+    report_date = extract_report_date(text) or utc_now().strftime("%Y-%m-%d")
     quarantine_reason = build_quarantine_reason(
         text=text,
         report_kind=report_kind,
@@ -626,7 +579,7 @@ def store_message(
     )
 
     ts = int(time.time())
-    storage_root = choose_storage_root(quarantine_reason, report_kind)
+    storage_root = choose_storage_root(quarantine_reason, report_kind, report_date)
     storage_root.mkdir(parents=True, exist_ok=True)
 
     stem = build_storage_stem(
@@ -659,6 +612,7 @@ def store_message(
         "quarantine_reason": quarantine_reason,
         "raw_sha256": raw_sha256,
         "received_at": iso_utc_now(),
+        "report_date": report_date,
         "report_type": report_kind,
         "sender_name": meta.get("sender_name"),
         "sender_phone": meta.get("sender_phone"),
@@ -671,6 +625,7 @@ def store_message(
     return {
         "ok": True,
         "branch": branch_slug or "unknown",
+        "branch_slug": branch_slug or "unknown",
         "report_type": report_kind,
         "stored_as": "quarantine" if quarantine_reason else ("unknown" if report_kind == "unknown" else "accepted"),
         "quarantine_reason": quarantine_reason,

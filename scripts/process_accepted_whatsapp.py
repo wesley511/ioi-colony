@@ -14,6 +14,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+try:
+    from scripts.whatsapp_gatekeeper import ValidationResult, reject_payload, validate_message
+except ModuleNotFoundError:
+    from whatsapp_gatekeeper import ValidationResult, reject_payload, validate_message
+
+try:
+    from scripts.utils_normalization import normalize_branch as shared_normalize_branch
+except ModuleNotFoundError:
+    from utils_normalization import normalize_branch as shared_normalize_branch
+
 # -----------------------------------------------------------------------------
 # Paths / config
 # -----------------------------------------------------------------------------
@@ -79,6 +89,12 @@ DEFAULT_CMD_BY_REPORT_TYPE = {
     "bale_summary": 'python3 -m scripts.parse_bale_summary "{txt}"',
 }
 
+REPORT_TYPE_ALIASES = {
+    "sales_report": "sales",
+    "staff_report": "staff_performance",
+    "bale_report": "bale_summary",
+}
+
 # -----------------------------------------------------------------------------
 # Data classes
 # -----------------------------------------------------------------------------
@@ -93,6 +109,7 @@ class AcceptedMessage:
     report_type: str
     received_at: str
     file_id: str
+    validation: ValidationResult | None = None
 
 
 # -----------------------------------------------------------------------------
@@ -141,6 +158,33 @@ def safe_slug(value: str, default: str = "unknown") -> str:
     return text or default
 
 
+def canonical_report_type(value: str | None) -> str:
+    slug = safe_slug(str(value or "unknown"))
+    return REPORT_TYPE_ALIASES.get(slug, slug)
+
+
+def resolve_branch_slug(meta: dict[str, Any], txt_path: Path) -> str:
+    candidates = [
+        meta.get("branch_slug"),
+        meta.get("branch"),
+        meta.get("source_name"),
+        meta.get("shop"),
+        txt_path.parent.name,
+    ]
+    for candidate in candidates:
+        if not candidate:
+            continue
+        normalized = shared_normalize_branch(
+            str(candidate),
+            style="canonical_slug",
+            fallback="none",
+            match_substring=True,
+        )
+        if normalized:
+            return str(normalized)
+    return "unknown"
+
+
 def sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
@@ -161,6 +205,15 @@ def parse_received_date(received_at: str) -> str:
         return dt.strftime("%Y-%m-%d")
     except Exception:
         return utc_now().strftime("%Y-%m-%d")
+
+
+def parse_received_at(received_at: str) -> datetime:
+    if not received_at:
+        return utc_now()
+    try:
+        return datetime.fromisoformat(received_at.replace("Z", "+00:00"))
+    except Exception:
+        return utc_now()
 
 
 def load_json(path: Path, default: Any) -> Any:
@@ -213,6 +266,53 @@ def discover_txt_files() -> list[Path]:
     return sorted(RAW_ACCEPTED_ROOT.glob("*/*.txt"))
 
 
+def validation_report_type(validation: ValidationResult | None, msg: AcceptedMessage) -> str:
+    if validation and validation.report_type:
+        return canonical_report_type(validation.report_type)
+    return canonical_report_type(msg.report_type)
+
+
+def validation_branch(validation: ValidationResult | None, msg: AcceptedMessage) -> str:
+    normalized = ((validation.normalized or {}).get("branch") if validation else None) or ""
+    return str(normalized or msg.branch_slug)
+
+
+def validation_date(validation: ValidationResult | None, msg: AcceptedMessage) -> str:
+    normalized = ((validation.normalized or {}).get("date") if validation else None) or ""
+    if not normalized:
+        normalized = parse_received_date(msg.received_at)
+    if len(normalized) == 8 and normalized.count("/") == 2:
+        try:
+            return datetime.strptime(normalized, "%d/%m/%y").date().isoformat()
+        except ValueError:
+            return normalized
+    return normalized
+
+
+def business_key(msg: AcceptedMessage) -> str:
+    validation = msg.validation
+    report_type = validation_report_type(validation, msg)
+    branch = validation_branch(validation, msg)
+    report_date = validation_date(validation, msg)
+
+    if report_type == "sales":
+        return f"sales:{branch}:{report_date}"
+    if report_type == "staff_performance":
+        return f"staff:{branch}:{report_date}"
+    if report_type == "bale_summary":
+        payload_hash = msg.meta.get("message_sha256") or msg.meta.get("raw_sha256") or msg.file_id
+        return f"bale:{branch}:{report_date}:{payload_hash}"
+    return f"{report_type}:{branch}:{report_date}:{msg.file_id}"
+
+
+def candidate_rank(msg: AcceptedMessage) -> tuple[datetime, str, str]:
+    return (
+        parse_received_at(msg.received_at),
+        str(msg.meta.get("message_sha256") or msg.meta.get("raw_sha256") or ""),
+        msg.txt_path.name,
+    )
+
+
 def parse_message(txt_path: Path) -> AcceptedMessage | None:
     meta_path = matching_meta_path(txt_path)
     if not meta_path.exists():
@@ -226,10 +326,11 @@ def parse_message(txt_path: Path) -> AcceptedMessage | None:
             log(f"skip invalid-meta txt={txt_path}")
             return None
 
-        branch_slug = safe_slug(str(meta.get("branch_slug") or "unknown"))
-        report_type = safe_slug(str(meta.get("report_type") or "unknown"))
+        branch_slug = resolve_branch_slug(meta, txt_path)
+        report_type = canonical_report_type(meta.get("report_type"))
         received_at = str(meta.get("received_at") or "")
         file_id = build_file_id(txt_path, meta_path)
+        validation = validate_message(text)
 
         return AcceptedMessage(
             txt_path=txt_path,
@@ -240,6 +341,7 @@ def parse_message(txt_path: Path) -> AcceptedMessage | None:
             report_type=report_type,
             received_at=received_at,
             file_id=file_id,
+            validation=validation,
         )
     except Exception as exc:
         log(f"skip parse-error txt={txt_path} error={exc}")
@@ -248,6 +350,9 @@ def parse_message(txt_path: Path) -> AcceptedMessage | None:
 
 def build_normalized_envelope(msg: AcceptedMessage) -> dict[str, Any]:
     received_date = parse_received_date(msg.received_at)
+    resolved_branch = validation_branch(msg.validation, msg)
+    resolved_type = validation_report_type(msg.validation, msg)
+    resolved_date = validation_date(msg.validation, msg)
     return {
         "kind": "whatsapp_accepted_dispatch",
         "schema_version": "1.0",
@@ -265,8 +370,9 @@ def build_normalized_envelope(msg: AcceptedMessage) -> dict[str, Any]:
             "bridge_source": msg.meta.get("source"),
         },
         "routing": {
-            "branch_slug": msg.branch_slug,
-            "report_type": msg.report_type,
+            "branch_slug": resolved_branch,
+            "report_type": resolved_type,
+            "report_date": resolved_date,
             "group_name": msg.meta.get("group_name"),
             "sender_name": msg.meta.get("sender_name"),
             "sender_phone": msg.meta.get("sender_phone"),
@@ -277,13 +383,17 @@ def build_normalized_envelope(msg: AcceptedMessage) -> dict[str, Any]:
             "text": msg.text.rstrip(),
             "text_preview": msg.meta.get("text_preview"),
         },
+        "validation": {
+            "ok": bool(msg.validation and msg.validation.ok),
+            "errors": list(msg.validation.errors if msg.validation else []),
+        },
         "meta": msg.meta,
     }
 
 
 def normalized_output_path(msg: AcceptedMessage) -> Path:
-    received_date = parse_received_date(msg.received_at)
-    base = NORMALIZED_ROOT / msg.branch_slug / received_date
+    received_date = validation_date(msg.validation, msg)
+    base = NORMALIZED_ROOT / validation_branch(msg.validation, msg) / received_date
     stem = msg.txt_path.stem
     return base / f"{stem}.dispatch.json"
 
@@ -300,6 +410,7 @@ def file_exists_under_workspace(rel_path: str) -> bool:
 
 
 def resolve_command_template(report_type: str) -> str | None:
+    report_type = canonical_report_type(report_type)
     env_cmd = ENV_CMD_BY_REPORT_TYPE.get(report_type, "")
     if env_cmd:
         return env_cmd
@@ -372,8 +483,8 @@ def run_downstream_parser(msg: AcceptedMessage) -> dict[str, Any]:
 
 
 def copy_to_processed_staging(msg: AcceptedMessage) -> dict[str, str]:
-    received_date = parse_received_date(msg.received_at)
-    stage_dir = STAGING_ROOT / msg.branch_slug / received_date / msg.report_type
+    received_date = validation_date(msg.validation, msg)
+    stage_dir = STAGING_ROOT / validation_branch(msg.validation, msg) / received_date / validation_report_type(msg.validation, msg)
     stage_dir.mkdir(parents=True, exist_ok=True)
 
     staged_txt = stage_dir / msg.txt_path.name
@@ -388,10 +499,42 @@ def copy_to_processed_staging(msg: AcceptedMessage) -> dict[str, str]:
     }
 
 
+def reject_invalid_message(msg: AcceptedMessage, state: dict[str, Any]) -> bool:
+    processed = state["processed"]
+    if msg.file_id in processed:
+        return False
+
+    validation = msg.validation
+    result = reject_payload(
+        raw_text=msg.text,
+        classifier_line=validation.classifier if validation else None,
+        inferred_type=validation.report_type if validation else msg.report_type,
+        reasons=list(validation.errors if validation else ["Validation failed"]),
+        raw_hash=msg.meta.get("raw_sha256") or sha256_text(msg.text),
+    )
+    processed[msg.file_id] = {
+        "file_id": msg.file_id,
+        "processed_at": iso_utc_now(),
+        "txt_path": str(msg.txt_path),
+        "meta_path": str(msg.meta_path),
+        "status": "rejected",
+        "branch_slug": msg.branch_slug,
+        "report_type": msg.report_type,
+        "received_at": msg.received_at,
+        "reasons": result["reasons"],
+    }
+    save_state(state)
+    log(f"rejected file={msg.txt_path.name} reasons={'; '.join(result['reasons'])}")
+    return True
+
+
 def process_one(msg: AcceptedMessage, state: dict[str, Any], mark_processed_even_on_error: bool) -> bool:
     processed = state["processed"]
     if msg.file_id in processed:
         return False
+
+    if msg.validation and not msg.validation.ok:
+        return reject_invalid_message(msg, state)
 
     dispatch_path = write_normalized_envelope(msg)
     parser_result = run_downstream_parser(msg)
@@ -403,8 +546,10 @@ def process_one(msg: AcceptedMessage, state: dict[str, Any], mark_processed_even
         "txt_path": str(msg.txt_path),
         "meta_path": str(msg.meta_path),
         "dispatch_path": str(dispatch_path),
-        "branch_slug": msg.branch_slug,
-        "report_type": msg.report_type,
+        "branch_slug": validation_branch(msg.validation, msg),
+        "report_type": validation_report_type(msg.validation, msg),
+        "report_date": validation_date(msg.validation, msg),
+        "business_key": business_key(msg),
         "received_at": msg.received_at,
         "parser": parser_result,
         "staging": staged,
@@ -423,10 +568,45 @@ def process_one(msg: AcceptedMessage, state: dict[str, Any], mark_processed_even
 
     log(
         f"processed file={msg.txt_path.name} "
-        f"branch={msg.branch_slug} type={msg.report_type} "
+        f"branch={record['branch_slug']} type={record['report_type']} "
         f"dispatch={dispatch_path} parser_status={parser_result['status']}"
     )
     return True
+
+
+def choose_messages(messages: list[AcceptedMessage]) -> tuple[list[AcceptedMessage], list[dict[str, Any]]]:
+    chosen_by_key: dict[str, AcceptedMessage] = {}
+    audit_rows: list[dict[str, Any]] = []
+
+    grouped: dict[str, list[AcceptedMessage]] = {}
+    for msg in messages:
+        key = business_key(msg)
+        grouped.setdefault(key, []).append(msg)
+
+    for key, group in sorted(grouped.items()):
+        selected = max(group, key=candidate_rank)
+        chosen_by_key[key] = selected
+        audit_rows.append(
+            {
+                "business_key": key,
+                "count": len(group),
+                "selected_file": selected.txt_path.name,
+                "selected_received_at": selected.received_at,
+                "files": [item.txt_path.name for item in sorted(group, key=lambda item: item.txt_path.name)],
+            }
+        )
+
+    return list(chosen_by_key.values()), audit_rows
+
+
+def write_duplicate_audit(audit_rows: list[dict[str, Any]]) -> None:
+    report = {
+        "generated_at": iso_utc_now(),
+        "accepted_root": str(RAW_ACCEPTED_ROOT),
+        "groups": audit_rows,
+        "duplicate_group_count": sum(1 for row in audit_rows if row["count"] > 1),
+    }
+    save_json(WORKSPACE_ROOT / "DATA" / "whatsapp_duplicate_audit.json", report)
 
 
 def process_batch(mark_processed_even_on_error: bool) -> int:
@@ -434,10 +614,22 @@ def process_batch(mark_processed_even_on_error: bool) -> int:
     state = load_state()
     count = 0
 
+    parsed_messages: list[AcceptedMessage] = []
     for txt_path in discover_txt_files():
         msg = parse_message(txt_path)
-        if not msg:
-            continue
+        if msg:
+            parsed_messages.append(msg)
+
+    valid_messages = [msg for msg in parsed_messages if not msg.validation or msg.validation.ok]
+    invalid_messages = [msg for msg in parsed_messages if msg.validation and not msg.validation.ok]
+    selected_messages, audit_rows = choose_messages(valid_messages)
+    write_duplicate_audit(audit_rows)
+
+    for msg in sorted(invalid_messages, key=lambda item: item.txt_path.name):
+        if process_one(msg, state, mark_processed_even_on_error=mark_processed_even_on_error):
+            count += 1
+
+    for msg in sorted(selected_messages, key=candidate_rank):
         if process_one(msg, state, mark_processed_even_on_error=mark_processed_even_on_error):
             count += 1
 

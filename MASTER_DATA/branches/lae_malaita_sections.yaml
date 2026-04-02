@@ -1,0 +1,90 @@
+branch: LAE_MALAITA
+location: LAE
+
+sections:
+  - id: 1
+    name: mens_shorts
+
+  - id: 2
+    name: kids_shorts
+    items:
+      - kids_shorts
+      - children_shorts
+      - kids_short
+      - child_shorts
+
+  - id: 3
+    name: kids_boys_pants
+
+  - id: 4
+    name: reflectors
+
+  - id: 5
+    name: mens_button_flannel_shirts
+
+  - id: 6
+    name: mens_tshirts
+
+  - id: 7
+    name: jackets_mens_suit_coat
+
+  - id: 8
+    name: mens_jeans
+
+  - id: 9
+    name: kids_boys_polo_jersey
+
+  - id: 10
+    name: kids_girls_tshirt_baby_overalls
+
+  - id: 11
+    name: girls_dress_ladies_swimwear
+
+  - id: 12
+    name: kids_girls_pants
+
+  - id: 13
+    name: ladies_tshirt_hanger_items
+
+  - id: 14
+    name: ladies_skirt_denim_skirt
+
+  - id: 15
+    name: ladies_shorts
+
+  - id: 16
+    name: ladies_long_teregal_mini_dress
+
+  - id: 19
+    name: ladies_jeans
+
+  - id: 20
+    name: ladies_cotton_capri_leggings
+
+  - id: 21
+    name: ladies_color_jeans
+
+  - id: 22
+    name: mens_cotton_pants
+
+  - id: 23
+    name: household_rummage
+    items:
+      - towel
+      - towels
+      - hhr
+
+  - id: 24
+    name: shoe_shop
+    items:
+      - slippers
+      - soft_toys
+      - shoes
+      - bags
+      - belts
+
+  - id: 25
+    name: ladies_bra_underwear
+
+meta:
+  source: floor_plan

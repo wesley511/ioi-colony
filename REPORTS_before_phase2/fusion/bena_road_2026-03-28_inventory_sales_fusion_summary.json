@@ -1,0 +1,111 @@
+{
+  "summary_type": "inventory_sales_fusion_summary",
+  "branch": "bena_road",
+  "report_date": "2026-03-28",
+  "fusion_score": null,
+  "fusion_band": null,
+  "sales": {
+    "available": false,
+    "branch": null,
+    "report_date": null,
+    "cash": null,
+    "card": null,
+    "z_reading": null,
+    "total_sales": null,
+    "balanced": null,
+    "foot_traffic": null,
+    "served_customers": null,
+    "sales_per_labor_hour": null,
+    "sales_per_customer": null,
+    "conversion_rate_pct": null,
+    "staffing_issues": null,
+    "stock_issues_affecting_sales": null,
+    "pricing_or_system_issues": null,
+    "cash_variance": null,
+    "exceptions_escalated": null,
+    "labels": [],
+    "source_file": null
+  },
+  "inventory_summary": {
+    "available": false,
+    "branch": null,
+    "report_date": null,
+    "events_count": 0,
+    "section_count": 0,
+    "avg_signal_strength": null,
+    "event_kind_counts": {},
+    "direction_counts": {},
+    "primary_inventory_risk": null,
+    "top_opportunity": null,
+    "highest_pressure_sections": [],
+    "strongest_sections": [],
+    "recommended_actions": [],
+    "source_file": null
+  },
+  "inventory_release": {
+    "available": false,
+    "source_branch": null,
+    "source_date": null,
+    "released_value": null,
+    "released_qty": null,
+    "bales_broken_today": null,
+    "bales_released_today": null,
+    "bales_pending_release": null,
+    "pending_release_ratio": null,
+    "avg_price_per_piece": null,
+    "top_value_bale": null,
+    "top_value_density_bale": null,
+    "weak_value_density_bale": null,
+    "prepared_by": null,
+    "bales": [],
+    "source_file": null
+  },
+  "conversion": {
+    "inventory_to_sales_conversion": null,
+    "inventory_sales_gap": null,
+    "unsold_value": null,
+    "unsold_ratio": null,
+    "value_per_released_piece": null,
+    "oversold_against_release": false
+  },
+  "release_execution_assessment": {
+    "score": null,
+    "band": null,
+    "components": {
+      "release_component": null,
+      "value_component": null,
+      "conversion_component": null
+    }
+  },
+  "diagnostics": {
+    "warnings": [
+      "Bale summary file not found, continuing without it: /home/clawadmin/.openclaw/workspace/ioi-colony/INPUTS/bena_road_bale_summary_2026-03-28.txt",
+      "Daily sales event is unavailable for the requested branch/date.",
+      "Inventory availability summary is unavailable for the requested branch/date."
+    ],
+    "findings": [
+      {
+        "type": "warning",
+        "severity": "medium",
+        "message": "Bale summary file not found, continuing without it: /home/clawadmin/.openclaw/workspace/ioi-colony/INPUTS/bena_road_bale_summary_2026-03-28.txt"
+      },
+      {
+        "type": "warning",
+        "severity": "medium",
+        "message": "Daily sales event is unavailable for the requested branch/date."
+      },
+      {
+        "type": "warning",
+        "severity": "medium",
+        "message": "Inventory availability summary is unavailable for the requested branch/date."
+      },
+      {
+        "type": "inventory_release",
+        "severity": "medium",
+        "message": "No bale release summary loaded, so release-side diagnostics are partial."
+      }
+    ],
+    "recommended_actions": []
+  },
+  "summary_text": "sales=unavailable | inventory_release=unavailable"
+}

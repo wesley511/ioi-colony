@@ -1,0 +1,75 @@
+mens_tshirt:
+  department: menswear
+  type: section
+
+mens_shorts:
+  department: menswear
+  type: section
+
+mens_cotton_pants:
+  department: menswear
+  type: section
+
+mens_jeans:
+  department: menswear
+  type: section
+
+ladies_tshirt:
+  department: ladieswear
+  type: section
+
+ladies_shorts:
+  department: ladieswear
+  type: section
+
+ladies_skirt:
+  department: ladieswear
+  type: section
+
+ladies_teregal_skirt:
+  department: ladieswear
+  type: section
+
+ladies_dress:
+  department: ladieswear
+  type: section
+
+kids_boys_tshirt:
+  department: kidswear
+  type: section
+
+kids_boys_shorts:
+  department: kidswear
+  type: section
+
+kids_boys_pants:
+  department: kidswear
+  type: section
+
+kids_girls_dress:
+  department: kidswear
+  type: section
+
+baby_rummage:
+  department: baby
+  type: section
+
+shoes:
+  department: footwear
+  type: section
+
+caps:
+  department: accessories
+  type: section
+
+socks:
+  department: accessories
+  type: section
+
+towel:
+  department: household
+  type: section
+
+bed_sheet:
+  department: household
+  type: section

@@ -6,6 +6,11 @@ from typing import Any
 
 import yaml
 
+try:
+    from scripts.branch_resolution import canonical_branch_slug
+except ModuleNotFoundError:
+    from branch_resolution import canonical_branch_slug
+
 
 ROOT = Path(__file__).resolve().parents[1]
 REPORTS_DIR = ROOT / "REPORTS"
@@ -30,11 +35,14 @@ def main() -> None:
 
     reports = load_yaml(INPUT_FILE) or []
     branch_totals: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    branch_display: dict[str, str] = {}
 
     for report in reports:
         branch = str(report.get("branch", "")).strip().upper()
+        branch_slug = canonical_branch_slug(branch, fallback=branch)
+        branch_display.setdefault(branch_slug, branch)
         for sec in report.get("section_totals", []):
-            branch_totals[branch].append(sec)
+            branch_totals[branch_slug].append(sec)
 
     out_md = REPORTS_DIR / "section_intelligence.md"
     out_yaml = REPORTS_DIR / "section_intelligence.yaml"
@@ -44,7 +52,8 @@ def main() -> None:
     with out_md.open("w", encoding="utf-8") as f:
         f.write("# Section Intelligence\n\n")
 
-        for branch, rows in sorted(branch_totals.items()):
+        for branch_slug, rows in sorted(branch_totals.items()):
+            branch = branch_display.get(branch_slug, str(branch_slug).upper())
             rows_sorted = sorted(
                 rows,
                 key=lambda x: (safe_num(x.get("value")), safe_num(x.get("qty"))),

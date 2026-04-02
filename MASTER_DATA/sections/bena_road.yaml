@@ -1,0 +1,85 @@
+branch: TTC Bena Road
+
+sections:
+
+  - canonical: shoe_shop
+    section_type: product
+    aliases:
+      - shoe shop
+      - shoes
+    product_families:
+      - bags
+      - socks
+      - shoes
+      - sandals
+
+  - canonical: kids_girls_ladies_dresses_jackets
+    section_type: product
+    aliases:
+      - kids girls
+      - ladies dresses jacket
+    product_families:
+      - kids_girls
+      - jackets
+      - dresses
+
+  - canonical: creme_mens_tops_new_stock
+    section_type: mixed
+    aliases:
+      - creme
+      - new stock
+      - flannel
+    product_families:
+      - creme
+      - mens_tshirts
+      - flannel
+      - workwear
+
+  - canonical: kids_boys
+    section_type: product
+    aliases:
+      - boys
+      - kids boys
+    product_families:
+      - kids_boys
+
+  - canonical: beddings
+    section_type: product
+    aliases:
+      - bedding
+      - beddings
+    product_families:
+      - blankets
+      - bedsheets
+      - covers
+
+  - canonical: ladies_tops_jeans
+    section_type: product
+    aliases:
+      - ladies t-shirt
+      - ladies jeans
+    product_families:
+      - ladies_tshirts
+      - ladies_jeans
+
+  - canonical: mens_bottoms
+    section_type: product
+    aliases:
+      - mens section
+      - men pants
+    product_families:
+      - shorts
+      - cotton_pants
+      - office_pants
+
+  - canonical: ladies_bottoms_innerwear
+    section_type: product
+    aliases:
+      - ladies skirt
+      - leggings
+      - bra
+    product_families:
+      - skirts
+      - shorts
+      - leggings
+      - bra

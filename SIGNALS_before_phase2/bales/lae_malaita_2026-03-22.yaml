@@ -1,0 +1,32 @@
+branch: LAE_MALAITA
+location: LAE
+date: 2026-03-22
+
+bales:
+  total: 5
+  released: 5
+  on_hold: 0
+
+totals:
+  quantity: 1089
+  value: 8335
+
+items:
+  - name: original_shorts
+    qty: 193
+    value: 4374
+  - name: soft_toys
+    qty: 52
+    value: 303
+  - name: mens_tshirt_ss
+    qty: 299
+    value: 1841
+  - name: children_rummage
+    qty: 466
+    value: 1157
+  - name: slippers
+    qty: 79
+    value: 660
+
+meta:
+  source: bale_report

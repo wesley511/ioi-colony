@@ -1,0 +1,128 @@
+{
+  "branch": "waigani",
+  "report_date": "2026-03-23",
+  "data_completeness": "partial",
+  "signal_families_available": 2,
+  "release_execution_score": null,
+  "release_execution_band": null,
+  "limited_fusion_score": 0.2872,
+  "limited_fusion_band": "weak",
+  "fusion_score": null,
+  "fusion_band": "incomplete",
+  "summary": "sales=K7,970.20 | inventory_summary=available | inventory_release=unavailable",
+  "sales": {
+    "available": true,
+    "source_file": "/home/clawadmin/.openclaw/workspace/ioi-colony/RAW_INPUT/2026-03-23/sales/waigani_sales_2026-03-23.yaml",
+    "total_sales": 7970.2,
+    "cash": 6849.6,
+    "card": 1120.6,
+    "z_reading": 7970.2,
+    "traffic": 318,
+    "conversion_rate_pct": 56.2,
+    "raw": {
+      "source_name": "waigani",
+      "date": "2026-03-23",
+      "sales": {
+        "total_sales": 7970.2,
+        "cash": 6849.6,
+        "card": 1120.6,
+        "z_reading": 7970.2,
+        "balance_variance": 0.0,
+        "variance_reason": "none"
+      },
+      "customers": {
+        "main_door": 318,
+        "served_customers": 179,
+        "total_traffic": 318
+      },
+      "performance_metrics": {
+        "sales_per_labor_hour": 42.6,
+        "sales_per_customer": 44.5,
+        "conversion_rate": 56.2
+      },
+      "operations_notes": [
+        "no cash variance",
+        "moderate conversion compared to next day spike"
+      ]
+    }
+  },
+  "inventory_summary": {
+    "available": true,
+    "source_file": "/home/clawadmin/.openclaw/workspace/ioi-colony/REPORTS/inventory/waigani_2026-03-23_inventory_summary.json",
+    "events_count": 0,
+    "section_count": 0,
+    "avg_signal_strength": null,
+    "sections": {},
+    "raw": {
+      "branch": "waigani",
+      "report_date": "2026-03-23",
+      "available": false,
+      "source_file": "/home/clawadmin/.openclaw/workspace/ioi-colony/RAW_INPUT/2026-03-23/operations/waigani_supervisor_2026-03-23.yaml",
+      "events_count": 0,
+      "section_count": 0,
+      "avg_signal_strength": null,
+      "sections": {},
+      "diagnostics": [
+        {
+          "severity": "medium",
+          "code": "no_section_signals_detected",
+          "message": "Operations source loaded but no section-level inventory availability signals were detected."
+        }
+      ],
+      "recommended_actions": [
+        "Improve supervisor report structure so section availability states are explicitly captured."
+      ],
+      "raw": {
+        "source_name": "waigani",
+        "date": "2026-03-23",
+        "report_type": "supervisor_control",
+        "supervisor": "francis_ano",
+        "issues": {
+          "cash_variance": {
+            "status": false
+          },
+          "staffing_issue": {
+            "status": false
+          },
+          "stock_issue": {
+            "status": false
+          },
+          "pricing_system_issue": {
+            "status": false
+          }
+        },
+        "exceptions": [],
+        "escalation": {
+          "escalated_to_ops_manager": true
+        },
+        "control_notes": [
+          "stable operations"
+        ]
+      }
+    }
+  },
+  "inventory_release": {
+    "available": false,
+    "source_file": null,
+    "released_value": null,
+    "released_qty": null,
+    "bale_entries_count": 0,
+    "raw_branch": null,
+    "branch": null,
+    "bales": [],
+    "raw": {}
+  },
+  "diagnostics": [
+    {
+      "severity": "medium",
+      "code": "inventory_release_missing",
+      "message": "No bale release summary loaded, so release-side diagnostics are partial."
+    },
+    {
+      "severity": "medium",
+      "code": "partial_fusion_only",
+      "message": "At least two signal families are present, but full fusion is not allowed because one required family is still missing."
+    }
+  ],
+  "recommended_actions": []
+}

@@ -1,0 +1,12 @@
+SUPERVISOR CONTROL REPORT
+
+Branch: waigani
+Date: 26/03/26
+
+Exception Type: STAFF_ISSUE
+Details: One staff arrived late
+Action Taken: Warned and reassigned
+Escalated By: Joyce
+Time: 08:15
+
+Supervisor Confirmed: YES

@@ -8,6 +8,10 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+try:
+    from scripts.branch_resolution import legacy_branch_stem, resolve_branch_slug
+except ModuleNotFoundError:
+    from branch_resolution import legacy_branch_stem, resolve_branch_slug
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -24,6 +28,7 @@ POST_PREFIX = "[IOI Decision Signal Generator]"
 @dataclass
 class DecisionSignal:
     filename: str
+    branch_slug: str
     title: str
     source: str
     date_identified: str
@@ -170,16 +175,7 @@ def parse_fusion_summary(fusion_text: str) -> tuple[str | None, str | None]:
 def build_signal_file_content(signal: DecisionSignal) -> str:
     signal_id = Path(signal.filename).stem
     signal_date = signal.date_identified[:10]
-
-    source_name = "unknown"
-    if signal.filename.startswith("waigani_"):
-        source_name = "waigani"
-    elif signal.filename.startswith("lae_malaita_"):
-        source_name = "lae_malaita"
-    elif signal.filename.startswith("bena_road_"):
-        source_name = "bena_road"
-    elif signal.filename.startswith("5th_street_"):
-        source_name = "5th_street"
+    source_name = legacy_branch_stem(signal.branch_slug)
 
     title_lower = signal.title.lower()
 
@@ -204,6 +200,7 @@ def build_signal_file_content(signal: DecisionSignal) -> str:
         f"date: {signal_date}\n"
         f"source_type: advisory_report\n"
         f"source_name: {source_name}\n"
+        f"branch_slug: {signal.branch_slug}\n"
         f"category: {category}\n"
         f"signal_type: {signal_type}\n"
         f"description: {signal.description}\n"
@@ -253,6 +250,7 @@ def build_signals_from_reports(
         signals.append(
             DecisionSignal(
                 filename=f"{branch_slug}_{section_slug}_gap_{advisory_stamp}.md",
+                branch_slug=resolve_branch_slug(candidates=[branch]),
                 title="Performance Gap — Operations",
                 source=f"advisory_report:{advisory_path.name}",
                 date_identified=now_iso,
@@ -271,6 +269,7 @@ def build_signals_from_reports(
         signals.append(
             DecisionSignal(
                 filename=f"{slugify(branch)}_{slugify(staff_name)}_strength_{advisory_stamp}.md",
+                branch_slug=resolve_branch_slug(candidates=[branch]),
                 title="Strong Performance — Staff",
                 source=f"advisory_report:{advisory_path.name}",
                 date_identified=now_iso,
@@ -291,6 +290,7 @@ def build_signals_from_reports(
             signals.append(
                 DecisionSignal(
                     filename=f"{slugify(top_branch)}_branch_strength_{advisory_stamp}.md",
+                    branch_slug=resolve_branch_slug(candidates=[top_branch]),
                     title="Strong Performance — Branch Performance",
                     source=f"fusion_report:{fusion_path.name if fusion_path else 'unknown'}",
                     date_identified=now_iso,
@@ -304,6 +304,7 @@ def build_signals_from_reports(
             signals.append(
                 DecisionSignal(
                     filename=f"{slugify(weak_branch)}_branch_gap_{advisory_stamp}.md",
+                    branch_slug=resolve_branch_slug(candidates=[weak_branch]),
                     title="Performance Gap — Branch Performance",
                     source=f"fusion_report:{fusion_path.name if fusion_path else 'unknown'}",
                     date_identified=now_iso,

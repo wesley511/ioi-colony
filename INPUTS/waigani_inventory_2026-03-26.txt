@@ -1,0 +1,9 @@
+INVENTORY AVAILABILITY REPORT
+
+Branch: waigani
+Date: 26/03/26
+
+mens_tshirt: NORMAL
+shoes_and_sandals: LOOSE
+
+Notes: Initial test file

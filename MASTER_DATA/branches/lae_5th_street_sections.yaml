@@ -1,0 +1,69 @@
+branch: LAE_5TH_STREET
+
+sections:
+
+- id: 1
+  name: mens_tshirt_roundneck_collar
+  items:
+    - mens_tshirt
+    - mens_tshirt_ss
+    - mens_tshirt_big_size
+    - boys_tshirt_ss
+    - tshirt
+    - roundneck
+    - collar
+
+- id: 2
+  name: kids_shorts
+  items:
+    - kids_shorts
+    - children_shorts
+    - chsh
+
+- id: 3
+  name: ladies_silk_blouse_tshirt
+  items:
+    - flannel_blouse
+    - silk_blouse
+    - ladies_blouse
+    - ladies_tshirt
+
+- id: 4
+  name: ladies_capri_colored_jeans
+  items:
+    - ladies_pants
+    - capri
+    - colored_jeans
+    - ladies_jeans
+
+- id: 5
+  name: shoes_sandals_toys
+  items:
+    - soft_toys
+    - mix_shoes_a
+    - slippers
+    - sandals
+    - shoes
+
+- id: 6
+  name: baby_light_rummage
+  items:
+    - children_rummage
+    - baby_items
+    - baby_army
+
+- id: 7
+  name: beddings_kitchen_small
+  items:
+    - towel
+    - towels
+    - bedding
+    - kitchen
+
+- id: 8
+  name: mens_shorts
+  items:
+    - mens_shorts
+    - original_shorts
+    - original_shorts_2
+    - osh

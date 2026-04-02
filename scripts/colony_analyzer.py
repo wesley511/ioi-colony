@@ -6,10 +6,23 @@ from datetime import datetime
 from pathlib import Path
 from typing import DefaultDict, Dict, List, Tuple
 
+try:
+    from scripts.branch_resolution import legacy_branch_display, legacy_branch_stem, resolve_branch_slug
+except ModuleNotFoundError:
+    from branch_resolution import legacy_branch_display, legacy_branch_stem, resolve_branch_slug
+try:
+    from scripts.section_normalizer import normalize_section_name
+except ModuleNotFoundError:
+    from section_normalizer import normalize_section_name
+try:
+    from scripts.staff_signal_loader import dedupe_staff_signals
+except ModuleNotFoundError:
+    from staff_signal_loader import dedupe_staff_signals
 from scripts.section_master_data import resolve_section_from_master_data
 
 
 STAFF_SIGNALS_DIR = Path("COLONY_MEMORY/staff_signals")
+NORMALIZED_STAFF_DIR = Path("SIGNALS/normalized")
 REPORTS_DIR = Path("REPORTS")
 
 
@@ -58,25 +71,11 @@ def clean_token(text: str) -> str:
 
 
 def pretty_branch(branch_slug: str) -> str:
-    return clean_token(branch_slug).upper()
+    return legacy_branch_display(branch_slug)
 
 
 def infer_branch_slug_from_path(signal: dict) -> str:
-    path = str(signal.get("_path", ""))
-    name = Path(path).name.lower()
-
-    if "waigani" in name:
-        return "waigani"
-    if "bena_road" in name or "staff-bena-" in name or "staff-bena-road-" in name:
-        return "bena_road"
-    if "5th_street" in name or "fifth_street" in name or "staff-5th-" in name:
-        return "fifth_street"
-    if "mataita" in name:
-        return "mataita_street"
-    if "lae_malaita" in name or "malaita" in name:
-        return "lae_malaita"
-
-    return "unknown_branch"
+    return resolve_branch_slug(signal, path=signal.get("_path"), candidates=[signal.get("branch"), signal.get("source_slug")])
 
 
 def infer_staff_name_from_path(signal: dict) -> str:
@@ -108,12 +107,7 @@ def infer_staff_name_from_path(signal: dict) -> str:
 
 
 def infer_staff_key(signal: dict) -> str:
-    branch_slug = clean_token(
-        signal.get("source_slug")
-        or signal.get("branch_slug")
-        or signal.get("branch")
-        or infer_branch_slug_from_path(signal)
-    )
+    branch_slug = clean_token(resolve_branch_slug(signal, path=signal.get("_path")))
     staff_name = clean_token(
         signal.get("staff_name")
         or infer_staff_name_from_path(signal)
@@ -128,12 +122,7 @@ def normalize_section_key(signal: dict) -> tuple[str, str]:
 
     section_type ∈ {product, operational, mixed, unknown}
     """
-    branch_slug = clean_token(
-        signal.get("source_slug")
-        or signal.get("branch_slug")
-        or signal.get("branch")
-        or infer_branch_slug_from_path(signal)
-    )
+    branch_slug = clean_token(resolve_branch_slug(signal, path=signal.get("_path")))
 
     raw_section = (
         signal.get("grouped_section")
@@ -147,8 +136,12 @@ def normalize_section_key(signal: dict) -> tuple[str, str]:
     if match:
         return clean_token(match.canonical), clean_token(match.section_type)
 
-    cleaned = clean_token(str(raw_section))
-    return cleaned or "unknown_section", "unknown"
+    cleaned = normalize_section_name(str(raw_section))
+    if cleaned:
+        return clean_token(cleaned), "resolved"
+
+    fallback_cleaned = clean_token(str(raw_section))
+    return fallback_cleaned or "unknown_section", "unknown"
 
 
 def infer_signal_strength(signal: dict) -> float:
@@ -170,16 +163,29 @@ def infer_signal_strength(signal: dict) -> float:
 
 
 def load_staff_signals(signals_dir: Path = STAFF_SIGNALS_DIR) -> list[dict]:
-    if not signals_dir.exists():
+    candidate_paths: list[Path] = []
+    if NORMALIZED_STAFF_DIR.exists():
+        candidate_paths.extend(sorted(NORMALIZED_STAFF_DIR.glob("*staff*.md")))
+    if not candidate_paths and signals_dir.exists():
+        candidate_paths.extend(sorted(signals_dir.glob("*.md")))
+    if not candidate_paths:
         return []
 
-    signals: list[dict] = []
-    for path in sorted(signals_dir.glob("*.md")):
+    def _parser(path: Path) -> dict | None:
         try:
-            signals.append(parse_signal_file(path))
+            payload = parse_signal_file(path)
+            payload.setdefault("source_file", str(path))
+            return payload
         except Exception:
+            return None
+
+    results = []
+    for payload in dedupe_staff_signals(candidate_paths, _parser):
+        section = clean_token(payload.get("section_canonical") or payload.get("section") or payload.get("raw_section"))
+        if section in {"unknown", "unknown_section"}:
             continue
-    return signals
+        results.append(payload)
+    return results
 
 
 def aggregate_signal(signal: dict, bucket: dict) -> None:
@@ -198,7 +204,7 @@ def aggregate_signal(signal: dict, bucket: dict) -> None:
         bucket["operational_section_scores"][section_key] += strength
     elif section_type == "mixed":
         bucket["mixed_section_scores"][section_key] += strength
-    else:
+    elif section_type == "unknown":
         bucket["unknown_section_scores"][section_key] += strength
 
 
@@ -206,12 +212,10 @@ def build_branch_data(signals: list[dict]) -> Dict[str, Dict]:
     branch_data: Dict[str, Dict] = {}
 
     for signal in signals:
-        branch_slug = clean_token(
-            signal.get("source_slug")
-            or signal.get("branch_slug")
-            or signal.get("branch")
-            or infer_branch_slug_from_path(signal)
-        )
+        branch_slug = clean_token(resolve_branch_slug(signal, path=signal.get("_path")))
+        staff_name = clean_token(signal.get("staff_name") or infer_staff_name_from_path(signal))
+        if branch_slug == "unknown" or staff_name == "unknown_staff":
+            continue
 
         if branch_slug not in branch_data:
             branch_data[branch_slug] = {
@@ -280,7 +284,7 @@ def build_recommendations(weak_sections: Dict[str, List[str]]) -> List[str]:
     recs: List[str] = []
     for branch, sections in weak_sections.items():
         for sec in sections:
-            recs.append(f"Improve display, support, and engagement in {branch} -> {sec}")
+            recs.append(f"Improve display, support, and engagement in {legacy_branch_stem(branch)} -> {sec}")
     return recs
 
 def ensure_governance(value) -> str:

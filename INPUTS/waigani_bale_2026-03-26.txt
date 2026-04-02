@@ -1,0 +1,15 @@
+DAILY BALE SUMMARY – RELEASED TO RAIL
+
+Branch: waigani
+Date: 26/03/26
+
+Bale ID: B001
+Section: mens_tshirt
+Qty: 20
+Amount: 400
+Status: RELEASED
+
+Total Qty: 20
+Total Amount: 400
+
+Released By: Joyce

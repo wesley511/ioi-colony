@@ -1,0 +1,9 @@
+{
+  "inbox_dir": "/home/clawadmin/.openclaw/workspace/ioi-colony/INPUTS",
+  "raw_store_dir": "/home/clawadmin/.openclaw/workspace/ioi-colony/RAW_INPUT/whatsapp",
+  "normalized_dir": "/home/clawadmin/.openclaw/workspace/ioi-colony/normalized",
+  "unknown_dir": "/home/clawadmin/.openclaw/workspace/ioi-colony/unknown",
+  "duplicate_dir": "/home/clawadmin/.openclaw/workspace/ioi-colony/SIGNALS/quarantine_duplicates",
+  "state_file": "/home/clawadmin/.openclaw/workspace/ioi-colony/DATA/whatsapp_gatekeeper_state.json",
+  "log_dir": "/home/clawadmin/.openclaw/workspace/ioi-colony/LOGS"
+}

@@ -1,0 +1,36 @@
+# Friendtex codes
+MTSH: mens_tshirt
+OSH: mens_shorts
+CHSH: kids_boys_shorts
+CTSH: kids_boys_tshirt
+LTSK: ladies_teregal_skirt
+LSHT: ladies_shorts
+MWKT: mens_cotton_pants
+ASHO: mens_shorts
+6PKS: mens_shorts
+MCP_GRIP: mens_cotton_pants
+
+# Supplier variations
+"men t shirt": mens_tshirt
+"mens tshirt": mens_tshirt
+"mens tshirt round neck": mens_tshirt
+"mens tshirts collar": mens_tshirt
+
+"boys tshirt": kids_boys_tshirt
+"children tshirt": kids_boys_tshirt
+
+"ladies skirt": ladies_skirt
+"ladies tegel skirt": ladies_teregal_skirt
+
+"ladies shorts": ladies_shorts
+"mens shorts": mens_shorts
+
+"baby rummage": baby_rummage
+
+"caps": caps
+"belt": caps
+
+"socks": socks
+
+"towel": towel
+"bed sheet": bed_sheet

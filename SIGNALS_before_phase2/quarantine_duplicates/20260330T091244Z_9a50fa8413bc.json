@@ -1,0 +1,15 @@
+{
+  "status": "duplicate",
+  "sha256": "9a50fa8413bc43a482c42dd044d9ab618d7e6904986e14a1af5363a8747a37c1",
+  "ingested_at": "2026-03-30T09:12:44Z",
+  "existing_meta": {
+    "status": "accepted",
+    "classifier": "DAY-END SALES REPORT",
+    "report_type": "sales_report",
+    "branch": "waigani",
+    "date": "30/03/26",
+    "output_file": "/home/clawadmin/.openclaw/workspace/ioi-colony/SIGNALS/normalized/waigani/waigani_sales_report_2026-03-30.json",
+    "ingested_at": "2026-03-30T09:12:44Z"
+  },
+  "raw_text": "DAY-END SALES REPORT\n\nBranch: waigani\nDate: 30/03/26\n\nZ Reading: 4000\nCash Sales: 2500\nEFTPOS Sales: 1500\n\nTotal Customers (Traffic): 220\nCustomers Served: 150\n\nStaff on Duty: 10\n\nCash Variance: 0\nOver/Short Reason: NONE\n\nSupervisor Confirmed: YES\nNotes: First live webhook TXT test\n"
+}

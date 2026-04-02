@@ -1,0 +1,12 @@
+{
+  "status": "rejected",
+  "classifier_line": "INVENTORY AVAILABILITY REPORT",
+  "report_type": "inventory_report",
+  "reasons": [
+    "Invalid section name: boys",
+    "Invalid section name: mens_shoes"
+  ],
+  "sha256": "76ce09be70fb325bf43d499968f3d89a3f4450e7123919996ee280892ac09db2",
+  "ingested_at": "2026-03-29T11:59:51Z",
+  "raw_text": "INVENTORY AVAILABILITY REPORT\n\nBranch: waigani\nDate: 26/03/26\n\nboys: NORMAL\nmens_shoes: LOOSE\n\nNotes: Initial test file\n"
+}

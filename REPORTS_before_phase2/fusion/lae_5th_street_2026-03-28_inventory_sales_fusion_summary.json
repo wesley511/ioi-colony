@@ -1,0 +1,85 @@
+{
+  "branch": "lae_5th_street",
+  "report_date": "2026-03-28",
+  "data_completeness": "incomplete",
+  "signal_families_available": 0,
+  "release_execution_score": null,
+  "release_execution_band": null,
+  "limited_fusion_score": null,
+  "limited_fusion_band": null,
+  "fusion_score": null,
+  "fusion_band": null,
+  "summary": "sales=unavailable | inventory_summary=unavailable | inventory_release=unavailable",
+  "sales": {
+    "available": false,
+    "source_file": null,
+    "total_sales": null,
+    "cash": null,
+    "card": null,
+    "z_reading": null,
+    "traffic": null,
+    "conversion_rate_pct": null,
+    "raw": {}
+  },
+  "inventory_summary": {
+    "available": false,
+    "source_file": null,
+    "events_count": 0,
+    "section_count": 0,
+    "avg_signal_strength": null,
+    "sections": {},
+    "raw": {}
+  },
+  "inventory_release": {
+    "available": false,
+    "source_file": "/home/clawadmin/.openclaw/workspace/ioi-colony/SIGNALS/normalized/lae_5th_street/2026-03-28/lae_5th_street_bale_release_2026-03-28.json",
+    "released_value": null,
+    "released_qty": null,
+    "bale_entries_count": 0,
+    "raw_branch": "lae_5th_street",
+    "branch": "lae_5th_street",
+    "bales": [],
+    "raw": {
+      "signal_type": "bale_release_summary",
+      "event_kind": "daily_bale_summary_released_to_rail",
+      "branch": "lae_5th_street",
+      "report_date": "2026-03-28",
+      "source_file": "/home/clawadmin/.openclaw/workspace/ioi-colony/RAW_INPUT/bale_release/lae_5th_street/2026-03-28/daily_bale_summary_released_to_rail.txt",
+      "prepared_by": "Joyce",
+      "totals": {
+        "bales_broken_today": null,
+        "bales_released_today": null,
+        "bales_pending_release": null,
+        "total_quantity": 688.0,
+        "total_amount": 8240.0,
+        "avg_price_per_piece": 11.98
+      },
+      "bales": [],
+      "operational_flags": {
+        "full_release_completed": false,
+        "release_backlog": false
+      }
+    }
+  },
+  "diagnostics": [
+    {
+      "severity": "medium",
+      "code": "insufficient_signal_families",
+      "message": "Insufficient validated signal families for fusion scoring."
+    },
+    {
+      "severity": "medium",
+      "code": "sales_missing",
+      "message": "Daily sales event is unavailable for the requested branch/date."
+    },
+    {
+      "severity": "medium",
+      "code": "inventory_summary_missing",
+      "message": "Inventory availability summary is unavailable for the requested branch/date."
+    }
+  ],
+  "recommended_actions": [
+    "Ingest the day-end sales report for this branch/date before treating the result as business fusion.",
+    "Generate the inventory availability summary under REPORTS/inventory for this branch/date."
+  ]
+}

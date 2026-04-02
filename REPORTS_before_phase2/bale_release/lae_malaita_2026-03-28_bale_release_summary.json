@@ -1,0 +1,56 @@
+{
+  "signal_type": "bale_release_summary",
+  "event_kind": "daily_bale_summary_released_to_rail",
+  "branch": "lae_malaita",
+  "report_date": "2026-03-28",
+  "source_file": "/home/clawadmin/.openclaw/workspace/ioi-colony/RAW_INPUT/bale_release/lae_malaita/2026-03-28/daily_bale_summary_released_to_rail.txt",
+  "source_format": "whatsapp_text",
+  "report_title": "📦 DAILY BALE SUMMARY – RELEASED TO RAIL",
+  "totals": {
+    "bales_broken_today": 4,
+    "bales_released_today": null,
+    "bales_pending_release": null,
+    "total_quantity": 606.0,
+    "total_amount": 12559.0,
+    "avg_price_per_piece": 20.72
+  },
+  "bales": [
+    {
+      "bale_number": 1,
+      "item_name": "Ladies Mix pants 200pcs 80kg",
+      "qty": 180.0,
+      "amount": 1401.0,
+      "avg_price_per_piece": 7.78
+    },
+    {
+      "bale_number": 2,
+      "item_name": "Work wear Creme 40kg",
+      "qty": 81.0,
+      "amount": 9261.0,
+      "avg_price_per_piece": 114.33
+    },
+    {
+      "bale_number": 3,
+      "item_name": "Baseball Cap 20kg",
+      "qty": 272.0,
+      "amount": 1457.0,
+      "avg_price_per_piece": 5.36
+    },
+    {
+      "bale_number": 4,
+      "item_name": "Slippers 20kg",
+      "qty": 73.0,
+      "amount": 440.0,
+      "avg_price_per_piece": 6.03
+    }
+  ],
+  "notes": [
+    "Bale #\tItem Name\tTotal Qty (pcs)\tTotal Amount( K)",
+    "Today we break four (4) and all of our bales are out for sales"
+  ],
+  "operational_flags": {
+    "full_release_completed": null,
+    "release_backlog": null
+  },
+  "warnings": []
+}

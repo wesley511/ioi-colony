@@ -1,0 +1,11 @@
+{
+  "status": "rejected",
+  "classifier_line": "TTC 5th Street branch",
+  "report_type": null,
+  "reasons": [
+    "Unknown classifier line: TTC 5th Street branch"
+  ],
+  "sha256": "75b785e0d419e1dd102083a6590dfcb78295a6f247c281770c391a51efa13362",
+  "ingested_at": "2026-03-29T10:42:18Z",
+  "raw_text": "TTC 5th Street branch\nDate: 26/03/26\n\nDAY-END SALES REPORT\nTill#1: Main Shop\nCashier:Imelda Patrick\nAssistant: Joyce\nT/Cash:K2,627.00\nT/Card: K949.00\nZ/Reading: K3,576.00\nBalance:Yes\n\nTOTALS\nTotal Cash: K2,627.00\nTotal Card: K949.00\nTotal Sales: K3,576.00\n\nCUSTOMER COUNT\nMain Door: 296\nGuest/customer serve: 113\n\nADDITIONAL INFORMATION.\n\n*Sales per labor hours =K35.10\n\n*Sale per customer:= K31.70\n\n*Conversion rate:= 38.20%\n\n--------------------------------\n\nSupervisor Control Summary\nDate: 21/03/26\nBranch: 5th Street\nSupervisor: Joyce (acting)\n\nCash variance: No\nStaffing issues: Yes\nStock issues affecting sales: No\nPricing or system issues:NO\n\nExceptions escalated to Ops Manager:\n\nSupervisor confirmation:\nAll material issues have been escalated.\n"
+}

@@ -1,0 +1,33 @@
+branch: LAE_5TH_STREET
+location: LAE
+date: 2026-03-23
+
+bales:
+  total: 5
+  released: 5
+  on_hold: 0
+
+totals:
+  quantity: 1049
+  value: 8070
+
+items:
+  - name: boys_tshirt_ss
+    qty: 316
+    value: 1969
+  - name: mix_shoes_a
+    qty: 49
+    value: 1146
+  - name: children_rummage
+    qty: 449
+    value: 1507
+  - name: mens_tshirt_big_size
+    qty: 154
+    value: 1569
+  - name: towel
+    qty: 81
+    value: 1879
+
+meta:
+  source: bale_report
+  prepared_by: Rhoda Frank

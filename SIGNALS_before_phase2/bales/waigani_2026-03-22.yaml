@@ -1,0 +1,39 @@
+branch: WAIGANI
+location: POM
+date: 2026-03-22
+
+bales:
+  total: 7
+  released: 5
+  on_hold: 2
+
+totals:
+  quantity: 859
+  value: 7282
+
+items:
+  - name: ladies_tshirt_xl
+    qty: 197
+    value: 916
+  - name: osh
+    qty: 224
+    value: 2437
+  - name: osh
+    qty: 235
+    value: 2207
+  - name: ladies_tshirt_xl
+    qty: 166
+    value: 807
+  - name: bed_cover
+    qty: 37
+    value: 915
+  - name: premium_dress
+    qty: 93
+    value: 514
+  - name: jumpsuit_creme
+    qty: 89
+    value: 511
+
+meta:
+  source: bale_report
+  prepared_by: Moviyo Alex

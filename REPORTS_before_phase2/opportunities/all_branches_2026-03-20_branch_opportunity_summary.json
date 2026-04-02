@@ -1,0 +1,569 @@
+{
+  "summary_type": "branch_opportunity_summary",
+  "entries_count": 1,
+  "overall_avg_fusion_score": 4.76,
+  "overall_fusion_band": "strong",
+  "top_risk_branch": {
+    "branch": "waigani",
+    "report_date": "2026-03-20",
+    "fusion_score": 4.76,
+    "fusion_band": "strong",
+    "priority_score": 5.74,
+    "primary_cause": "arrangement_execution",
+    "top_opportunity": "tighten arrangement and section presentation standards",
+    "sales_available": false,
+    "staff_available": true,
+    "sales": {
+      "total_sales": null,
+      "conversion_rate_pct": null,
+      "foot_traffic": null,
+      "served_customers": null,
+      "staffing_issues": null,
+      "stock_issues_affecting_sales": null,
+      "pricing_or_system_issues": null
+    },
+    "staff": {
+      "overall_avg_score": 4.76,
+      "overall_band": "strong",
+      "weakest_dimension": "arrangement",
+      "weakest_sections": [
+        {
+          "section_slug": "ladies",
+          "events_count": 5,
+          "staff_count": 5,
+          "arrangement_avg": 4.8,
+          "display_avg": 4.6,
+          "performance_avg": 4.6,
+          "overall_avg": 4.67,
+          "overall_band": "strong",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "arrangement": 5,
+            "display": 5,
+            "performance": 5
+          }
+        },
+        {
+          "section_slug": "mens_cotton_pants",
+          "events_count": 1,
+          "staff_count": 1,
+          "arrangement_avg": 4.0,
+          "display_avg": 5.0,
+          "performance_avg": 5.0,
+          "overall_avg": 4.67,
+          "overall_band": "strong",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "arrangement": 1,
+            "display": 1,
+            "performance": 1
+          }
+        },
+        {
+          "section_slug": "unknown_section",
+          "events_count": 16,
+          "staff_count": 16,
+          "arrangement_avg": 4.2,
+          "display_avg": 4.6,
+          "performance_avg": 4.75,
+          "overall_avg": 4.75,
+          "overall_band": "strong",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "performance": 16,
+            "arrangement": 5,
+            "display": 5
+          }
+        }
+      ],
+      "bottom_staff": [
+        {
+          "staff_id": "STAFF-WAIGANI-DEBRAH",
+          "staff_name": "debrah",
+          "staff_name_raw": "DEBRAH",
+          "branch": "waigani",
+          "report_date": "2026-03-20",
+          "events_count": 1,
+          "section_most_seen": "ladies",
+          "arrangement_avg": 4.0,
+          "display_avg": 4.0,
+          "performance_avg": 4.0,
+          "overall_avg": 4.0,
+          "overall_band": "acceptable",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "arrangement": 1,
+            "display": 1,
+            "performance": 1
+          },
+          "rating_bands_seen": {
+            "acceptable": 1
+          },
+          "confidence_avg": 1.0,
+          "source_files": [
+            "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_24c02ce8f83c500c.json"
+          ]
+        },
+        {
+          "staff_id": "STAFF-WAIGANI-EPU_YASA",
+          "staff_name": "epu_yasa",
+          "staff_name_raw": "EPU YASA",
+          "branch": "waigani",
+          "report_date": "2026-03-20",
+          "events_count": 1,
+          "section_most_seen": "unknown_section",
+          "arrangement_avg": 4.0,
+          "display_avg": 4.0,
+          "performance_avg": 4.0,
+          "overall_avg": 4.0,
+          "overall_band": "acceptable",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "arrangement": 1,
+            "display": 1,
+            "performance": 1
+          },
+          "rating_bands_seen": {
+            "acceptable": 1
+          },
+          "confidence_avg": 0.75,
+          "source_files": [
+            "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_5eff4b21e5bb4e91.json"
+          ]
+        },
+        {
+          "staff_id": "STAFF-WAIGANI-FLORIDA",
+          "staff_name": "florida",
+          "staff_name_raw": "FLORIDA",
+          "branch": "waigani",
+          "report_date": "2026-03-20",
+          "events_count": 1,
+          "section_most_seen": "unknown_section",
+          "arrangement_avg": 4.0,
+          "display_avg": 4.0,
+          "performance_avg": 4.0,
+          "overall_avg": 4.0,
+          "overall_band": "acceptable",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "arrangement": 1,
+            "display": 1,
+            "performance": 1
+          },
+          "rating_bands_seen": {
+            "acceptable": 1
+          },
+          "confidence_avg": 0.75,
+          "source_files": [
+            "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_ec0a73e6d63b4384.json"
+          ]
+        }
+      ]
+    },
+    "findings": [
+      {
+        "type": "staff_performance",
+        "severity": "info",
+        "message": "Overall staff performance is strong at 4.76."
+      },
+      {
+        "type": "weakest_dimension",
+        "severity": "medium",
+        "message": "Weakest staff dimension is arrangement."
+      },
+      {
+        "type": "weakest_section",
+        "severity": "medium",
+        "message": "Weakest section is ladies with overall_avg=4.67."
+      },
+      {
+        "type": "bottom_staff",
+        "severity": "medium",
+        "message": "Lowest-ranked staff in summary is debrah with overall_avg=4.0."
+      }
+    ],
+    "recommended_actions": [
+      "Tighten arrangement standards and section presentation checks.",
+      "Supervisor should inspect section: ladies.",
+      "Provide targeted coaching for debrah."
+    ],
+    "headline": "waigani on 2026-03-20: fusion=4.76 (strong), cause=arrangement_execution, opportunity=tighten arrangement and section presentation standards",
+    "source_file": "REPORTS/fusion/waigani_2026-03-20_sales_staff_fusion_summary.json"
+  },
+  "top_opportunity_branch": {
+    "branch": "waigani",
+    "report_date": "2026-03-20",
+    "fusion_score": 4.76,
+    "fusion_band": "strong",
+    "priority_score": 5.74,
+    "primary_cause": "arrangement_execution",
+    "top_opportunity": "tighten arrangement and section presentation standards",
+    "sales_available": false,
+    "staff_available": true,
+    "sales": {
+      "total_sales": null,
+      "conversion_rate_pct": null,
+      "foot_traffic": null,
+      "served_customers": null,
+      "staffing_issues": null,
+      "stock_issues_affecting_sales": null,
+      "pricing_or_system_issues": null
+    },
+    "staff": {
+      "overall_avg_score": 4.76,
+      "overall_band": "strong",
+      "weakest_dimension": "arrangement",
+      "weakest_sections": [
+        {
+          "section_slug": "ladies",
+          "events_count": 5,
+          "staff_count": 5,
+          "arrangement_avg": 4.8,
+          "display_avg": 4.6,
+          "performance_avg": 4.6,
+          "overall_avg": 4.67,
+          "overall_band": "strong",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "arrangement": 5,
+            "display": 5,
+            "performance": 5
+          }
+        },
+        {
+          "section_slug": "mens_cotton_pants",
+          "events_count": 1,
+          "staff_count": 1,
+          "arrangement_avg": 4.0,
+          "display_avg": 5.0,
+          "performance_avg": 5.0,
+          "overall_avg": 4.67,
+          "overall_band": "strong",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "arrangement": 1,
+            "display": 1,
+            "performance": 1
+          }
+        },
+        {
+          "section_slug": "unknown_section",
+          "events_count": 16,
+          "staff_count": 16,
+          "arrangement_avg": 4.2,
+          "display_avg": 4.6,
+          "performance_avg": 4.75,
+          "overall_avg": 4.75,
+          "overall_band": "strong",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "performance": 16,
+            "arrangement": 5,
+            "display": 5
+          }
+        }
+      ],
+      "bottom_staff": [
+        {
+          "staff_id": "STAFF-WAIGANI-DEBRAH",
+          "staff_name": "debrah",
+          "staff_name_raw": "DEBRAH",
+          "branch": "waigani",
+          "report_date": "2026-03-20",
+          "events_count": 1,
+          "section_most_seen": "ladies",
+          "arrangement_avg": 4.0,
+          "display_avg": 4.0,
+          "performance_avg": 4.0,
+          "overall_avg": 4.0,
+          "overall_band": "acceptable",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "arrangement": 1,
+            "display": 1,
+            "performance": 1
+          },
+          "rating_bands_seen": {
+            "acceptable": 1
+          },
+          "confidence_avg": 1.0,
+          "source_files": [
+            "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_24c02ce8f83c500c.json"
+          ]
+        },
+        {
+          "staff_id": "STAFF-WAIGANI-EPU_YASA",
+          "staff_name": "epu_yasa",
+          "staff_name_raw": "EPU YASA",
+          "branch": "waigani",
+          "report_date": "2026-03-20",
+          "events_count": 1,
+          "section_most_seen": "unknown_section",
+          "arrangement_avg": 4.0,
+          "display_avg": 4.0,
+          "performance_avg": 4.0,
+          "overall_avg": 4.0,
+          "overall_band": "acceptable",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "arrangement": 1,
+            "display": 1,
+            "performance": 1
+          },
+          "rating_bands_seen": {
+            "acceptable": 1
+          },
+          "confidence_avg": 0.75,
+          "source_files": [
+            "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_5eff4b21e5bb4e91.json"
+          ]
+        },
+        {
+          "staff_id": "STAFF-WAIGANI-FLORIDA",
+          "staff_name": "florida",
+          "staff_name_raw": "FLORIDA",
+          "branch": "waigani",
+          "report_date": "2026-03-20",
+          "events_count": 1,
+          "section_most_seen": "unknown_section",
+          "arrangement_avg": 4.0,
+          "display_avg": 4.0,
+          "performance_avg": 4.0,
+          "overall_avg": 4.0,
+          "overall_band": "acceptable",
+          "weak_dimensions": {},
+          "strong_dimensions": {
+            "arrangement": 1,
+            "display": 1,
+            "performance": 1
+          },
+          "rating_bands_seen": {
+            "acceptable": 1
+          },
+          "confidence_avg": 0.75,
+          "source_files": [
+            "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_ec0a73e6d63b4384.json"
+          ]
+        }
+      ]
+    },
+    "findings": [
+      {
+        "type": "staff_performance",
+        "severity": "info",
+        "message": "Overall staff performance is strong at 4.76."
+      },
+      {
+        "type": "weakest_dimension",
+        "severity": "medium",
+        "message": "Weakest staff dimension is arrangement."
+      },
+      {
+        "type": "weakest_section",
+        "severity": "medium",
+        "message": "Weakest section is ladies with overall_avg=4.67."
+      },
+      {
+        "type": "bottom_staff",
+        "severity": "medium",
+        "message": "Lowest-ranked staff in summary is debrah with overall_avg=4.0."
+      }
+    ],
+    "recommended_actions": [
+      "Tighten arrangement standards and section presentation checks.",
+      "Supervisor should inspect section: ladies.",
+      "Provide targeted coaching for debrah."
+    ],
+    "headline": "waigani on 2026-03-20: fusion=4.76 (strong), cause=arrangement_execution, opportunity=tighten arrangement and section presentation standards",
+    "source_file": "REPORTS/fusion/waigani_2026-03-20_sales_staff_fusion_summary.json"
+  },
+  "branches": [
+    {
+      "branch": "waigani",
+      "report_date": "2026-03-20",
+      "fusion_score": 4.76,
+      "fusion_band": "strong",
+      "priority_score": 5.74,
+      "primary_cause": "arrangement_execution",
+      "top_opportunity": "tighten arrangement and section presentation standards",
+      "sales_available": false,
+      "staff_available": true,
+      "sales": {
+        "total_sales": null,
+        "conversion_rate_pct": null,
+        "foot_traffic": null,
+        "served_customers": null,
+        "staffing_issues": null,
+        "stock_issues_affecting_sales": null,
+        "pricing_or_system_issues": null
+      },
+      "staff": {
+        "overall_avg_score": 4.76,
+        "overall_band": "strong",
+        "weakest_dimension": "arrangement",
+        "weakest_sections": [
+          {
+            "section_slug": "ladies",
+            "events_count": 5,
+            "staff_count": 5,
+            "arrangement_avg": 4.8,
+            "display_avg": 4.6,
+            "performance_avg": 4.6,
+            "overall_avg": 4.67,
+            "overall_band": "strong",
+            "weak_dimensions": {},
+            "strong_dimensions": {
+              "arrangement": 5,
+              "display": 5,
+              "performance": 5
+            }
+          },
+          {
+            "section_slug": "mens_cotton_pants",
+            "events_count": 1,
+            "staff_count": 1,
+            "arrangement_avg": 4.0,
+            "display_avg": 5.0,
+            "performance_avg": 5.0,
+            "overall_avg": 4.67,
+            "overall_band": "strong",
+            "weak_dimensions": {},
+            "strong_dimensions": {
+              "arrangement": 1,
+              "display": 1,
+              "performance": 1
+            }
+          },
+          {
+            "section_slug": "unknown_section",
+            "events_count": 16,
+            "staff_count": 16,
+            "arrangement_avg": 4.2,
+            "display_avg": 4.6,
+            "performance_avg": 4.75,
+            "overall_avg": 4.75,
+            "overall_band": "strong",
+            "weak_dimensions": {},
+            "strong_dimensions": {
+              "performance": 16,
+              "arrangement": 5,
+              "display": 5
+            }
+          }
+        ],
+        "bottom_staff": [
+          {
+            "staff_id": "STAFF-WAIGANI-DEBRAH",
+            "staff_name": "debrah",
+            "staff_name_raw": "DEBRAH",
+            "branch": "waigani",
+            "report_date": "2026-03-20",
+            "events_count": 1,
+            "section_most_seen": "ladies",
+            "arrangement_avg": 4.0,
+            "display_avg": 4.0,
+            "performance_avg": 4.0,
+            "overall_avg": 4.0,
+            "overall_band": "acceptable",
+            "weak_dimensions": {},
+            "strong_dimensions": {
+              "arrangement": 1,
+              "display": 1,
+              "performance": 1
+            },
+            "rating_bands_seen": {
+              "acceptable": 1
+            },
+            "confidence_avg": 1.0,
+            "source_files": [
+              "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_24c02ce8f83c500c.json"
+            ]
+          },
+          {
+            "staff_id": "STAFF-WAIGANI-EPU_YASA",
+            "staff_name": "epu_yasa",
+            "staff_name_raw": "EPU YASA",
+            "branch": "waigani",
+            "report_date": "2026-03-20",
+            "events_count": 1,
+            "section_most_seen": "unknown_section",
+            "arrangement_avg": 4.0,
+            "display_avg": 4.0,
+            "performance_avg": 4.0,
+            "overall_avg": 4.0,
+            "overall_band": "acceptable",
+            "weak_dimensions": {},
+            "strong_dimensions": {
+              "arrangement": 1,
+              "display": 1,
+              "performance": 1
+            },
+            "rating_bands_seen": {
+              "acceptable": 1
+            },
+            "confidence_avg": 0.75,
+            "source_files": [
+              "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_5eff4b21e5bb4e91.json"
+            ]
+          },
+          {
+            "staff_id": "STAFF-WAIGANI-FLORIDA",
+            "staff_name": "florida",
+            "staff_name_raw": "FLORIDA",
+            "branch": "waigani",
+            "report_date": "2026-03-20",
+            "events_count": 1,
+            "section_most_seen": "unknown_section",
+            "arrangement_avg": 4.0,
+            "display_avg": 4.0,
+            "performance_avg": 4.0,
+            "overall_avg": 4.0,
+            "overall_band": "acceptable",
+            "weak_dimensions": {},
+            "strong_dimensions": {
+              "arrangement": 1,
+              "display": 1,
+              "performance": 1
+            },
+            "rating_bands_seen": {
+              "acceptable": 1
+            },
+            "confidence_avg": 0.75,
+            "source_files": [
+              "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_ec0a73e6d63b4384.json"
+            ]
+          }
+        ]
+      },
+      "findings": [
+        {
+          "type": "staff_performance",
+          "severity": "info",
+          "message": "Overall staff performance is strong at 4.76."
+        },
+        {
+          "type": "weakest_dimension",
+          "severity": "medium",
+          "message": "Weakest staff dimension is arrangement."
+        },
+        {
+          "type": "weakest_section",
+          "severity": "medium",
+          "message": "Weakest section is ladies with overall_avg=4.67."
+        },
+        {
+          "type": "bottom_staff",
+          "severity": "medium",
+          "message": "Lowest-ranked staff in summary is debrah with overall_avg=4.0."
+        }
+      ],
+      "recommended_actions": [
+        "Tighten arrangement standards and section presentation checks.",
+        "Supervisor should inspect section: ladies.",
+        "Provide targeted coaching for debrah."
+      ],
+      "headline": "waigani on 2026-03-20: fusion=4.76 (strong), cause=arrangement_execution, opportunity=tighten arrangement and section presentation standards",
+      "source_file": "REPORTS/fusion/waigani_2026-03-20_sales_staff_fusion_summary.json"
+    }
+  ]
+}

@@ -2,6 +2,10 @@ from __future__ import annotations
 
 from typing import Any
 
+try:
+    from scripts.branch_resolution import legacy_branch_display, legacy_branch_stem
+except ModuleNotFoundError:
+    from branch_resolution import legacy_branch_display, legacy_branch_stem
 from scripts.colony_fusion_analyzer import (
     build_branch_metrics,
     load_sales_signals,
@@ -58,6 +62,8 @@ def _find_branch_key(metrics: dict[str, Any], text: str) -> str | None:
     normalized_map: dict[str, str] = {}
     for branch in metrics:
         normalized_map[_normalize_text(branch)] = branch
+        normalized_map[_normalize_text(legacy_branch_stem(branch))] = branch
+        normalized_map[_normalize_text(legacy_branch_display(branch))] = branch
 
     if target in normalized_map:
         return normalized_map[target]
@@ -87,7 +93,7 @@ def _branch_detail(metrics: dict[str, Any], branch_name: str) -> str | None:
 
     data = metrics[branch_key]
     lines = [
-        f"Branch: {branch_key.upper()}",
+        f"Branch: {legacy_branch_display(branch_key)}",
         f"Fusion score: {data.get('fusion_score', 0.0):.2f}",
         f"Staff signals: {data.get('staff_signal_count', 0)}",
         f"Sales signals: {data.get('sales_signal_count', 0)}",
@@ -142,7 +148,7 @@ def _staff_performance_summary(metrics: dict[str, Any]) -> str:
 
     for branch, data in ranked:
         lines.append(
-            f"- {branch.upper()}: "
+            f"- {legacy_branch_display(branch)}: "
             f"staff avg {data.get('staff_strength_avg', 0.0):.2f}, "
             f"signals {data.get('staff_signal_count', 0)}, "
             f"fusion {data.get('fusion_score', 0.0):.2f}"
@@ -158,7 +164,7 @@ def _staff_performance_summary(metrics: dict[str, Any]) -> str:
         lines.append("")
         lines.append("Top staff overall:")
         for branch, name, score in all_staff[:8]:
-            lines.append(f"- {name} ({branch.upper()}): {score:.2f}")
+            lines.append(f"- {name} ({legacy_branch_display(branch)}): {score:.2f}")
 
     weak_sections: list[tuple[str, str, float]] = []
     for branch, data in metrics.items():
@@ -170,7 +176,7 @@ def _staff_performance_summary(metrics: dict[str, Any]) -> str:
         lines.append("")
         lines.append("Weak sections overall:")
         for branch, section, score in weak_sections[:8]:
-            lines.append(f"- {section} ({branch.upper()}): {score:.2f}")
+            lines.append(f"- {section} ({legacy_branch_display(branch)}): {score:.2f}")
 
     return "\n".join(lines)
 
@@ -183,13 +189,13 @@ def _overall_summary(metrics: dict[str, Any]) -> str:
 
     parts: list[str] = []
     if top:
-        parts.append(f"Top branch: {top[0].upper()} ({top[1].get('fusion_score', 0.0):.2f})")
+        parts.append(f"Top branch: {legacy_branch_display(top[0])} ({top[1].get('fusion_score', 0.0):.2f})")
     if weak:
-        parts.append(f"Weakest branch: {weak[0].upper()} ({weak[1].get('fusion_score', 0.0):.2f})")
+        parts.append(f"Weakest branch: {legacy_branch_display(weak[0])} ({weak[1].get('fusion_score', 0.0):.2f})")
     if sales:
-        parts.append(f"Highest sales: {sales[0].upper()} ({_fmt_money(sales[1].get('sales_total', 0.0))})")
+        parts.append(f"Highest sales: {legacy_branch_display(sales[0])} ({_fmt_money(sales[1].get('sales_total', 0.0))})")
     if traffic:
-        parts.append(f"Most traffic: {traffic[0].upper()} ({traffic[1].get('transaction_total', 0)} customers)")
+        parts.append(f"Most traffic: {legacy_branch_display(traffic[0])} ({traffic[1].get('transaction_total', 0)} customers)")
     return "\n".join(parts)
 
 
@@ -249,7 +255,7 @@ def handle_query(query: str) -> str:
             return "No branch data available."
         branch, data = result
         return (
-            f"Top branch is {branch.upper()}.\n"
+            f"Top branch is {legacy_branch_display(branch)}.\n"
             f"Fusion score: {data.get('fusion_score', 0.0):.2f}\n"
             f"Sales total: {_fmt_money(data.get('sales_total', 0.0))}\n"
             f"Transactions: {data.get('transaction_total', 0)}"
@@ -261,7 +267,7 @@ def handle_query(query: str) -> str:
             return "No branch data available."
         branch, data = result
         return (
-            f"Weakest branch is {branch.upper()}.\n"
+            f"Weakest branch is {legacy_branch_display(branch)}.\n"
             f"Fusion score: {data.get('fusion_score', 0.0):.2f}\n"
             f"Sales total: {_fmt_money(data.get('sales_total', 0.0))}\n"
             f"Transactions: {data.get('transaction_total', 0)}"
@@ -277,7 +283,7 @@ def handle_query(query: str) -> str:
             return "No sales data available."
         branch, data = result
         return (
-            f"Highest sales branch is {branch.upper()}.\n"
+            f"Highest sales branch is {legacy_branch_display(branch)}.\n"
             f"Sales total: {_fmt_money(data.get('sales_total', 0.0))}\n"
             f"Cash sales: {_fmt_money(data.get('cash_sales_total', 0.0))}\n"
             f"EFTPOS sales: {_fmt_money(data.get('eftpos_sales_total', 0.0))}"
@@ -289,7 +295,7 @@ def handle_query(query: str) -> str:
             return "No traffic data available."
         branch, data = result
         return (
-            f"Highest traffic branch is {branch.upper()}.\n"
+            f"Highest traffic branch is {legacy_branch_display(branch)}.\n"
             f"Transactions: {data.get('transaction_total', 0)}\n"
             f"Sales total: {_fmt_money(data.get('sales_total', 0.0))}"
         )

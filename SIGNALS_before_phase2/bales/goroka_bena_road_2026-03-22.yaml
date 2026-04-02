@@ -1,0 +1,30 @@
+branch: GOROKA_BENA_ROAD
+location: GOROKA
+date: 2026-03-22
+
+bales:
+  total: 4
+  released: 4
+  on_hold: 0
+
+totals:
+  quantity: 632
+  value: 5721
+
+items:
+  - name: mix_clothing
+    qty: 153
+    value: 1388
+  - name: mix_clothing
+    qty: 159
+    value: 1432
+  - name: mix_clothing
+    qty: 161
+    value: 1384
+  - name: mix_clothing
+    qty: 159
+    value: 1517
+
+meta:
+  source: bale_report
+  prepared_by: Erick Tobby

@@ -1,0 +1,47 @@
+{
+  "branch": "waigani",
+  "report_date": "2026-03-23",
+  "available": false,
+  "source_file": "/home/clawadmin/.openclaw/workspace/ioi-colony/RAW_INPUT/2026-03-23/operations/waigani_supervisor_2026-03-23.yaml",
+  "events_count": 0,
+  "section_count": 0,
+  "avg_signal_strength": null,
+  "sections": {},
+  "diagnostics": [
+    {
+      "severity": "medium",
+      "code": "no_section_signals_detected",
+      "message": "Operations source loaded but no section-level inventory availability signals were detected."
+    }
+  ],
+  "recommended_actions": [
+    "Improve supervisor report structure so section availability states are explicitly captured."
+  ],
+  "raw": {
+    "source_name": "waigani",
+    "date": "2026-03-23",
+    "report_type": "supervisor_control",
+    "supervisor": "francis_ano",
+    "issues": {
+      "cash_variance": {
+        "status": false
+      },
+      "staffing_issue": {
+        "status": false
+      },
+      "stock_issue": {
+        "status": false
+      },
+      "pricing_system_issue": {
+        "status": false
+      }
+    },
+    "exceptions": [],
+    "escalation": {
+      "escalated_to_ops_manager": true
+    },
+    "control_notes": [
+      "stable operations"
+    ]
+  }
+}

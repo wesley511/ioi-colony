@@ -38,6 +38,18 @@ from pathlib import Path
 from typing import Any
 
 try:
+    from scripts.branch_resolution import legacy_branch_display, legacy_branch_stem, resolve_branch_slug
+except ModuleNotFoundError:
+    from branch_resolution import legacy_branch_display, legacy_branch_stem, resolve_branch_slug
+try:
+    from scripts.section_normalizer import normalize_section_name as shared_normalize_section_name
+except ModuleNotFoundError:
+    from section_normalizer import normalize_section_name as shared_normalize_section_name
+try:
+    from scripts.staff_signal_loader import dedupe_staff_signals
+except ModuleNotFoundError:
+    from staff_signal_loader import dedupe_staff_signals
+try:
     from scripts.section_mapper import (
         build_section_metrics,
         load_branch_sections,
@@ -107,26 +119,14 @@ def normalize_token(text: str) -> str:
 
 
 def canonical_branch(name: str) -> str:
-    token = normalize_token(name)
-    aliases = {
-        "bena": "bena_road",
-        "bena_road_branch": "bena_road",
-        "ttc_bena_road_branch": "bena_road",
-        "5th_street": "5th_street",
-        "5thstreet": "5th_street",
-        "fifth_street": "5th_street",
-        "waigani_branch": "waigani",
-        "ttc_waigani_branch": "waigani",
-        "lae_malaita_branch": "lae_malaita",
-    }
-    return aliases.get(token, token or "unknown")
+    return resolve_branch_slug(candidates=[name])
 
 
 def is_weak_placeholder_section(section: str) -> bool:
     s = normalize_token(section)
     if not s:
         return True
-    if s in {"unknown", "na", "n_a", "nil"}:
+    if s in {"unknown", "unknown_section", "na", "n_a", "nil"}:
         return True
     if re.fullmatch(r"\d+", s):
         return True
@@ -134,37 +134,12 @@ def is_weak_placeholder_section(section: str) -> bool:
 
 
 def normalize_section_name(section: str) -> str:
+    normalized = shared_normalize_section_name(section)
+    if normalized:
+        return normalized
     s = normalize_token(section)
-
-    section_aliases = {
-        "mans_shoe": "shoe_shop",
-        "mens_shoe": "shoe_shop",
-        "shoe_section": "shoe_shop",
-        "shoes": "shoe_shop",
-        "ladies_t_shirts_blouse": "ladies_tshirts_blouse",
-        "ladies_tshirt_blouse": "ladies_tshirts_blouse",
-        "ladies_tshirts": "ladies_tshirts_blouse",
-        "blouse": "ladies_tshirts_blouse",
-        "ladies_tops": "ladies_tops_jeans",
-        "ladies_jeans": "ladies_tops_jeans",
-        "bedding": "beddings",
-        "kids_boys_section": "kids_boys",
-        "pricing_room": "pricing_room",
-        "cashier_till_1": "cashier_till_1",
-        "cashier_till_2": "cashier_till_2",
-        "cashier_till_3": "cashier_till_3",
-        "monitor_till_1_2": "monitor_till_1_2",
-    }
-
-    if s in section_aliases:
-        return section_aliases[s]
-
-    # Strip numeric prefixes from legacy signals like "10_pricing_room"
     s = re.sub(r"^\d+_", "", s)
-
-    # Compress duplicated words
     s = re.sub(r"(?:_)+", "_", s).strip("_")
-
     return s or "unknown"
 
 
@@ -218,28 +193,7 @@ def parse_kv_lines(text: str) -> dict[str, Any]:
 
 
 def infer_branch_from_filename(path: Path) -> str:
-    name = path.stem.lower()
-
-    for branch in ["waigani", "lae_malaita", "bena_road", "5th_street"]:
-        if branch in name:
-            return branch
-
-    for branch, data in branch_metrics.items():
-        normalized_branch = normalize_branch_name(branch)
-        data["sections"] = section_metrics.get(normalized_branch, {})
-
-    # patterns like branch-date-name
-    tokens = normalize_token(name)
-    if "bena" in tokens:
-        return "bena_road"
-    if "waigani" in tokens:
-        return "waigani"
-    if "malaita" in tokens:
-        return "lae_malaita"
-    if "5th" in tokens or "fifth" in tokens:
-        return "5th_street"
-
-    return "unknown"
+    return resolve_branch_slug(path=path, candidates=[path.stem])
 
 
 def infer_date_from_filename(path: Path) -> str | None:
@@ -286,7 +240,7 @@ def branch_from_staff_id(staff_id: str) -> str:
     token = normalize_token(staff_id)
     parts = token.split("-")
     if len(parts) >= 3 and parts[0] == "staff":
-        return parts[1]
+        return resolve_branch_slug(candidates=[parts[1]])
     return ""
 
 def parse_signal_file(text: str, path: Path) -> dict[str, Any] | None:
@@ -328,17 +282,18 @@ def parse_signal_file(text: str, path: Path) -> dict[str, Any] | None:
         or ""
     ).strip()
 
-    branch = canonical_branch(
-        str(
-            data.get("source_slug")
-            or data.get("branch_slug")
-            or data.get("branch")
-            or branch_from_staff_id(staff_id_hint)
-            or data.get("shop")
-            or data.get("branch_name")
-            or data.get("source_name")
-            or infer_branch_from_filename(path)
-        )
+    branch = resolve_branch_slug(
+        data,
+        path=path,
+        candidates=[
+            data.get("source_slug"),
+            data.get("branch"),
+            branch_from_staff_id(staff_id_hint),
+            data.get("shop"),
+            data.get("branch_name"),
+            data.get("source_name"),
+            infer_branch_from_filename(path),
+        ],
     )
 
     staff_name = str(
@@ -445,14 +400,16 @@ def parse_sales_file(path: Path) -> SalesSignal | None:
     if not data:
         return None
 
-    branch = canonical_branch(
-        str(
-            data.get("branch")
-            or data.get("shop")
-            or data.get("branch_name")
-            or data.get("source_name")
-            or infer_branch_from_filename(path)
-        )
+    branch = resolve_branch_slug(
+        data,
+        path=path,
+        candidates=[
+            data.get("branch"),
+            data.get("shop"),
+            data.get("branch_name"),
+            data.get("source_name"),
+            infer_branch_from_filename(path),
+        ],
     )
 
     totals = data.get("totals")
@@ -534,87 +491,75 @@ def load_signals(
     Returns list[dict] rather than dataclasses to preserve compatibility.
     """
     signals: list[dict] = []
+    candidate_paths: list[Path] = []
+    if NORMALIZED_SIGNALS_DIR.exists():
+        candidate_paths.extend(sorted(NORMALIZED_SIGNALS_DIR.glob("*staff*.md")))
+    if not candidate_paths and signals_dir.exists():
+        candidate_paths.extend(sorted(signals_dir.glob("*")))
 
-    if not signals_dir.exists():
-        return signals
-
-    for path in sorted(signals_dir.glob("*")):
+    def _parser(path: Path) -> dict[str, Any] | None:
         if path.suffix.lower() not in {".md", ".txt", ".yaml", ".yml", ".json"}:
-            continue
-
+            return None
         parsed = parse_staff_signal(path)
         if not parsed:
+            return None
+        if min_confidence and min_confidence > 0 and parsed.confidence < min_confidence:
+            return None
+        return {
+            "branch": parsed.branch,
+            "staff_id": parsed.staff_id,
+            "staff_name": parsed.staff_name,
+            "section": parsed.section,
+            "strength": parsed.strength,
+            "confidence": parsed.confidence,
+            "timestamp": parsed.timestamp,
+            "source_file": parsed.source_file,
+            "raw": parsed.raw,
+        }
+
+    for parsed in dedupe_staff_signals(candidate_paths, _parser):
+        section = normalize_section_name(str(parsed.get("section") or ""))
+        if parsed.get("branch") == "unknown" or str(parsed.get("staff_name")).strip().lower() == "unknown_staff":
             continue
-
-        if min_confidence and min_confidence > 0:
-            if parsed.confidence < min_confidence:
-                continue
-
-        signals.append(
-            {
-                "branch": parsed.branch,
-                "staff_id": parsed.staff_id,
-                "staff_name": parsed.staff_name,
-                "section": parsed.section,
-                "strength": parsed.strength,
-                "confidence": parsed.confidence,
-                "timestamp": parsed.timestamp,
-                "source_file": parsed.source_file,
-                "raw": parsed.raw,
-            }
-        )
+        if is_weak_placeholder_section(section):
+            continue
+        parsed["section"] = section
+        signals.append(parsed)
 
     return signals
 
 
 def load_sales_signals(normalized_dir: Path = NORMALIZED_SIGNALS_DIR) -> list[dict]:
-    signals: list[dict] = []
+    chosen: dict[str, dict] = {}
 
     if not normalized_dir.exists():
-        return signals
+        return []
 
     for path in sorted(normalized_dir.glob("*_sales_*.yaml")):
         parsed = parse_sales_file(path)
-        if not parsed:
+        if not parsed or parsed.branch == "unknown":
             continue
 
-        signals.append(
-            {
-                "branch": parsed.branch,
-                "sales_value": parsed.sales_value,
-                "transaction_count": parsed.transaction_count,
-                "cash_sales": parsed.cash_sales,
-                "eftpos_sales": parsed.eftpos_sales,
-                "timestamp": parsed.timestamp,
-                "source_file": parsed.source_file,
-                "raw": parsed.raw,
-            }
-        )
+        current = {
+            "branch": parsed.branch,
+            "sales_value": parsed.sales_value,
+            "transaction_count": parsed.transaction_count,
+            "cash_sales": parsed.cash_sales,
+            "eftpos_sales": parsed.eftpos_sales,
+            "timestamp": parsed.timestamp,
+            "source_file": parsed.source_file,
+            "raw": parsed.raw,
+        }
+        existing = chosen.get(parsed.branch)
+        current_rank = (str(parsed.timestamp or ""), path.name)
+        existing_rank = (
+            str(existing.get("timestamp") or ""),
+            Path(existing["source_file"]).name,
+        ) if existing else ("", "")
+        if existing is None or current_rank > existing_rank:
+            chosen[parsed.branch] = current
 
-    return signals
-
-    for path in sorted(normalized_dir.glob("*_sales_*")):
-        if path.suffix.lower() not in {".md", ".txt", ".yaml", ".yml", ".json"}:
-            continue
-
-        parsed = parse_sales_file(path)
-        if not parsed:
-            continue
-
-        signals.append(
-            {
-                "branch": parsed.branch,
-                "sales_value": parsed.sales_value,
-                "transaction_count": parsed.transaction_count,
-                "cash_sales": parsed.cash_sales,
-                "eftpos_sales": parsed.eftpos_sales,
-                "timestamp": parsed.timestamp,
-                "source_file": parsed.source_file,
-                "raw": parsed.raw,
-            }
-        )
-
-    return signals
+    return list(chosen.values())
 
 
 # ---------------------------------------------------------------------------
@@ -665,7 +610,7 @@ def build_branch_metrics(staff_signals: list[dict], sales_signals: list[dict]) -
     seen_staff_per_branch: dict[str, set[str]] = defaultdict(set)
 
     for signal in staff_signals:
-        branch = canonical_branch(signal.get("branch", "unknown"))
+        branch = resolve_branch_slug(signal, candidates=[signal.get("branch")])
         section = normalize_section_name(signal.get("section", "unknown"))
         strength = parse_float(signal.get("strength"), 0.0)
         staff_id = str(signal.get("staff_id") or signal.get("staff_name") or "unknown")
@@ -688,7 +633,7 @@ def build_branch_metrics(staff_signals: list[dict], sales_signals: list[dict]) -
 
     # Sales signals
     for signal in sales_signals:
-        branch = canonical_branch(signal.get("branch", "unknown"))
+        branch = resolve_branch_slug(signal, candidates=[signal.get("branch")])
         metrics = branch_metrics[branch]
         metrics["sales_signal_count"] += 1
         metrics["sales_total"] += parse_float(signal.get("sales_value"), 0.0)
@@ -703,13 +648,15 @@ def build_branch_metrics(staff_signals: list[dict], sales_signals: list[dict]) -
 
         # Weak sections: low strength or placeholder sections
         for section, score in metrics["section_strength"].items():
-            if is_weak_placeholder_section(section) or score < 50:
+            if is_weak_placeholder_section(section):
+                continue
+            if score < 50:
                 metrics["weak_sections"].add(section)
 
         for section in sorted(metrics["weak_sections"]):
             metrics["issues"].append(f"Weak section: {section}")
             metrics["recommendations"].append(
-                f"Improve display, support, and engagement in {branch} -> {section}"
+                f"Improve display, support, and engagement in {legacy_branch_stem(branch)} -> {section}"
             )
 
         # Fusion score
@@ -751,8 +698,8 @@ def render_report(branch_metrics: dict[str, Any]) -> str:
     lines.append("")
 
     if branches:
-        top_performer = branches[0][0].upper()
-        weakest_branch = branches[-1][0].upper()
+        top_performer = legacy_branch_display(branches[0][0])
+        weakest_branch = legacy_branch_display(branches[-1][0])
         lines.append(f"- Top performer: {top_performer}")
         lines.append(f"- Weakest branch: {weakest_branch}")
         lines.append("")
@@ -762,7 +709,7 @@ def render_report(branch_metrics: dict[str, Any]) -> str:
 
     for idx, (branch, metrics) in enumerate(branches, start=1):
         lines.append(
-            f"{idx}. {branch.upper()} | "
+            f"{idx}. {legacy_branch_display(branch)} | "
             f"fusion_score={metrics['fusion_score']:.2f} | "
             f"staff_avg={metrics['staff_strength_avg']:.2f} | "
             f"sales_total={metrics['sales_total']:.2f} | "
@@ -772,7 +719,7 @@ def render_report(branch_metrics: dict[str, Any]) -> str:
     lines.append("")
 
     for branch, metrics in branches:
-        lines.append(f"## {branch.upper()}")
+        lines.append(f"## {legacy_branch_display(branch)}")
         lines.append("")
         lines.append(f"- fusion_score: {metrics['fusion_score']:.2f}")
         lines.append(f"- staff_signal_count: {metrics['staff_signal_count']}")

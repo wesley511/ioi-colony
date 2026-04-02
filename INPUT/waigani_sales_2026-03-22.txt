@@ -1,0 +1,49 @@
+TTC Waigani Branch
+Date: 22/03/26 _Sunday 
+
+DAY-END SALES REPORT
+Till#1: Main Shop
+Cashier: Fidelma Wobilo 
+Assistant: David Yairo 
+
+T/Cash:K5,246.80
+T/Card: K3,575.20
+Z/Reading: K8,822.00
+Balance: OK
+
+TOTALS
+Total Cassh: K5,246.80
+Total Card: K3,575.20
+Total Sales: K8,822.00
+
+CUSTOMER COUNT
+Main Door: 264
+Guest/ Customer served:198
+
+ADDITIONAL INFORMATION. 
+
+*Sales per labor hours =K45.10
+
+*Sale per customer:= K44.50
+
+*Conversion rate:=80%
+
+--------------------------------
+
+Supervisor Control Summary
+Date:22/03/26
+Branch: Waigani
+Supervisor: Francis Ano
+
+Cash verians: None
+
+Staffing issues:
+
+Stock issues 
+
+Pricing or system issues affecting sales: 
+
+Exceptions escalated to Ops Manager: 
+
+Supervisor confirmation:
+All material issues have been escalated.

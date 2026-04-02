@@ -1,0 +1,17 @@
+{
+  "summary_type": "inventory_availability_summary",
+  "message": "No inventory-relevant normalized events found for the requested filter.",
+  "branch": null,
+  "report_date": null,
+  "totals": {
+    "events_count": 0,
+    "section_count": 0
+  },
+  "sections": {},
+  "signals": {},
+  "diagnostics": {
+    "primary_inventory_risk": null,
+    "top_opportunity": null,
+    "recommended_actions": []
+  }
+}

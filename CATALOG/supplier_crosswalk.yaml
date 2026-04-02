@@ -1,0 +1,23 @@
+friendtex:
+  MTSH: mens_tshirt
+  OSH: mens_shorts
+  CHSH: kids_boys_shorts
+  CTSH: kids_boys_tshirt
+  LTSK: ladies_teregal_skirt
+  LSHT: ladies_shorts
+  MWKT: mens_cotton_pants
+  ASHO: mens_shorts
+  6PKS: mens_shorts
+  MCP_GRIP: mens_cotton_pants
+  LWS_SUPA: mixed_lightweight_bale
+  MM_200KGS: mens_mixed_bale
+
+qc_trading:
+  "mens tshirt round neck": mens_tshirt
+  "kids jersey tshirts": kids_boys_tshirt
+  "ladies cotton dresses": ladies_dress
+
+al_sadiqa:
+  "army clothing": mens_shorts
+  "baby rummage": baby_rummage
+

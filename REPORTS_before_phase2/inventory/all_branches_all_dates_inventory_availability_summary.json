@@ -1,0 +1,966 @@
+{
+  "summary_type": "inventory_availability_summary",
+  "branch": "multiple",
+  "report_date": "unknown-date",
+  "branches_seen": [
+    "lae_malaita",
+    "unknown",
+    "waigani"
+  ],
+  "dates_seen": [
+    "unknown-date"
+  ],
+  "totals": {
+    "events_count": 66,
+    "section_count": 5
+  },
+  "signals": {
+    "event_kind_counts": {
+      "gap_report": 14,
+      "monitoring_report": 12,
+      "pricing_report": 6,
+      "strength_report": 34
+    },
+    "direction_counts": {
+      "risk": 32,
+      "strength": 34
+    },
+    "avg_signal_strength": 2.94
+  },
+  "sections": {
+    "section_count": 5,
+    "highest_pressure_sections": [
+      {
+        "section_slug": "pricing_clark",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 4.0,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "pricing_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_pricing_report_9e6ebc230e28da81.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_pricing_report_be4b68675b425072.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_pricing_report_9e6ebc230e28da81.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_pricing_report_be4b68675b425072.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_pricing_report_762b9a201cc9452f.json"
+        ]
+      },
+      {
+        "section_slug": "assisting_cashier",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 3.5,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "gap_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_gap_report_4cf8f16148bf8aa0.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_gap_report_9f0f2ff854c889e3.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_gap_report_4cf8f16148bf8aa0.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_gap_report_9f0f2ff854c889e3.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_gap_report_8d2a112bf5ace49c.json"
+        ]
+      },
+      {
+        "section_slug": "monitoring_stuff_and_rails",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 3.5,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "monitoring_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_7331a919d4f94877.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_99a11392050b2183.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_7331a919d4f94877.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_99a11392050b2183.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_monitoring_report_7f4e8b7c4cfeabdf.json"
+        ]
+      },
+      {
+        "section_slug": "monitoring",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 2.5,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "monitoring_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_07b38181399af3e8.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_a77bfab78c4c25f8.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_07b38181399af3e8.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_a77bfab78c4c25f8.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_monitoring_report_07111f19388a3d87.json"
+        ]
+      },
+      {
+        "section_slug": "unknown_section",
+        "events_count": 42,
+        "risk_count": 8,
+        "strength_count": 34,
+        "neutral_count": 0,
+        "avg_signal_strength": 2.69,
+        "pressure_score": -18.0,
+        "event_kinds": {
+          "gap_report": 8,
+          "strength_report": 34
+        },
+        "top_keywords": [
+          [
+            "0",
+            42
+          ],
+          [
+            "03",
+            42
+          ],
+          [
+            "2026",
+            42
+          ],
+          [
+            "24t15",
+            42
+          ],
+          [
+            "active",
+            42
+          ],
+          [
+            "date",
+            42
+          ],
+          [
+            "description",
+            42
+          ],
+          [
+            "identified",
+            42
+          ],
+          [
+            "in",
+            42
+          ],
+          [
+            "is",
+            42
+          ]
+        ],
+        "sample_sources": [
+          "normalized/lae_malaita/2026-03-26/lae_malaita_unknown_sender_gap_report_1464f975a549f2fd.json",
+          "normalized/lae_malaita/2026-03-26/lae_malaita_unknown_sender_gap_report_1471d2ada3bead68.json",
+          "normalized/lae_malaita/2026-03-27/lae_malaita_unknown_sender_gap_report_1464f975a549f2fd.json",
+          "normalized/lae_malaita/2026-03-27/lae_malaita_unknown_sender_gap_report_1471d2ada3bead68.json",
+          "normalized/lae_malaita/2026-03-28/lae_malaita_unknown_sender_gap_report_36acd00bd62151f7.json"
+        ]
+      }
+    ],
+    "strongest_sections": [
+      {
+        "section_slug": "unknown_section",
+        "events_count": 42,
+        "risk_count": 8,
+        "strength_count": 34,
+        "neutral_count": 0,
+        "avg_signal_strength": 2.69,
+        "pressure_score": -18.0,
+        "event_kinds": {
+          "gap_report": 8,
+          "strength_report": 34
+        },
+        "top_keywords": [
+          [
+            "0",
+            42
+          ],
+          [
+            "03",
+            42
+          ],
+          [
+            "2026",
+            42
+          ],
+          [
+            "24t15",
+            42
+          ],
+          [
+            "active",
+            42
+          ],
+          [
+            "date",
+            42
+          ],
+          [
+            "description",
+            42
+          ],
+          [
+            "identified",
+            42
+          ],
+          [
+            "in",
+            42
+          ],
+          [
+            "is",
+            42
+          ]
+        ],
+        "sample_sources": [
+          "normalized/lae_malaita/2026-03-26/lae_malaita_unknown_sender_gap_report_1464f975a549f2fd.json",
+          "normalized/lae_malaita/2026-03-26/lae_malaita_unknown_sender_gap_report_1471d2ada3bead68.json",
+          "normalized/lae_malaita/2026-03-27/lae_malaita_unknown_sender_gap_report_1464f975a549f2fd.json",
+          "normalized/lae_malaita/2026-03-27/lae_malaita_unknown_sender_gap_report_1471d2ada3bead68.json",
+          "normalized/lae_malaita/2026-03-28/lae_malaita_unknown_sender_gap_report_36acd00bd62151f7.json"
+        ]
+      },
+      {
+        "section_slug": "assisting_cashier",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 3.5,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "gap_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_gap_report_4cf8f16148bf8aa0.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_gap_report_9f0f2ff854c889e3.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_gap_report_4cf8f16148bf8aa0.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_gap_report_9f0f2ff854c889e3.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_gap_report_8d2a112bf5ace49c.json"
+        ]
+      },
+      {
+        "section_slug": "monitoring",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 2.5,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "monitoring_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_07b38181399af3e8.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_a77bfab78c4c25f8.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_07b38181399af3e8.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_a77bfab78c4c25f8.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_monitoring_report_07111f19388a3d87.json"
+        ]
+      },
+      {
+        "section_slug": "monitoring_stuff_and_rails",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 3.5,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "monitoring_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_7331a919d4f94877.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_99a11392050b2183.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_7331a919d4f94877.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_99a11392050b2183.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_monitoring_report_7f4e8b7c4cfeabdf.json"
+        ]
+      },
+      {
+        "section_slug": "pricing_clark",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 4.0,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "pricing_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_pricing_report_9e6ebc230e28da81.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_pricing_report_be4b68675b425072.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_pricing_report_9e6ebc230e28da81.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_pricing_report_be4b68675b425072.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_pricing_report_762b9a201cc9452f.json"
+        ]
+      }
+    ],
+    "sections": [
+      {
+        "section_slug": "pricing_clark",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 4.0,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "pricing_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_pricing_report_9e6ebc230e28da81.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_pricing_report_be4b68675b425072.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_pricing_report_9e6ebc230e28da81.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_pricing_report_be4b68675b425072.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_pricing_report_762b9a201cc9452f.json"
+        ]
+      },
+      {
+        "section_slug": "assisting_cashier",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 3.5,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "gap_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_gap_report_4cf8f16148bf8aa0.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_gap_report_9f0f2ff854c889e3.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_gap_report_4cf8f16148bf8aa0.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_gap_report_9f0f2ff854c889e3.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_gap_report_8d2a112bf5ace49c.json"
+        ]
+      },
+      {
+        "section_slug": "monitoring_stuff_and_rails",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 3.5,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "monitoring_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_7331a919d4f94877.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_99a11392050b2183.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_7331a919d4f94877.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_99a11392050b2183.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_monitoring_report_7f4e8b7c4cfeabdf.json"
+        ]
+      },
+      {
+        "section_slug": "monitoring",
+        "events_count": 6,
+        "risk_count": 6,
+        "strength_count": 0,
+        "neutral_count": 0,
+        "avg_signal_strength": 2.5,
+        "pressure_score": 12.0,
+        "event_kinds": {
+          "monitoring_report": 6
+        },
+        "top_keywords": [
+          [
+            "0",
+            6
+          ],
+          [
+            "03",
+            6
+          ],
+          [
+            "2026",
+            6
+          ],
+          [
+            "24t15",
+            6
+          ],
+          [
+            "74",
+            6
+          ],
+          [
+            "a",
+            6
+          ],
+          [
+            "active",
+            6
+          ],
+          [
+            "advisory",
+            6
+          ],
+          [
+            "advisory_2026",
+            6
+          ],
+          [
+            "advisory_report",
+            6
+          ]
+        ],
+        "sample_sources": [
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_07b38181399af3e8.json",
+          "normalized/waigani/2026-03-26/waigani_unknown_sender_monitoring_report_a77bfab78c4c25f8.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_07b38181399af3e8.json",
+          "normalized/waigani/2026-03-27/waigani_unknown_sender_monitoring_report_a77bfab78c4c25f8.json",
+          "normalized/waigani/2026-03-28/waigani_unknown_sender_monitoring_report_07111f19388a3d87.json"
+        ]
+      },
+      {
+        "section_slug": "unknown_section",
+        "events_count": 42,
+        "risk_count": 8,
+        "strength_count": 34,
+        "neutral_count": 0,
+        "avg_signal_strength": 2.69,
+        "pressure_score": -18.0,
+        "event_kinds": {
+          "gap_report": 8,
+          "strength_report": 34
+        },
+        "top_keywords": [
+          [
+            "0",
+            42
+          ],
+          [
+            "03",
+            42
+          ],
+          [
+            "2026",
+            42
+          ],
+          [
+            "24t15",
+            42
+          ],
+          [
+            "active",
+            42
+          ],
+          [
+            "date",
+            42
+          ],
+          [
+            "description",
+            42
+          ],
+          [
+            "identified",
+            42
+          ],
+          [
+            "in",
+            42
+          ],
+          [
+            "is",
+            42
+          ]
+        ],
+        "sample_sources": [
+          "normalized/lae_malaita/2026-03-26/lae_malaita_unknown_sender_gap_report_1464f975a549f2fd.json",
+          "normalized/lae_malaita/2026-03-26/lae_malaita_unknown_sender_gap_report_1471d2ada3bead68.json",
+          "normalized/lae_malaita/2026-03-27/lae_malaita_unknown_sender_gap_report_1464f975a549f2fd.json",
+          "normalized/lae_malaita/2026-03-27/lae_malaita_unknown_sender_gap_report_1471d2ada3bead68.json",
+          "normalized/lae_malaita/2026-03-28/lae_malaita_unknown_sender_gap_report_36acd00bd62151f7.json"
+        ]
+      }
+    ]
+  },
+  "diagnostics": {
+    "primary_inventory_risk": "pricing_clark",
+    "top_opportunity": "unknown_section",
+    "recommended_actions": [
+      "Supervisor should inspect inventory availability in section: pricing_clark.",
+      "Review rail readiness, stock depth, and presentation in high-pressure sections.",
+      "Check whether pricing flow is slowing item availability or floor readiness."
+    ]
+  }
+}

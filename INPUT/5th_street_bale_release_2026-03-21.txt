@@ -1,0 +1,60 @@
+📦 DAILY BALE RELEASE SUMMARY
+
+Branch: TTC 5TH STREET
+Date: 2026-03-21
+Day: Saturday
+
+BALE DETAILS
+
+1. Bale No: 1
+Item: original_shorts_2
+Weight: 40kg
+Quantity: 161
+Amount: 2094.00
+
+2. Bale No: 2
+Item: cargo_shorts
+Weight: 40kg
+Quantity: 104
+Amount: 3904.00
+
+3. Bale No: 3
+Item: hawai_shirts
+Weight: 40kg
+Quantity: 209
+Amount: 2652.00
+
+4. Bale No: 4
+Item: army_clothing
+Weight: 40kg
+Quantity: 82
+Amount: 2134.00
+
+5. Bale No: 5
+Item: ladies_cotton_pants
+Weight: 40kg
+Quantity: 121
+Amount: 984.00
+
+6. Bale No: 6
+Item: mix_shoes
+Weight: 25kg
+Quantity: 50
+Amount: 972.00
+
+7. Bale No: 7
+Item: mens_shorts_xl
+Weight: 40kg
+Quantity: 111
+Amount: 1646.00
+
+SUMMARY
+
+Total Bales: 7
+Bales Released to Rail: 7
+Bales Not Yet Released: 0
+Total Quantity: 838
+Total Amount: 14386.00
+
+Prepared by: Rhoda Frank
+Role: Supervisor

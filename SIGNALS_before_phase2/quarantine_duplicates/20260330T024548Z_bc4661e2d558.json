@@ -1,0 +1,15 @@
+{
+  "status": "duplicate",
+  "sha256": "bc4661e2d558562f03fcd2143b1dca333006f55771e58fdf745720853093952e",
+  "ingested_at": "2026-03-30T02:45:48Z",
+  "existing_meta": {
+    "status": "accepted",
+    "classifier": "DAY-END SALES REPORT",
+    "report_type": "sales_report",
+    "branch": "waigani",
+    "date": "26/03/26",
+    "output_file": "/home/clawadmin/.openclaw/workspace/ioi-colony/SIGNALS/normalized/waigani/waigani_sales_report_2026-03-26.json",
+    "ingested_at": "2026-03-29T11:57:12Z"
+  },
+  "raw_text": "DAY-END SALES REPORT\n\nBranch: waigani\nDate: 26/03/26\n\nZ Reading: 0\nCash Sales: 0\nEFTPOS Sales: 0\n\nTotal Customers (Traffic): 0\nCustomers Served: 0\n\nStaff on Duty: 0\n\nCash Variance: 0\nOver/Short Reason: NONE\n\nSupervisor Confirmed: YES\nNotes: Initial test file\n"
+}

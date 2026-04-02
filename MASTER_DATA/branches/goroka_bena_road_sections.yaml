@@ -1,0 +1,78 @@
+branch: GOROKA_BENA_ROAD
+location: GOROKA
+
+sections:
+  - id: 1
+    name: shoe_shop
+    items:
+      - cotton_shopping_bags
+      - hand_bags
+      - toys
+      - household_rummage_small
+      - socks
+      - canvas_shoes
+      - sandals
+
+  - id: 2
+    name: kids_girls_ladies_dresses_jackets
+    items:
+      - kids_girls_clothing
+      - jackets
+      - reflectors_vests
+      - ladies_dresses
+
+  - id: 3
+    name: creme_mens_tshirt_flannel_new_stock
+    items:
+      - army
+      - workwear
+      - reflectors_creme
+      - creme_clothing
+      - new_stock_distribution
+
+  - id: 4
+    name: kids_boys_section
+    items:
+      - kids_boys_clothing
+
+  - id: 5
+    name: beddings_section
+    items:
+      - comforters
+      - bedsheets
+      - bed_covers
+      - pillow_covers
+      - quilt_covers
+      - baby_blanket
+      - soft_blanket
+      - blankets
+      - household_rummage
+
+  - id: 6
+    name: ladies_tops_jeans_section
+    items:
+      - ladies_tshirts
+      - ladies_jeans
+      - three_quarter_jeans
+
+  - id: 7
+    name: men_section
+    items:
+      - polo_shorts
+      - surfing_shorts
+      - mens_shorts
+      - cotton_pants
+      - office_pants
+
+  - id: 8
+    name: ladies_bottoms_section
+    items:
+      - ladies_skirts
+      - ladies_shorts
+      - three_quarter_pants
+      - leggings
+      - sexy_shorts
+      - ladies_bra
+
+meta:
+  source: floor_plan

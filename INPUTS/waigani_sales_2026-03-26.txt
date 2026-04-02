@@ -1,0 +1,19 @@
+DAY-END SALES REPORT
+
+Branch: waigani
+Date: 26/03/26
+
+Z Reading: 0
+Cash Sales: 0
+EFTPOS Sales: 0
+
+Total Customers (Traffic): 0
+Customers Served: 0
+
+Staff on Duty: 0
+
+Cash Variance: 0
+Over/Short Reason: NONE
+
+Supervisor Confirmed: YES
+Notes: Initial test file

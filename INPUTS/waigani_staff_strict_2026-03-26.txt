@@ -1,0 +1,14 @@
+STAFF PERFORMANCE REPORT
+
+Branch: waigani
+Date: 26/03/26
+
+Staff Name: Milford
+Section: mens_tshirt
+Arrangement: 5
+Display: 5
+Performance: 5
+Customers Assisted: 8
+Items Moved: 12
+
+Notes: Initial test file

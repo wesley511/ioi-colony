@@ -1,0 +1,45 @@
+TTC 5th Street branch
+Date: 26/03/26
+
+DAY-END SALES REPORT
+Till#1: Main Shop
+Cashier:Imelda Patrick
+Assistant: Joyce
+T/Cash:K2,627.00
+T/Card: K949.00
+Z/Reading: K3,576.00
+Balance:Yes
+
+TOTALS
+Total Cash: K2,627.00
+Total Card: K949.00
+Total Sales: K3,576.00
+
+CUSTOMER COUNT
+Main Door: 296
+Guest/customer serve: 113
+
+ADDITIONAL INFORMATION.
+
+*Sales per labor hours =K35.10
+
+*Sale per customer:= K31.70
+
+*Conversion rate:= 38.20%
+
+--------------------------------
+
+Supervisor Control Summary
+Date: 21/03/26
+Branch: 5th Street
+Supervisor: Joyce (acting)
+
+Cash variance: No
+Staffing issues: Yes
+Stock issues affecting sales: No
+Pricing or system issues:NO
+
+Exceptions escalated to Ops Manager:
+
+Supervisor confirmation:
+All material issues have been escalated.

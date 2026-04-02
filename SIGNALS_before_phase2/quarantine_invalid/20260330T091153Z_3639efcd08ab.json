@@ -1,0 +1,11 @@
+{
+  "status": "rejected",
+  "classifier_line": "Hi",
+  "report_type": null,
+  "reasons": [
+    "Unknown classifier line: Hi"
+  ],
+  "sha256": "3639efcd08abb273b1619e82e78c29a7df02c1051b1820e99fc395dcaa3326b8",
+  "ingested_at": "2026-03-30T09:11:53Z",
+  "raw_text": "Hi"
+}

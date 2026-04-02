@@ -1,0 +1,434 @@
+- source_file: SIGNALS/bales/goroka_bena_road_2026-03-22.yaml
+  branch: GOROKA_BENA_ROAD
+  date: '2026-03-22'
+  mapped_items:
+  - item_name: mix_clothing
+    qty: 153
+    value: 1388.0
+    section_id: 2
+    section_name: kids_girls_ladies_dresses_jackets
+    confidence: 0.25
+  - item_name: mix_clothing
+    qty: 159
+    value: 1432.0
+    section_id: 2
+    section_name: kids_girls_ladies_dresses_jackets
+    confidence: 0.25
+  - item_name: mix_clothing
+    qty: 161
+    value: 1384.0
+    section_id: 2
+    section_name: kids_girls_ladies_dresses_jackets
+    confidence: 0.25
+  - item_name: mix_clothing
+    qty: 159
+    value: 1517.0
+    section_id: 2
+    section_name: kids_girls_ladies_dresses_jackets
+    confidence: 0.25
+  section_totals:
+  - section_id: 2
+    section_name: kids_girls_ladies_dresses_jackets
+    qty: 632
+    value: 5721.0
+    items:
+    - mix_clothing
+    - mix_clothing
+    - mix_clothing
+    - mix_clothing
+- source_file: SIGNALS/bales/lae_5th_street_2026-03-22.yaml
+  branch: LAE_5TH_STREET
+  date: '2026-03-22'
+  mapped_items:
+  - item_name: original_shorts_2
+    qty: 156
+    value: 2237.0
+    section_id: 8
+    section_name: mens_shorts
+    confidence: 1.0
+  - item_name: soft_toys
+    qty: 57
+    value: 276.0
+    section_id: 5
+    section_name: shoes_sandals_toys
+    confidence: 1.0
+  - item_name: mens_tshirt_ss
+    qty: 189
+    value: 2271.0
+    section_id: 1
+    section_name: mens_tshirt_roundneck_collar
+    confidence: 1.0
+  - item_name: flannel_blouse
+    qty: 155
+    value: 1656.0
+    section_id: 3
+    section_name: ladies_silk_blouse_tshirt
+    confidence: 1.0
+  - item_name: ladies_pants
+    qty: 80
+    value: 469.0
+    section_id: 4
+    section_name: ladies_capri_colored_jeans
+    confidence: 1.0
+  section_totals:
+  - section_id: 1
+    section_name: mens_tshirt_roundneck_collar
+    qty: 189
+    value: 2271.0
+    items:
+    - mens_tshirt_ss
+  - section_id: 8
+    section_name: mens_shorts
+    qty: 156
+    value: 2237.0
+    items:
+    - original_shorts_2
+  - section_id: 3
+    section_name: ladies_silk_blouse_tshirt
+    qty: 155
+    value: 1656.0
+    items:
+    - flannel_blouse
+  - section_id: 4
+    section_name: ladies_capri_colored_jeans
+    qty: 80
+    value: 469.0
+    items:
+    - ladies_pants
+  - section_id: 5
+    section_name: shoes_sandals_toys
+    qty: 57
+    value: 276.0
+    items:
+    - soft_toys
+- source_file: SIGNALS/bales/lae_5th_street_2026-03-23.yaml
+  branch: LAE_5TH_STREET
+  date: '2026-03-23'
+  mapped_items:
+  - item_name: boys_tshirt_ss
+    qty: 316
+    value: 1969.0
+    section_id: 1
+    section_name: mens_tshirt_roundneck_collar
+    confidence: 1.0
+  - item_name: mix_shoes_a
+    qty: 49
+    value: 1146.0
+    section_id: 5
+    section_name: shoes_sandals_toys
+    confidence: 1.0
+  - item_name: children_rummage
+    qty: 449
+    value: 1507.0
+    section_id: 6
+    section_name: baby_light_rummage
+    confidence: 1.0
+  - item_name: mens_tshirt_big_size
+    qty: 154
+    value: 1569.0
+    section_id: 1
+    section_name: mens_tshirt_roundneck_collar
+    confidence: 1.0
+  - item_name: towel
+    qty: 81
+    value: 1879.0
+    section_id: 7
+    section_name: beddings_kitchen_small
+    confidence: 1.0
+  section_totals:
+  - section_id: 1
+    section_name: mens_tshirt_roundneck_collar
+    qty: 470
+    value: 3538.0
+    items:
+    - boys_tshirt_ss
+    - mens_tshirt_big_size
+  - section_id: 7
+    section_name: beddings_kitchen_small
+    qty: 81
+    value: 1879.0
+    items:
+    - towel
+  - section_id: 6
+    section_name: baby_light_rummage
+    qty: 449
+    value: 1507.0
+    items:
+    - children_rummage
+  - section_id: 5
+    section_name: shoes_sandals_toys
+    qty: 49
+    value: 1146.0
+    items:
+    - mix_shoes_a
+- source_file: SIGNALS/bales/lae_malaita_2026-03-22.yaml
+  branch: LAE_MALAITA
+  date: '2026-03-22'
+  mapped_items:
+  - item_name: original_shorts
+    qty: 193
+    value: 4374.0
+    section_id: 1
+    section_name: mens_shorts
+    confidence: 0.4
+  - item_name: soft_toys
+    qty: 52
+    value: 303.0
+    section_id: 24
+    section_name: shoe_shop
+    confidence: 1.0
+  - item_name: mens_tshirt_ss
+    qty: 299
+    value: 1841.0
+    section_id: 6
+    section_name: mens_tshirts
+    confidence: 0.4
+  - item_name: children_rummage
+    qty: 466
+    value: 1157.0
+    section_id: 2
+    section_name: kids_shorts
+    confidence: 0.25
+  - item_name: slippers
+    qty: 79
+    value: 660.0
+    section_id: 24
+    section_name: shoe_shop
+    confidence: 1.0
+  section_totals:
+  - section_id: 1
+    section_name: mens_shorts
+    qty: 193
+    value: 4374.0
+    items:
+    - original_shorts
+  - section_id: 6
+    section_name: mens_tshirts
+    qty: 299
+    value: 1841.0
+    items:
+    - mens_tshirt_ss
+  - section_id: 2
+    section_name: kids_shorts
+    qty: 466
+    value: 1157.0
+    items:
+    - children_rummage
+  - section_id: 24
+    section_name: shoe_shop
+    qty: 131
+    value: 963.0
+    items:
+    - soft_toys
+    - slippers
+- source_file: SIGNALS/bales/lae_malaita_2026-03-23.yaml
+  branch: LAE_MALAITA
+  date: '2026-03-23'
+  mapped_items:
+  - item_name: children_shorts
+    qty: 218
+    value: 2966.0
+    section_id: 2
+    section_name: kids_shorts
+    confidence: 1.0
+  - item_name: terigal_skirt
+    qty: 181
+    value: 3140.0
+    section_id: 14
+    section_name: ladies_skirt_denim_skirt
+    confidence: 0.4
+  - item_name: baby_army
+    qty: 436
+    value: 2828.0
+    section_id: 10
+    section_name: kids_girls_tshirt_baby_overalls
+    confidence: 0.4
+  - item_name: towel
+    qty: 72
+    value: 1896.0
+    section_id: 23
+    section_name: household_rummage
+    confidence: 1.0
+  - item_name: ladies_sports_tshirt
+    qty: 289
+    value: 1626.0
+    section_id: 13
+    section_name: ladies_tshirt_hanger_items
+    confidence: 0.3
+  section_totals:
+  - section_id: 14
+    section_name: ladies_skirt_denim_skirt
+    qty: 181
+    value: 3140.0
+    items:
+    - terigal_skirt
+  - section_id: 2
+    section_name: kids_shorts
+    qty: 218
+    value: 2966.0
+    items:
+    - children_shorts
+  - section_id: 10
+    section_name: kids_girls_tshirt_baby_overalls
+    qty: 436
+    value: 2828.0
+    items:
+    - baby_army
+  - section_id: 23
+    section_name: household_rummage
+    qty: 72
+    value: 1896.0
+    items:
+    - towel
+  - section_id: 13
+    section_name: ladies_tshirt_hanger_items
+    qty: 289
+    value: 1626.0
+    items:
+    - ladies_sports_tshirt
+- source_file: SIGNALS/bales/waigani_2026-03-22.yaml
+  branch: WAIGANI
+  date: '2026-03-22'
+  mapped_items:
+  - item_name: ladies_tshirt_xl
+    qty: 197
+    value: 916.0
+    section_id: 18
+    section_name: ladies_tshirt
+    confidence: 1.0
+  - item_name: osh
+    qty: 224
+    value: 2437.0
+    section_id: 8
+    section_name: mens_shorts
+    confidence: 1.0
+  - item_name: osh
+    qty: 235
+    value: 2207.0
+    section_id: 8
+    section_name: mens_shorts
+    confidence: 1.0
+  - item_name: ladies_tshirt_xl
+    qty: 166
+    value: 807.0
+    section_id: 18
+    section_name: ladies_tshirt
+    confidence: 1.0
+  - item_name: bed_cover
+    qty: 37
+    value: 915.0
+    section_id: 21
+    section_name: beddings
+    confidence: 1.0
+  - item_name: premium_dress
+    qty: 93
+    value: 514.0
+    section_id: 16
+    section_name: ladies_dress
+    confidence: 1.0
+  - item_name: jumpsuit_creme
+    qty: 89
+    value: 511.0
+    section_id: 16
+    section_name: ladies_dress
+    confidence: 1.0
+  section_totals:
+  - section_id: 8
+    section_name: mens_shorts
+    qty: 459
+    value: 4644.0
+    items:
+    - osh
+    - osh
+  - section_id: 18
+    section_name: ladies_tshirt
+    qty: 363
+    value: 1723.0
+    items:
+    - ladies_tshirt_xl
+    - ladies_tshirt_xl
+  - section_id: 16
+    section_name: ladies_dress
+    qty: 182
+    value: 1025.0
+    items:
+    - premium_dress
+    - jumpsuit_creme
+  - section_id: 21
+    section_name: beddings
+    qty: 37
+    value: 915.0
+    items:
+    - bed_cover
+- source_file: SIGNALS/bales/waigani_2026-03-23.yaml
+  branch: WAIGANI
+  date: '2026-03-23'
+  mapped_items:
+  - item_name: osh
+    qty: 224
+    value: 2031.0
+    section_id: 8
+    section_name: mens_shorts
+    confidence: 1.0
+  - item_name: towel
+    qty: 82
+    value: 1812.0
+    section_id: 24
+    section_name: towels
+    confidence: 1.0
+  - item_name: chsh
+    qty: 380
+    value: 2692.0
+    section_id: 2
+    section_name: childrens_shorts_boys_pants
+    confidence: 1.0
+  - item_name: mini_skirt
+    qty: 174
+    value: 956.0
+    section_id: 11
+    section_name: ladies_skirts
+    confidence: 1.0
+  - item_name: premium_dress
+    qty: 93
+    value: 707.0
+    section_id: 16
+    section_name: ladies_dress
+    confidence: 1.0
+  - item_name: jumpsuit_creme
+    qty: 89
+    value: 654.0
+    section_id: 16
+    section_name: ladies_dress
+    confidence: 1.0
+  section_totals:
+  - section_id: 2
+    section_name: childrens_shorts_boys_pants
+    qty: 380
+    value: 2692.0
+    items:
+    - chsh
+  - section_id: 8
+    section_name: mens_shorts
+    qty: 224
+    value: 2031.0
+    items:
+    - osh
+  - section_id: 24
+    section_name: towels
+    qty: 82
+    value: 1812.0
+    items:
+    - towel
+  - section_id: 16
+    section_name: ladies_dress
+    qty: 182
+    value: 1361.0
+    items:
+    - premium_dress
+    - jumpsuit_creme
+  - section_id: 11
+    section_name: ladies_skirts
+    qty: 174
+    value: 956.0
+    items:
+    - mini_skirt

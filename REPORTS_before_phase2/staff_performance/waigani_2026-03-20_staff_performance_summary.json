@@ -1,0 +1,1221 @@
+{
+  "summary_type": "staff_performance_summary",
+  "branch": "waigani",
+  "report_date": "2026-03-20",
+  "branches_seen": [
+    "waigani"
+  ],
+  "dates_seen": [
+    "2026-03-20"
+  ],
+  "totals": {
+    "events_count": 25,
+    "staff_count": 25,
+    "section_count": 6,
+    "overall_avg_score": 4.76,
+    "overall_band": "strong"
+  },
+  "dimensions": {
+    "averages": {
+      "arrangement": 4.57,
+      "display": 4.71,
+      "performance": 4.76
+    },
+    "strongest_dimension": "performance",
+    "weakest_dimension": "arrangement",
+    "weak_dimension_counts": {},
+    "strong_dimension_counts": {
+      "performance": 25,
+      "arrangement": 14,
+      "display": 14
+    }
+  },
+  "staff": {
+    "staff_count": 25,
+    "events_count": 25,
+    "top_staff": [
+      {
+        "staff_id": "STAFF-WAIGANI-AGNES",
+        "staff_name": "agnes",
+        "staff_name_raw": "AGNES",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_e7bd448b40ac03cb.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-ALICE",
+        "staff_name": "alice",
+        "staff_name_raw": "ALICE .",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_affe6248d99e5f98.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-ANITA",
+        "staff_name": "anita",
+        "staff_name_raw": "ANITA",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_12600e57bc05cc6e.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-BETHSIAN",
+        "staff_name": "bethsian",
+        "staff_name_raw": "BETHSIAN",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "ladies",
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 1.0,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_d1c285d7a44d1ef8.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-DAVID",
+        "staff_name": "david",
+        "staff_name_raw": "DAVID",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_2801fc2c2e61a369.json"
+        ]
+      }
+    ],
+    "bottom_staff": [
+      {
+        "staff_id": "STAFF-WAIGANI-DEBRAH",
+        "staff_name": "debrah",
+        "staff_name_raw": "DEBRAH",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "ladies",
+        "arrangement_avg": 4.0,
+        "display_avg": 4.0,
+        "performance_avg": 4.0,
+        "overall_avg": 4.0,
+        "overall_band": "acceptable",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "acceptable": 1
+        },
+        "confidence_avg": 1.0,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_24c02ce8f83c500c.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-EPU_YASA",
+        "staff_name": "epu_yasa",
+        "staff_name_raw": "EPU YASA",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": 4.0,
+        "display_avg": 4.0,
+        "performance_avg": 4.0,
+        "overall_avg": 4.0,
+        "overall_band": "acceptable",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "acceptable": 1
+        },
+        "confidence_avg": 0.75,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_5eff4b21e5bb4e91.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-FLORIDA",
+        "staff_name": "florida",
+        "staff_name_raw": "FLORIDA",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": 4.0,
+        "display_avg": 4.0,
+        "performance_avg": 4.0,
+        "overall_avg": 4.0,
+        "overall_band": "acceptable",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "acceptable": 1
+        },
+        "confidence_avg": 0.75,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_ec0a73e6d63b4384.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-MITEGE",
+        "staff_name": "mitege",
+        "staff_name_raw": "MITEGE",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 4.0,
+        "overall_avg": 4.0,
+        "overall_band": "acceptable",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "acceptable": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_27344e8bfe1f9d1c.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-GASSI",
+        "staff_name": "gassi",
+        "staff_name_raw": "GASSI",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": 4.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.75,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_4c3d981e4c552b2b.json"
+        ]
+      }
+    ],
+    "staff_members": [
+      {
+        "staff_id": "STAFF-WAIGANI-AGNES",
+        "staff_name": "agnes",
+        "staff_name_raw": "AGNES",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_e7bd448b40ac03cb.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-ALICE",
+        "staff_name": "alice",
+        "staff_name_raw": "ALICE .",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_affe6248d99e5f98.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-ANITA",
+        "staff_name": "anita",
+        "staff_name_raw": "ANITA",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_12600e57bc05cc6e.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-BETHSIAN",
+        "staff_name": "bethsian",
+        "staff_name_raw": "BETHSIAN",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "ladies",
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 1.0,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_d1c285d7a44d1ef8.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-DAVID",
+        "staff_name": "david",
+        "staff_name_raw": "DAVID",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_2801fc2c2e61a369.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-DEBRAH",
+        "staff_name": "debrah",
+        "staff_name_raw": "DEBRAH",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "ladies",
+        "arrangement_avg": 4.0,
+        "display_avg": 4.0,
+        "performance_avg": 4.0,
+        "overall_avg": 4.0,
+        "overall_band": "acceptable",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "acceptable": 1
+        },
+        "confidence_avg": 1.0,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_24c02ce8f83c500c.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-EPU_YASA",
+        "staff_name": "epu_yasa",
+        "staff_name_raw": "EPU YASA",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": 4.0,
+        "display_avg": 4.0,
+        "performance_avg": 4.0,
+        "overall_avg": 4.0,
+        "overall_band": "acceptable",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "acceptable": 1
+        },
+        "confidence_avg": 0.75,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_5eff4b21e5bb4e91.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-FLORIDA",
+        "staff_name": "florida",
+        "staff_name_raw": "FLORIDA",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": 4.0,
+        "display_avg": 4.0,
+        "performance_avg": 4.0,
+        "overall_avg": 4.0,
+        "overall_band": "acceptable",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "acceptable": 1
+        },
+        "confidence_avg": 0.75,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_ec0a73e6d63b4384.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-GASSI",
+        "staff_name": "gassi",
+        "staff_name_raw": "GASSI",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": 4.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.75,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_4c3d981e4c552b2b.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-GRACE",
+        "staff_name": "grace",
+        "staff_name_raw": "GRACE",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "mens_shoes",
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 1.0,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_53b71781f8e75413.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-HENRY",
+        "staff_name": "henry",
+        "staff_name_raw": "HENRY",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_9752f71f8ad082dc.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-KIMSON",
+        "staff_name": "kimson",
+        "staff_name_raw": "KIMSON",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "mens_cotton_pants",
+        "arrangement_avg": 4.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 1.0,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_0a065a067d8f6f80.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-MATTHEW",
+        "staff_name": "matthew",
+        "staff_name_raw": "MATTHEW",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 4.0,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.75,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_cc512558de2ab9d2.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-MICHAEL",
+        "staff_name": "michael",
+        "staff_name_raw": "MICHAEL",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_856480b6970dac76.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-MILFORD",
+        "staff_name": "milford",
+        "staff_name_raw": "MILFORD",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "boys",
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 1.0,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_ec530bca2152bac3.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-MITEGE",
+        "staff_name": "mitege",
+        "staff_name_raw": "MITEGE",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 4.0,
+        "overall_avg": 4.0,
+        "overall_band": "acceptable",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "acceptable": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_27344e8bfe1f9d1c.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-MOVIYO",
+        "staff_name": "moviyo",
+        "staff_name_raw": "MOVIYO",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_b6b1d46c5c3c5db1.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-NICK",
+        "staff_name": "nick",
+        "staff_name_raw": "NICK",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_c44acfad6936bce7.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-NIM",
+        "staff_name": "nim",
+        "staff_name_raw": "NIM",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": 4.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.75,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_93371274c09d7cb5.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-PRIVIEN",
+        "staff_name": "privien",
+        "staff_name_raw": "PRIVIEN",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_e5d3a8d795634aae.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-REBECCA",
+        "staff_name": "rebecca",
+        "staff_name_raw": "REBECCA",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "ladies",
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 1.0,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_8c2d64281042bc49.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-RICKY",
+        "staff_name": "ricky",
+        "staff_name_raw": "RICKY",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "unknown_section",
+        "arrangement_avg": null,
+        "display_avg": null,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 0.45,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_3381075ce1ce9967.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-SABILLA",
+        "staff_name": "sabilla",
+        "staff_name_raw": "SABILLA",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "ladies",
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 4.0,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 1.0,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_a3dfaed71aa8d77a.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-STANLEY",
+        "staff_name": "stanley",
+        "staff_name_raw": "STANLEY",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "mens_office_pants",
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 1.0,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_e3fb773c08ab1d4e.json"
+        ]
+      },
+      {
+        "staff_id": "STAFF-WAIGANI-XEENA",
+        "staff_name": "xeena",
+        "staff_name_raw": "XEENA",
+        "branch": "waigani",
+        "report_date": "2026-03-20",
+        "events_count": 1,
+        "section_most_seen": "ladies",
+        "arrangement_avg": 5.0,
+        "display_avg": 4.0,
+        "performance_avg": 5.0,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        },
+        "rating_bands_seen": {
+          "strong": 1
+        },
+        "confidence_avg": 1.0,
+        "source_files": [
+          "normalized/waigani/2026-03-20/waigani_unknown_sender_staff_performance_2d66dfaecd569284.json"
+        ]
+      }
+    ]
+  },
+  "sections": {
+    "section_count": 6,
+    "weakest_sections": [
+      {
+        "section_slug": "ladies",
+        "events_count": 5,
+        "staff_count": 5,
+        "arrangement_avg": 4.8,
+        "display_avg": 4.6,
+        "performance_avg": 4.6,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 5,
+          "display": 5,
+          "performance": 5
+        }
+      },
+      {
+        "section_slug": "mens_cotton_pants",
+        "events_count": 1,
+        "staff_count": 1,
+        "arrangement_avg": 4.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        }
+      },
+      {
+        "section_slug": "unknown_section",
+        "events_count": 16,
+        "staff_count": 16,
+        "arrangement_avg": 4.2,
+        "display_avg": 4.6,
+        "performance_avg": 4.75,
+        "overall_avg": 4.75,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 16,
+          "arrangement": 5,
+          "display": 5
+        }
+      },
+      {
+        "section_slug": "mens_shoes",
+        "events_count": 1,
+        "staff_count": 1,
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        }
+      },
+      {
+        "section_slug": "boys",
+        "events_count": 1,
+        "staff_count": 1,
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        }
+      }
+    ],
+    "strongest_sections": [
+      {
+        "section_slug": "boys",
+        "events_count": 1,
+        "staff_count": 1,
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        }
+      },
+      {
+        "section_slug": "mens_office_pants",
+        "events_count": 1,
+        "staff_count": 1,
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        }
+      },
+      {
+        "section_slug": "mens_shoes",
+        "events_count": 1,
+        "staff_count": 1,
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        }
+      },
+      {
+        "section_slug": "unknown_section",
+        "events_count": 16,
+        "staff_count": 16,
+        "arrangement_avg": 4.2,
+        "display_avg": 4.6,
+        "performance_avg": 4.75,
+        "overall_avg": 4.75,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 16,
+          "arrangement": 5,
+          "display": 5
+        }
+      },
+      {
+        "section_slug": "ladies",
+        "events_count": 5,
+        "staff_count": 5,
+        "arrangement_avg": 4.8,
+        "display_avg": 4.6,
+        "performance_avg": 4.6,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 5,
+          "display": 5,
+          "performance": 5
+        }
+      }
+    ],
+    "sections": [
+      {
+        "section_slug": "ladies",
+        "events_count": 5,
+        "staff_count": 5,
+        "arrangement_avg": 4.8,
+        "display_avg": 4.6,
+        "performance_avg": 4.6,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 5,
+          "display": 5,
+          "performance": 5
+        }
+      },
+      {
+        "section_slug": "mens_cotton_pants",
+        "events_count": 1,
+        "staff_count": 1,
+        "arrangement_avg": 4.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 4.67,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        }
+      },
+      {
+        "section_slug": "unknown_section",
+        "events_count": 16,
+        "staff_count": 16,
+        "arrangement_avg": 4.2,
+        "display_avg": 4.6,
+        "performance_avg": 4.75,
+        "overall_avg": 4.75,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "performance": 16,
+          "arrangement": 5,
+          "display": 5
+        }
+      },
+      {
+        "section_slug": "mens_shoes",
+        "events_count": 1,
+        "staff_count": 1,
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        }
+      },
+      {
+        "section_slug": "boys",
+        "events_count": 1,
+        "staff_count": 1,
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        }
+      },
+      {
+        "section_slug": "mens_office_pants",
+        "events_count": 1,
+        "staff_count": 1,
+        "arrangement_avg": 5.0,
+        "display_avg": 5.0,
+        "performance_avg": 5.0,
+        "overall_avg": 5.0,
+        "overall_band": "strong",
+        "weak_dimensions": {},
+        "strong_dimensions": {
+          "arrangement": 1,
+          "display": 1,
+          "performance": 1
+        }
+      }
+    ]
+  }
+}

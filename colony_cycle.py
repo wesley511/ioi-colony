@@ -150,6 +150,21 @@ def write_alerts() -> None:
     if not processed_state.exists():
         alerts.append("LOW: processed_accepted_whatsapp.json missing")
 
+    pipeline_audit = DATA_DIR / "whatsapp_pipeline_audit.json"
+    if pipeline_audit.exists():
+        try:
+            import json
+
+            payload = json.loads(pipeline_audit.read_text(encoding="utf-8"))
+            missing = payload.get("missing_staff_branches") or []
+            latest_date = payload.get("latest_staff_report_date") or "unknown"
+            if missing:
+                alerts.append(
+                    f"MEDIUM: missing daily staff reports for {latest_date}: {', '.join(missing)}"
+                )
+        except Exception:
+            alerts.append("LOW: whatsapp_pipeline_audit.json unreadable")
+
     content = [
         "# IOI Colony Alerts",
         "",
@@ -238,6 +253,20 @@ def run_whatsapp_processor() -> None:
 
     if result.returncode != 0:
         raise RuntimeError(f"Accepted WhatsApp processor failed with exit code {result.returncode}")
+
+
+def run_whatsapp_audit() -> None:
+    auditor = BASE_DIR / "scripts" / "whatsapp_pipeline_audit.py"
+    if not auditor.exists():
+        print(f"{POST_PREFIX} Skipping: whatsapp pipeline audit (script not found)")
+        return
+
+    print(f"{POST_PREFIX} Running: whatsapp pipeline audit")
+    result = run_command([sys.executable, str(auditor)])
+    print_output(result)
+
+    if result.returncode != 0:
+        raise RuntimeError(f"WhatsApp pipeline audit failed with exit code {result.returncode}")
 
 
 def emit_staff_signals() -> None:
@@ -341,6 +370,7 @@ def main() -> int:
 
         run_sales_ingestion()
         run_whatsapp_processor()
+        run_whatsapp_audit()
 
         print(f"{POST_PREFIX} Running: staff signal emitter")
         emit_staff_signals()

@@ -1,0 +1,33 @@
+branch: LAE_5TH_STREET
+location: LAE
+date: 2026-03-22
+
+bales:
+  total: 5
+  released: 5
+  on_hold: 0
+
+totals:
+  quantity: 637
+  value: 6909
+
+items:
+  - name: original_shorts_2
+    qty: 156
+    value: 2237
+  - name: soft_toys
+    qty: 57
+    value: 276
+  - name: mens_tshirt_ss
+    qty: 189
+    value: 2271
+  - name: flannel_blouse
+    qty: 155
+    value: 1656
+  - name: ladies_pants
+    qty: 80
+    value: 469
+
+meta:
+  source: bale_report
+  prepared_by: Rhoda Frank

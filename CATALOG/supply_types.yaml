@@ -1,0 +1,9 @@
+mixed_lightweight_bale:
+  type: supply
+  source_codes:
+    - LWS_SUPA
+
+mens_mixed_bale:
+  type: supply
+  source_codes:
+    - MM_200KGS

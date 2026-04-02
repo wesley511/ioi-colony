@@ -1,179 +1,41 @@
-TTC Waigani Branch
-Date: 21/03/26 Saturday
-
-DAY-END SALES REPORT
-Till#1: Main Shop
-Cashier: Fidelma Wobilo 
-Assistant: Privian Keiby 
-
-T/Cash:K7,706.00
-T/Card: K2,964.80
-Z/Reading: K10,711.80
-Balance: K41.00 (Items return)
-
-Till#02: Main shop 
-Cashier: Dorothy Morofa 
-Assistant: David Yailo 
-
-T/Cash: K4,018.20
-T/Card: K3,049.60
-Z/Reading: K7,067.80
-Balance: OK
-
-TOTALS
-Total Cash: K11,724.20
-Total Card: K6,014.40
-Total Sales: K17,738.60
-
-CUSTOMER COUNT
-Main Door:537
-Guest/ Customer served:341
-
-ADDITIONAL INFORMATION. 
-
-Sales per labor hour= K67.30
-Sale per customer:=K52.00
-Conversion rate:=63.5%
-
-Supervisor Control Summary
+TTC 5th Street branch
 Date: 21/03/26
-Branch: Waigani
-Supervisor: Francis Ano
-
-Cash verians: K41.00
-Staffing issues:
-Stock issues affecting sales:
-Pricing or system issues:
-Exceptions escalated to Ops Manager:
-
-Supervisor confirmation:
-All material issues have been escalated.
-
-
-TTC Lae Malaita Branch
-Date: Saturday 21/03/26
 
 DAY-END SALES REPORT
 Till#1: Main Shop
-Cashier: Innah Kakimo 
-
-T/Cash: K 3,484.00
-T/Card: K 1,125.00
-Z/Reading: K 4,609.00
-Balance: Ok
-
-TOTALS
-Total Cash: K3,484.00
-Total Card: K 1,125.00
-Total Sales: K 4,609.00
-
-CUSTOMER COUNT
-Main Door: 278
-Other Entry/Guests: 173
-
-ADDITIONAL INFO
-Sales Per Labor Hour: K20.80
-Sales Per Staff:
-K177.20
-Conversion Rate:
-62.2%
-
-Supervisor Control Summary
-Date: 21/03/26
-Branch: Lae Malaita
-Supervisor: Renate Norman 
-
-Cash variance: NONE 
-Staffing issues: None 
-Stock issues affecting sales: None 
-Pricing or system issues:None
-
-Exceptions escalated to Ops Manager:
-
-1.Reminder notice regarding Manaka Security outstanding payments - Continuous follow-up 
-2. Toilet and Signboard maintenance. 
-
-Supervisor confirmation:
-All material issues have been escalated.
-
-
-TTC Bena Road Branch
-Date: 21/03/26 Saturday
-
-DAY-END SALES REPORT
-Till#1: Main Shop
-Cashier: (example_name)
-
-T/Cash: K5,200.00
-T/Card: K1,800.00
-Z/Reading: K7,000.00
-Balance: OK
+Cashier: Julie.Y
+Assistant: Rhoda
+T/Cash:K3,878.00
+T/Card: K768.00
+Z/Reading: K4,646.00
+Balance:No
 
 TOTALS
-Total Cash: K5,200.00
-Total Card: K1,800.00
-Total Sales: K7,000.00
+Total Cash: K3,878.00
+Total Card: K768.00
+Total Sales: K4,646.00
 
 CUSTOMER COUNT
-Main Door: 320
-Customer served: 210
+Main Door: 463
+Guest/customerserve: 91
 
 ADDITIONAL INFORMATION
-Sales per labor hour= K45.00
-Sale per customer:=K33.33
-Conversion rate:=65.6%
 
-Supervisor Control Summary
-Date: 21/03/26
-Branch: Bena Road
-Supervisor: (example_supervisor)
+*Sales per labor hour:K32.20
+*Sales per customer:K51.10
+*Conversion rate:19.7%
 
-Cash variance: NONE
-Staffing issues: None
-Stock issues affecting sales: None
-Pricing or system issues: None
-
-Exceptions escalated to Ops Manager:
-
-Supervisor confirmation:
-All material issues have been escalated.
-
-
-TTC 5th Street Branch
-Date: 21/03/26 Saturday
-
-DAY-END SALES REPORT
-Till#1: Main Shop
-Cashier: (example_name)
-
-T/Cash: K6,800.00
-T/Card: K2,200.00
-Z/Reading: K9,000.00
-Balance: OK
-
-TOTALS
-Total Cash: K6,800.00
-Total Card: K2,200.00
-Total Sales: K9,000.00
-
-CUSTOMER COUNT
-Main Door: 410
-Customer served: 280
-
-ADDITIONAL INFORMATION
-Sales per labor hour= K55.00
-Sale per customer:=K32.14
-Conversion rate:=68.2%
+--------------------------------
 
 Supervisor Control Summary
 Date: 21/03/26
 Branch: 5th Street
-Supervisor: (example_supervisor)
+Supervisor: Rhoda Frank
 
 Cash variance: NONE
-Staffing issues: None
-Stock issues affecting sales: None
-Pricing or system issues: None
+Staffing issues: Yes
+Stock issues affecting sales: Yes
+Pricing or system issues:NO
 
 Exceptions escalated to Ops Manager:
 

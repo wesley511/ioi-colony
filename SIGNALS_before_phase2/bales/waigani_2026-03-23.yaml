@@ -1,0 +1,36 @@
+branch: WAIGANI
+location: POM
+date: 2026-03-23
+
+bales:
+  total: 7
+  released: 7
+  on_hold: 0
+
+totals:
+  quantity: 1042
+  value: 8852
+
+items:
+  - name: osh
+    qty: 224
+    value: 2031
+  - name: towel
+    qty: 82
+    value: 1812
+  - name: chsh
+    qty: 380
+    value: 2692
+  - name: mini_skirt
+    qty: 174
+    value: 956
+  - name: premium_dress
+    qty: 93
+    value: 707
+  - name: jumpsuit_creme
+    qty: 89
+    value: 654
+
+meta:
+  source: bale_report
+  prepared_by: Moviyo Alex

@@ -1,0 +1,110 @@
+branch: WAIGANI
+location: POM
+
+sections:
+  - id: 1
+    name: shoes_and_sandals
+
+  - id: 2
+    name: childrens_shorts_boys_pants
+    items:
+      - chsh
+      - children_shorts
+      - kids_shorts
+      - boys_pants
+
+  - id: 3
+    name: mens_tshirt
+
+  - id: 4
+    name: mens_hawaiian_sports_tshirt
+
+  - id: 5
+    name: mens_cotton_pants
+
+  - id: 6
+    name: office_pants
+
+  - id: 7
+    name: six_pockets
+
+  - id: 8
+    name: mens_shorts
+    items:
+      - osh
+      - original_shorts
+      - mens_shorts
+
+  - id: 9
+    name: mens_button_shirts
+
+  - id: 10
+    name: beachwear_soccer_shorts
+
+  - id: 11
+    name: ladies_skirts
+    items:
+      - mini_skirt
+      - terigal_skirt
+      - ladies_skirt
+
+  - id: 12
+    name: ladies_shorts
+
+  - id: 13
+    name: ladies_skinny_jeans_cotton_pants
+
+  - id: 14
+    name: long_skirts
+
+  - id: 15
+    name: small_girls_shorts_pants
+
+  - id: 16
+    name: ladies_dress
+    items:
+      - premium_dress
+      - jumpsuit_creme
+      - ladies_dress
+
+  - id: 17
+    name: ladies_blouse
+
+  - id: 18
+    name: ladies_tshirt
+    items:
+      - ladies_tshirt_xl
+      - ladies_tshirt
+
+  - id: 19
+    name: household_rummage
+
+  - id: 20
+    name: ladies_sports_leggings
+
+  - id: 21
+    name: beddings
+    items:
+      - bed_cover
+      - beddings
+
+  - id: 22
+    name: army_hardyaka_pants
+
+  - id: 23
+    name: bra_sports_bra
+
+  - id: 24
+    name: towels
+    items:
+      - towel
+      - towels
+
+  - id: 25
+    name: mens_jeans
+
+  - id: 26
+    name: baby_light_rummage
+
+meta:
+  source: floor_plan

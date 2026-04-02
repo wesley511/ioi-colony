@@ -1,0 +1,11 @@
+{
+  "status": "rejected",
+  "classifier_line": "STAFF PERFORMANCE REPORT",
+  "report_type": "staff_report",
+  "reasons": [
+    "Staff block 1: invalid section boys"
+  ],
+  "sha256": "331f841a4f4cc2fd141a00b8d88c389f5ae2b4cbbe3943415b750435d91415c9",
+  "ingested_at": "2026-03-29T12:00:03Z",
+  "raw_text": "STAFF PERFORMANCE REPORT\n\nBranch: waigani\nDate: 26/03/26\n\nStaff Name: Milford\nSection: boys\nArrangement: 5\nDisplay: 5\nPerformance: 5\nCustomers Assisted: 8\nItems Moved: 12\n\nNotes: Initial test file\n"
+}

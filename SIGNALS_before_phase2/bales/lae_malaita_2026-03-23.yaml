@@ -1,0 +1,32 @@
+branch: LAE_MALAITA
+location: LAE
+date: 2026-03-23
+
+bales:
+  total: 5
+  released: 4
+  on_hold: 1
+
+totals:
+  quantity: 1196
+  value: 12456
+
+items:
+  - name: children_shorts
+    qty: 218
+    value: 2966
+  - name: terigal_skirt
+    qty: 181
+    value: 3140
+  - name: baby_army
+    qty: 436
+    value: 2828
+  - name: towel
+    qty: 72
+    value: 1896
+  - name: ladies_sports_tshirt
+    qty: 289
+    value: 1626
+
+meta:
+  source: bale_report

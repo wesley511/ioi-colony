@@ -9,6 +9,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+try:
+    from scripts.utils_normalization import normalize_branch as shared_normalize_branch
+except ModuleNotFoundError:
+    from utils_normalization import normalize_branch as shared_normalize_branch
+
+try:
+    from scripts.section_normalizer import canonical_sections as canonical_section_names, normalize_section_name
+except ModuleNotFoundError:
+    from section_normalizer import canonical_sections as canonical_section_names, normalize_section_name
+
 
 # ============================================================
 # CONFIG
@@ -67,6 +77,12 @@ DATE_RE = re.compile(r"^\d{2}/\d{2}/\d{2}$")
 TIME_RE = re.compile(r"^\d{2}:\d{2}$")
 INT_RE = re.compile(r"^-?\d+$")
 NUMBER_RE = re.compile(r"^-?\d+(?:\.\d+)?$")
+STAFF_NAME_RE = re.compile(r"^\s*\d+[\.\)]*\s*(.+?)\s*$")
+
+STAFF_FIELD_ALIASES = {
+    "Arrangements": "Arrangement",
+    "Assisting Customers": "Customers Assisted",
+}
 
 
 # ============================================================
@@ -147,7 +163,14 @@ def to_int(value: str) -> int:
 
 
 def normalize_branch(value: str) -> str:
-    return value.strip().lower().replace(" ", "_")
+    normalized = shared_normalize_branch(
+        value,
+        style="canonical_slug",
+        fallback="lower_token",
+        match_substring=False,
+        profile="literal",
+    )
+    return str(normalized or "")
 
 
 def validate_date(value: str) -> bool:
@@ -164,6 +187,18 @@ def sanitize_filename(value: str) -> str:
 
 def split_nonempty_lines(text: str) -> list[str]:
     return [line.rstrip() for line in text.splitlines() if line.strip()]
+
+
+def canonicalize_staff_field_name(key: str) -> str:
+    return STAFF_FIELD_ALIASES.get(key.strip(), key.strip())
+
+
+def parse_staff_name_line(line: str) -> str | None:
+    match = STAFF_NAME_RE.fullmatch(line.strip())
+    if not match:
+        return None
+    name = match.group(1).strip().strip(".")
+    return name or None
 
 
 def read_master_sections() -> set[str]:
@@ -204,22 +239,41 @@ def read_master_sections() -> set[str]:
 
 
 CANONICAL_SECTIONS = read_master_sections()
+CANONICAL_SECTIONS.update(canonical_section_names())
 
 
 def validate_section_name(value: str) -> bool:
-    if not value:
+    normalized = normalize_section_name(value)
+    if not normalized:
         return False
     if not CANONICAL_SECTIONS:
-        # Fallback: allow safe slug-like section names if master data is absent.
-        return bool(re.fullmatch(r"[A-Za-z0-9_]+", value))
-    return value in CANONICAL_SECTIONS
+        return bool(re.fullmatch(r"[A-Za-z0-9_]+", normalized))
+    return normalized in CANONICAL_SECTIONS or value in CANONICAL_SECTIONS
+
+
+def classifier_lookup_candidates(value: str) -> list[str]:
+    normalized = value.strip().upper()
+    normalized = normalized.replace("—", "-").replace("–", "-")
+    normalized = re.sub(r"\s+", " ", normalized).strip()
+    compact = re.sub(r"\s*-\s*", "-", normalized)
+    spaced = re.sub(r"\s*-\s*", " - ", normalized)
+    candidates = [normalized]
+    for candidate in (compact, spaced):
+        candidate = re.sub(r"\s+", " ", candidate).strip()
+        if candidate and candidate not in candidates:
+            candidates.append(candidate)
+    return candidates
 
 
 def extract_header(lines: list[str]) -> tuple[str | None, str | None, list[str]]:
     if not lines:
         return None, None, []
     first = lines[0].strip()
-    classifier = CLASSIFIERS.get(first)
+    classifier = None
+    for candidate in classifier_lookup_candidates(first):
+        classifier = CLASSIFIERS.get(candidate)
+        if classifier is not None:
+            break
     return first, classifier, lines[1:]
 
 
@@ -617,12 +671,20 @@ def validate_staff_report(lines: list[str]) -> ValidationResult:
             current = {}
 
     for line in lines:
+        staff_name_line = parse_staff_name_line(line)
+        if staff_name_line:
+            if current:
+                flush_current()
+            current["Staff Name"] = staff_name_line
+            continue
+
         kv = parse_key_value_line(line)
         if not kv:
             errors.append(f"Invalid line format: {line}")
             continue
 
         key, value = kv
+        key = canonicalize_staff_field_name(key)
 
         if key == "Branch":
             branch = normalize_branch(value)
@@ -682,8 +744,9 @@ def validate_staff_report(lines: list[str]) -> ValidationResult:
         if not staff_name:
             errors.append(f"Staff block {idx}: Staff Name cannot be empty")
 
-        if section and not validate_section_name(section):
-            errors.append(f"Staff block {idx}: invalid section {section}")
+        normalized_section = normalize_section_name(section) if section else ""
+        if not normalized_section:
+            errors.append(f"Staff block {idx}: invalid section raw={section!r} reason=not_in_dictionary")
 
         score_fields = {
             "Arrangement": arrangement,
@@ -719,7 +782,8 @@ def validate_staff_report(lines: list[str]) -> ValidationResult:
             normalized_staff.append(
                 {
                     "staff_name": staff_name,
-                    "section": section,
+                    "section": normalized_section,
+                    "raw_section": section,
                     "arrangement": int(arrangement),
                     "display": int(display),
                     "performance": int(performance),

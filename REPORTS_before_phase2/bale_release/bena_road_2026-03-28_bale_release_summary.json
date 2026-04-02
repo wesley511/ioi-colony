@@ -1,0 +1,48 @@
+{
+  "signal_type": "bale_release_summary",
+  "event_kind": "daily_bale_summary_released_to_rail",
+  "branch": "bena_road",
+  "report_date": "2026-03-28",
+  "source_file": "/home/clawadmin/.openclaw/workspace/ioi-colony/RAW_INPUT/bale_release/bena_road/2026-03-28/daily_bale_summary_released_to_rail.txt",
+  "source_format": "whatsapp_text",
+  "report_title": "📦 DAILY BALE SUMMARY – RELEASED TO RAIL",
+  "totals": {
+    "bales_broken_today": null,
+    "bales_released_today": 4,
+    "bales_pending_release": null,
+    "total_quantity": 831.0,
+    "total_amount": 10122.0,
+    "avg_price_per_piece": 12.18
+  },
+  "bales": [],
+  "notes": [
+    "Bale #\tItem Name\tTotal Qty (pcs)\tTotal Amount (K)",
+    "#01.Belt 20kg",
+    "(Qty:221)  Amt:K2,460.00",
+    "#02. Army clothing 40kg",
+    "(Qty:75)",
+    "Amt:K2,648.00",
+    "#03.Ladies crazy jeans",
+    "(Qty:95)",
+    "Amt:K882.00",
+    "#04.Mix Clothing 40kg",
+    "(Qty:152)",
+    "Amt:K1,270.00",
+    "#05.Door Mat 40kg",
+    "(Qty:96)",
+    "Amt:K1,318.00",
+    "#06.Mans night wear 40kg",
+    "(Qty:192)",
+    "Amt:K1,544",
+    "Total bales break today Six(06)",
+    "Prepared by: Elise Kiea(Pricing Clerk)",
+    "Thanks."
+  ],
+  "operational_flags": {
+    "full_release_completed": null,
+    "release_backlog": null
+  },
+  "warnings": [
+    "No bale lines were parsed from report."
+  ]
+}

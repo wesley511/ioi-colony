@@ -9,45 +9,10 @@ from typing import Any
 
 import yaml
 
-
-BRANCH_ALIASES: dict[str, list[str]] = {
-    "waigani": [
-        "waigani",
-        "ttc waigani",
-        "pom waigani",
-        "ttc pom waigani branch",
-        "ttc waigani branch",
-        "waigani branch",
-        "port moresby waigani",
-    ],
-    "bena_road": [
-        "bena road",
-        "ttc bena road",
-        "ttc bena road goroka",
-        "bena road goroka",
-        "goroka bena road",
-        "goroka",
-        "ttc goroka",
-        "ttc bena",
-    ],
-    "lae_5th_street": [
-        "lae 5th street",
-        "5th street",
-        "ttc 5th street lae",
-        "ttc lae 5th street",
-        "lae fifth street",
-        "fifth street lae",
-    ],
-    "lae_malaita": [
-        "lae malaita",
-        "malaita",
-        "malaita street",
-        "lae malaita street",
-        "ttc malaita",
-        "ttc lae malaita",
-    ],
-}
-
+try:
+    from scripts.utils_normalization import normalize_branch as shared_normalize_branch
+except ModuleNotFoundError:
+    from utils_normalization import normalize_branch as shared_normalize_branch
 
 def utc_today_iso() -> str:
     return datetime.now(timezone.utc).date().isoformat()
@@ -95,24 +60,13 @@ def extract_line_value(text: str, *labels: str) -> str | None:
 def normalize_branch(raw_branch: str | None) -> str:
     if not raw_branch:
         return "unknown"
-
-    value = normalize_spaces(raw_branch).lower()
-    value = value.replace("&", " and ")
-    value = re.sub(r"\bbranch\b", " ", value)
-    value = re.sub(r"\bttc\b", " ", value)
-    value = re.sub(r"\bpom\b", " port moresby ", value)
-    value = normalize_spaces(value)
-
-    for canonical, aliases in BRANCH_ALIASES.items():
-        if value == canonical:
-            return canonical
-        for alias in aliases:
-            alias_norm = normalize_spaces(alias).lower()
-            if alias_norm in value or value in alias_norm:
-                return canonical
-
-    compact = slugify(value)
-    return compact or "unknown"
+    normalized = shared_normalize_branch(
+        raw_branch,
+        style="canonical_slug",
+        fallback="slugify",
+        match_substring=True,
+    )
+    return str(normalized or "unknown")
 
 
 def extract_branch(text: str) -> str:
@@ -468,6 +422,7 @@ def parse_bale_summary(text: str) -> dict[str, Any]:
     return {
         "type": "bale_release_summary",
         "branch": branch,
+        "branch_slug": branch,
         "date": signal_date,
         "summary": {
             "total_bales": effective_total_bales,
