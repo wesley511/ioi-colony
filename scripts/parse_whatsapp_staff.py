@@ -255,6 +255,10 @@ def record_to_markdown(rec: StaffRecord) -> str:
         f"performance: {'' if rec.performance is None else rec.performance}",
         f"items_moved: {items_moved}",
         f"confidence: {confidence:.2f}",
+        "warning_count: 0",
+        "inferred_field_count: 1",
+        "validation_lane: accepted",
+        "confidence_score: ",
         f"summary: {narrative_summary(rec)}",
     ]
     return "\n".join(lines) + "\n"

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -56,7 +57,92 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def is_staff_performance_file(path: Path) -> bool:
-    return path.is_file() and path.suffix == ".json" and "staff_performance" in path.name
+    if not path.is_file() or path.suffix != ".json":
+        return False
+    return "staff_performance" in path.name or "staff_report" in path.name
+
+
+def normalize_report_date(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return "unknown-date"
+    for src, dest in (
+        (r"^(\d{4}-\d{2}-\d{2})$", r"\1"),
+        (r"^(\d{2})/(\d{2})/(\d{2})$", None),
+    ):
+        match = re.fullmatch(src, text)
+        if not match:
+            continue
+        if dest is not None:
+            return match.group(1)
+        day, month, year = match.groups()
+        return f"20{year}-{month}-{day}"
+    return text
+
+
+def build_staff_event_from_scores(
+    *,
+    path: Path,
+    branch: str,
+    branch_slug: str,
+    report_date: str,
+    staff_id: str,
+    staff_name: str,
+    staff_name_raw: str | None,
+    section_slug: str,
+    section_name_raw: str | None,
+    arrangement: float | None,
+    display: float | None,
+    performance: float | None,
+    confidence: float | None,
+    raw: dict[str, Any],
+) -> StaffEvent:
+    values = [v for v in [arrangement, display, performance] if v is not None]
+    average_score = round(mean(values), 2) if values else None
+
+    if average_score is None:
+        rating_band = None
+    elif average_score >= 4.5:
+        rating_band = "strong"
+    elif average_score >= 3.5:
+        rating_band = "acceptable"
+    else:
+        rating_band = "weak"
+
+    weak_dimensions: list[str] = []
+    strong_dimensions: list[str] = []
+    for key, value in {
+        "arrangement": arrangement,
+        "display": display,
+        "performance": performance,
+    }.items():
+        if value is None:
+            continue
+        if value >= 4 and key not in strong_dimensions:
+            strong_dimensions.append(key)
+        elif value <= 2 and key not in weak_dimensions:
+            weak_dimensions.append(key)
+
+    return StaffEvent(
+        source_file=path,
+        branch=branch,
+        branch_slug=branch_slug,
+        report_date=report_date,
+        staff_id=staff_id,
+        staff_name=staff_name,
+        staff_name_raw=staff_name_raw,
+        section_slug=section_slug or "unknown_section",
+        section_name_raw=section_name_raw,
+        arrangement=arrangement,
+        display=display,
+        performance=performance,
+        average_score=average_score,
+        rating_band=rating_band,
+        weak_dimensions=weak_dimensions,
+        strong_dimensions=strong_dimensions,
+        confidence=confidence,
+        raw=raw,
+    )
 
 
 def extract_staff_event(path: Path) -> StaffEvent | None:
@@ -149,8 +235,8 @@ def extract_staff_event(path: Path) -> StaffEvent | None:
     section_name_raw = payload.get("section_name_raw") or payload.get("section")
     confidence = safe_float(payload.get("confidence"))
 
-    return StaffEvent(
-        source_file=path,
+    return build_staff_event_from_scores(
+        path=path,
         branch=branch,
         branch_slug=branch_slug,
         report_date=report_date,
@@ -162,13 +248,51 @@ def extract_staff_event(path: Path) -> StaffEvent | None:
         arrangement=arrangement,
         display=display,
         performance=performance,
-        average_score=average_score,
-        rating_band=rating_band,
-        weak_dimensions=weak_dimensions,
-        strong_dimensions=strong_dimensions,
         confidence=confidence,
         raw=data,
     )
+
+
+def extract_staff_events(path: Path) -> list[StaffEvent]:
+    data = load_json(path)
+    signal_type = str(data.get("signal_type") or "").strip()
+
+    if signal_type == "staff_performance_report":
+        branch = str(data.get("branch") or "unknown")
+        branch_slug = resolve_branch_slug(data, path=path, candidates=[data.get("branch")])
+        report_date = normalize_report_date(data.get("date") or data.get("report_date"))
+        events: list[StaffEvent] = []
+
+        for record in data.get("staff_records", []) or []:
+            if not isinstance(record, dict):
+                continue
+            staff_name = str(record.get("staff_name") or "").strip()
+            if not staff_name:
+                continue
+            staff_token = re.sub(r"[^a-z0-9]+", "_", staff_name.lower()).strip("_")
+            staff_id = str(record.get("staff_id") or f"staff-{branch_slug}-{staff_token}")
+            events.append(
+                build_staff_event_from_scores(
+                    path=path,
+                    branch=branch,
+                    branch_slug=branch_slug,
+                    report_date=report_date,
+                    staff_id=staff_id,
+                    staff_name=staff_name,
+                    staff_name_raw=staff_name,
+                    section_slug=str(record.get("section") or "unknown_section"),
+                    section_name_raw=str(record.get("raw_section") or record.get("section") or ""),
+                    arrangement=safe_float(record.get("arrangement")),
+                    display=safe_float(record.get("display")),
+                    performance=safe_float(record.get("performance")),
+                    confidence=safe_float(record.get("confidence")),
+                    raw=data,
+                )
+            )
+        return events
+
+    event = extract_staff_event(path)
+    return [event] if event is not None else []
 
 
 def find_staff_events(
@@ -184,19 +308,17 @@ def find_staff_events(
         if not is_staff_performance_file(path):
             continue
         try:
-            event = extract_staff_event(path)
+            parsed_events = extract_staff_events(path)
         except Exception as exc:
             print(f"[WARN] Failed to parse {path}: {exc}")
             continue
 
-        if event is None:
-            continue
-        if requested_branch_slug and event.branch_slug != requested_branch_slug:
-            continue
-        if report_date and event.report_date != report_date:
-            continue
-
-        events.append(event)
+        for event in parsed_events:
+            if requested_branch_slug and event.branch_slug != requested_branch_slug:
+                continue
+            if report_date and event.report_date != report_date:
+                continue
+            events.append(event)
 
     return sorted(events, key=lambda e: (e.branch_slug, e.report_date, e.staff_name))
 

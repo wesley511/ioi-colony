@@ -26,6 +26,14 @@ try:
     )
 except ModuleNotFoundError:
     from whatsapp_report_sections import extract_selected_report_text, iter_attendance_rows, select_report_block
+try:
+    from scripts.parse_whatsapp_sales import extract_till_totals as extract_sales_till_totals
+except ModuleNotFoundError:
+    from parse_whatsapp_sales import extract_till_totals as extract_sales_till_totals
+try:
+    from scripts.whatsapp_intelligence import build_confidence_metadata
+except ModuleNotFoundError:
+    from whatsapp_intelligence import build_confidence_metadata
 
 
 # ============================================================
@@ -79,6 +87,7 @@ CLASSIFIERS = {
     "DAILY BALE SUMMARY - RELEASED TO RAIL": "bale_report",
     "DAILY BALE SUMMARY": "bale_report",
     "STAFF PERFORMANCE REPORT": "staff_report",
+    "DAILY STAFF PERFORMANCE REPORT": "staff_report",
     "STAFF ATTENDANCE REPORT": "staff_attendance_report",
     "DAILY STAFF ATTENDANCE REPORT": "staff_attendance_report",
     "SUPERVISOR CONTROL REPORT": "staff_attendance_report",
@@ -282,6 +291,16 @@ def validate_date(value: str) -> bool:
     return bool(DATE_RE.fullmatch(value))
 
 
+def normalize_report_date_value(value: str) -> str:
+    raw = str(value or "").strip()
+    if validate_date(raw):
+        return raw
+    match = re.search(r"(\d{2}/\d{2}/\d{2})", raw)
+    if match:
+        return match.group(1)
+    return raw
+
+
 def validate_time(value: str) -> bool:
     return bool(TIME_RE.fullmatch(value))
 
@@ -437,28 +456,52 @@ def validate_sales_report(lines: list[str]) -> ValidationResult:
     warnings: list[str] = []
     flags: list[str] = []
     fields: dict[str, str] = {}
+    joined_text = "\n".join(lines)
 
     for line in lines:
         kv = parse_key_value_line(line)
         if kv:
             fields[kv[0]] = kv[1]
 
-    required = [
-        "Branch",
-        "Date",
-        "Z Reading",
-        "Cash Sales",
-        "EFTPOS Sales",
-        "Over/Short Reason",
-        "Supervisor Confirmed",
-    ]
-    for key in required:
+    till_totals = extract_sales_till_totals(joined_text)
+
+    if "Customers Served" not in fields:
+        for alias in ("Guest Served", "Guests Served", "Guest/ Customer served"):
+            if alias in fields:
+                fields["Customers Served"] = fields[alias]
+                break
+
+    if "Z Reading" not in fields and till_totals.get("z_reading", 0) > 0:
+        fields["Z Reading"] = str(till_totals["z_reading"])
+    if "Cash Sales" not in fields and till_totals.get("cash", 0) > 0:
+        fields["Cash Sales"] = str(till_totals["cash"])
+    if "EFTPOS Sales" not in fields and till_totals.get("card", 0) > 0:
+        fields["EFTPOS Sales"] = str(till_totals["card"])
+
+    if "Date" not in fields:
+        errors.append("Missing required field: Date")
+    elif fields.get("Date"):
+        fields["Date"] = normalize_report_date_value(fields["Date"])
+    for key in ("Z Reading", "Cash Sales", "EFTPOS Sales"):
         if key not in fields:
             errors.append(f"Missing required field: {key}")
 
     branch = normalize_branch(fields.get("Branch", ""))
+    if not branch:
+        inferred_branch = shared_normalize_branch(
+            joined_text,
+            style="canonical_slug",
+            fallback="none",
+            match_substring=True,
+        )
+        branch = str(inferred_branch or "")
+        if branch:
+            warnings.append("Branch missing; inferred from report text")
+            flags.append("branch_inferred")
     if branch and branch not in ALLOWED_BRANCHES:
         errors.append(f"Invalid branch: {branch}")
+    if not branch:
+        errors.append("Missing required field: Branch")
 
     report_date = fields.get("Date", "")
     if report_date and not validate_date(report_date):
@@ -558,13 +601,26 @@ def validate_sales_report(lines: list[str]) -> ValidationResult:
                 f"Z Reading mismatch: Cash Sales + EFTPOS Sales differs from Z Reading by {difference:.2f}"
             )
 
-        supervisor_confirmed = fields["Supervisor Confirmed"].upper()
-        if supervisor_confirmed not in {"YES", "NO"}:
+        supervisor_confirmed = fields.get("Supervisor Confirmed", "").upper()
+        if not supervisor_confirmed:
+            warnings.append("Supervisor Confirmed missing; stored as empty")
+            flags.append("supervisor_confirmed_missing")
+        elif supervisor_confirmed not in {"YES", "NO"}:
             errors.append("Supervisor Confirmed must be YES or NO")
+
+        if "Over/Short Reason" not in fields:
+            warnings.append("Over/Short Reason missing; stored as empty")
+            flags.append("over_short_reason_missing")
 
     normalized = None
     if not errors:
         notes = fields.get("Notes", "")
+        intelligence = build_confidence_metadata(
+            validation_lane=lane_for(errors, warnings),
+            warnings=warnings,
+            flags=flags,
+            confidence_score=None,
+        )
         normalized = {
             "signal_type": "daily_sales_report",
             "branch": branch,
@@ -586,12 +642,13 @@ def validate_sales_report(lines: list[str]) -> ValidationResult:
                 "staff_on_duty": staff_on_duty,
             },
             "control": {
-                "over_short_reason": fields["Over/Short Reason"],
-                "supervisor_confirmed": fields["Supervisor Confirmed"].upper(),
+                "over_short_reason": fields.get("Over/Short Reason", ""),
+                "supervisor_confirmed": fields.get("Supervisor Confirmed", "").upper(),
             },
             "notes": notes,
             "flags": list(flags),
             "warnings": list(warnings),
+            "intelligence": intelligence,
         }
 
     return ValidationResult(
@@ -622,6 +679,8 @@ def validate_inventory_report(lines: list[str]) -> ValidationResult:
         key, value = kv
 
         if key in {"Branch", "Date"} and phase == "header":
+            if key == "Date":
+                value = normalize_report_date_value(value)
             header_fields[key] = value
             continue
 
@@ -669,6 +728,12 @@ def validate_inventory_report(lines: list[str]) -> ValidationResult:
             "report_type": "inventory_report",
             "sections": section_rows,
             "notes": notes,
+            "intelligence": build_confidence_metadata(
+                validation_lane="accepted",
+                warnings=[],
+                inferred_field_count=0,
+                confidence_score=None,
+            ),
         }
 
     return ValidationResult(
@@ -682,6 +747,7 @@ def validate_inventory_report(lines: list[str]) -> ValidationResult:
 
 def validate_bale_report(lines: list[str]) -> ValidationResult:
     errors: list[str] = []
+    warnings: list[str] = []
     branch = ""
     report_date = ""
     released_by = ""
@@ -709,22 +775,19 @@ def validate_bale_report(lines: list[str]) -> ValidationResult:
             branch = normalize_branch(value)
             continue
         if key == "Date":
-            report_date = value
+            report_date = normalize_report_date_value(value)
             continue
         if key == "Released By":
             released_by = value
-            flush_current()
             continue
-        if key == "Total Qty":
+        if key in {"Total Qty", "Total Quantity"}:
             total_qty = value
-            flush_current()
             continue
-        if key == "Total Amount":
+        if key in {"Total Amount", "Amount Total"}:
             total_amount = value
-            flush_current()
             continue
 
-        if key == "Bale ID" and current:
+        if key in {"Bale ID", "Item", "Item Name", "Item_Name"} and current:
             flush_current()
 
         current[key] = value
@@ -742,12 +805,7 @@ def validate_bale_report(lines: list[str]) -> ValidationResult:
         errors.append("Invalid date format; expected DD/MM/YY")
 
     if not released_by:
-        errors.append("Missing required field: Released By")
-
-    if total_qty is None or not is_number(total_qty):
-        errors.append("Missing or invalid Total Qty")
-    if total_amount is None or not is_number(total_amount):
-        errors.append("Missing or invalid Total Amount")
+        warnings.append("Released By missing; stored as empty")
 
     if not blocks:
         errors.append("At least one bale block is required")
@@ -757,29 +815,35 @@ def validate_bale_report(lines: list[str]) -> ValidationResult:
     sum_amount = 0.0
 
     for idx, block in enumerate(blocks, start=1):
-        required = ["Bale ID", "Section", "Qty", "Amount", "Status"]
-        for key in required:
-            if key not in block:
-                errors.append(f"Bale block {idx}: missing {key}")
-
         bale_id = block.get("Bale ID", "").strip()
+        item_name = block.get("Item", "").strip() or block.get("Item Name", "").strip() or block.get("Item_Name", "").strip()
         section = block.get("Section", "").strip()
         qty = block.get("Qty", "").strip()
         amount = block.get("Amount", "").strip()
         status = block.get("Status", "").strip().upper()
 
-        if bale_id == "":
-            errors.append(f"Bale block {idx}: Bale ID cannot be empty")
+        if not item_name and not bale_id:
+            errors.append(f"Bale block {idx}: missing Item or Bale ID")
         if section and not validate_section_name(section):
             errors.append(f"Bale block {idx}: invalid section {section}")
-        if qty and not is_number(qty):
+        if not qty:
+            errors.append(f"Bale block {idx}: missing Qty")
+        elif not is_number(qty):
             errors.append(f"Bale block {idx}: Qty must be numeric")
-        if amount and not is_number(amount):
+        if not amount:
+            errors.append(f"Bale block {idx}: missing Amount")
+        elif not is_number(amount):
             errors.append(f"Bale block {idx}: Amount must be numeric")
         if status and status not in ALLOWED_BALE_STATUS:
             errors.append(f"Bale block {idx}: invalid status {status}")
+        if not bale_id:
+            warnings.append(f"Bale block {idx}: Bale ID missing; stored as empty")
+        if not section:
+            warnings.append(f"Bale block {idx}: Section missing; stored as empty")
+        if not status:
+            warnings.append(f"Bale block {idx}: Status missing; stored as empty")
 
-        if all([bale_id, section, qty, amount, status]) and not errors:
+        if qty and amount and is_number(qty) and is_number(amount):
             q = to_int(qty) if is_int(qty) else int(float(qty))
             a = to_number(amount)
             sum_qty += q
@@ -787,6 +851,7 @@ def validate_bale_report(lines: list[str]) -> ValidationResult:
             normalized_blocks.append(
                 {
                     "bale_id": bale_id,
+                    "item_name": item_name,
                     "section": section,
                     "qty": q,
                     "amount": a,
@@ -794,16 +859,30 @@ def validate_bale_report(lines: list[str]) -> ValidationResult:
                 }
             )
 
-    if total_qty is not None and is_number(total_qty):
-        if int(float(total_qty)) != sum_qty:
-            errors.append(f"Total Qty mismatch: declared {total_qty}, computed {sum_qty}")
+    if total_qty is None:
+        warnings.append("Total Qty missing; computed from bale rows")
+    elif not is_number(total_qty):
+        errors.append("Missing or invalid Total Qty")
+    elif int(float(total_qty)) != sum_qty:
+        errors.append(f"Total Qty mismatch: declared {total_qty}, computed {sum_qty}")
 
-    if total_amount is not None and is_number(total_amount):
-        if abs(float(total_amount) - sum_amount) > 0.01:
-            errors.append(f"Total Amount mismatch: declared {total_amount}, computed {sum_amount:.2f}")
+    if total_amount is None:
+        warnings.append("Total Amount missing; computed from bale rows")
+    elif not is_number(total_amount):
+        errors.append("Missing or invalid Total Amount")
+    elif abs(float(total_amount) - sum_amount) > 0.01:
+        errors.append(f"Total Amount mismatch: declared {total_amount}, computed {sum_amount:.2f}")
+
+    computed_total_qty = sum_qty
+    computed_total_amount = round(sum_amount, 2)
 
     normalized = None
     if not errors:
+        intelligence = build_confidence_metadata(
+            validation_lane=lane_for(errors, warnings),
+            warnings=warnings,
+            confidence_score=None,
+        )
         normalized = {
             "signal_type": "daily_bale_summary_report",
             "branch": branch,
@@ -812,9 +891,11 @@ def validate_bale_report(lines: list[str]) -> ValidationResult:
             "released_by": released_by,
             "bales": normalized_blocks,
             "totals": {
-                "total_qty": sum_qty,
-                "total_amount": round(sum_amount, 2),
+                "total_qty": int(float(total_qty)) if total_qty is not None and is_number(total_qty) else computed_total_qty,
+                "total_amount": round(float(total_amount), 2) if total_amount is not None and is_number(total_amount) else computed_total_amount,
             },
+            "warnings": list(warnings),
+            "intelligence": intelligence,
         }
 
     return ValidationResult(
@@ -823,6 +904,8 @@ def validate_bale_report(lines: list[str]) -> ValidationResult:
         report_type="bale_report",
         errors=errors,
         normalized=normalized,
+        warnings=warnings,
+        lane=lane_for(errors, warnings),
     )
 
 
@@ -861,7 +944,7 @@ def validate_staff_report(lines: list[str]) -> ValidationResult:
             branch = normalize_branch(value)
             continue
         if key == "Date":
-            report_date = value
+            report_date = normalize_report_date_value(value)
             continue
         if key == "Notes":
             notes = value
@@ -897,8 +980,6 @@ def validate_staff_report(lines: list[str]) -> ValidationResult:
             "Arrangement",
             "Display",
             "Performance",
-            "Customers Assisted",
-            "Items Moved",
         ]
         for key in required:
             if key not in block:
@@ -936,8 +1017,10 @@ def validate_staff_report(lines: list[str]) -> ValidationResult:
             "Customers Assisted": customers_assisted,
             "Items Moved": items_moved,
         }.items():
-            if not is_int(value):
-                errors.append(f"Staff block {idx}: {label} must be integer")
+            if not value:
+                warnings.append(f"Staff block {idx}: {label} missing; stored as null")
+            elif not is_int(value):
+                warnings.append(f"Staff block {idx}: {label} not numeric; stored as null")
             elif int(value) < 0:
                 errors.append(f"Staff block {idx}: {label} cannot be negative")
 
@@ -947,8 +1030,6 @@ def validate_staff_report(lines: list[str]) -> ValidationResult:
             arrangement,
             display,
             performance,
-            customers_assisted,
-            items_moved,
         ]) and not errors:
             normalized_staff.append(
                 {
@@ -958,13 +1039,18 @@ def validate_staff_report(lines: list[str]) -> ValidationResult:
                     "arrangement": int(arrangement),
                     "display": int(display),
                     "performance": int(performance),
-                    "customers_assisted": int(customers_assisted),
-                    "items_moved": int(items_moved),
+                    "customers_assisted": int(customers_assisted) if customers_assisted and is_int(customers_assisted) else None,
+                    "items_moved": int(items_moved) if items_moved and is_int(items_moved) else None,
                 }
             )
 
     normalized = None
     if not errors:
+        intelligence = build_confidence_metadata(
+            validation_lane=lane_for(errors, warnings),
+            warnings=warnings,
+            confidence_score=None,
+        )
         normalized = {
             "signal_type": "staff_performance_report",
             "branch": branch,
@@ -972,6 +1058,7 @@ def validate_staff_report(lines: list[str]) -> ValidationResult:
             "report_type": "staff_report",
             "staff_records": normalized_staff,
             "notes": notes,
+            "intelligence": intelligence,
         }
 
     return ValidationResult(
@@ -1007,7 +1094,7 @@ def validate_staff_attendance_report(lines: list[str], classifier_line: str = "S
                 branch = normalize_branch(value)
                 continue
             if key == "Date":
-                report_date = value
+                report_date = normalize_report_date_value(value)
                 continue
             if normalized_key in {
                 "present",
@@ -1112,6 +1199,11 @@ def validate_staff_attendance_report(lines: list[str], classifier_line: str = "S
 
     normalized = None
     if not errors:
+        intelligence = build_confidence_metadata(
+            validation_lane=lane_for(errors, warnings),
+            warnings=warnings,
+            confidence_score=None,
+        )
         normalized = {
             "signal_type": "staff_attendance_report",
             "branch": branch,
@@ -1130,6 +1222,7 @@ def validate_staff_attendance_report(lines: list[str], classifier_line: str = "S
             "declared_totals": declared_map,
             "warnings": list(warnings),
             "legacy_classifier": classifier_line,
+            "intelligence": intelligence,
         }
 
     return ValidationResult(
@@ -1233,8 +1326,9 @@ def ingest_file(path: Path, strict: bool = True) -> dict[str, Any]:
     state = load_state()
     seen_hashes: dict[str, Any] = state.setdefault("seen_hashes", {})
 
-    if raw_hash in seen_hashes:
-        return quarantine_duplicate(raw_text, raw_hash, seen_hashes[raw_hash])
+    existing_meta = seen_hashes.get(raw_hash)
+    if existing_meta and existing_meta.get("status") != "rejected":
+        return quarantine_duplicate(raw_text, raw_hash, existing_meta)
 
     validation = validate_message(raw_text)
 
@@ -1273,6 +1367,13 @@ def ingest_file(path: Path, strict: bool = True) -> dict[str, Any]:
         return result
 
     normalized = validation.normalized.copy()
+    intelligence = build_confidence_metadata(
+        validation_lane=validation.lane,
+        warnings=validation.warnings,
+        flags=(normalized.get("flags") if isinstance(normalized, dict) else None),
+        confidence_score=None,
+    )
+    normalized["intelligence"] = intelligence
     normalized["meta"] = {
         "source_file": str(path),
         "sha256": raw_hash,
@@ -1280,6 +1381,7 @@ def ingest_file(path: Path, strict: bool = True) -> dict[str, Any]:
         "strict_mode": strict,
         "validation_lane": validation.lane,
         "validation_warnings": list(validation.warnings),
+        **intelligence,
     }
 
     branch = normalized["branch"]
@@ -1310,6 +1412,7 @@ def ingest_file(path: Path, strict: bool = True) -> dict[str, Any]:
         "date": report_date,
         "sha256": raw_hash,
         "warnings": list(validation.warnings),
+        **intelligence,
     }
 
 

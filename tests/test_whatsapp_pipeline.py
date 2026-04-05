@@ -101,6 +101,39 @@ Total Amount: 100
             quarantined = list((tmp_path / "SIGNALS" / "quarantine_invalid").glob("*.json"))
             self.assertEqual(len(quarantined), 1)
 
+    def test_gatekeeper_replays_previously_rejected_hash_under_current_rules(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            input_file = tmp_path / "sales.txt"
+            text = """DAY-END SALES REPORT
+Branch: bena_road
+Date: 31/03/26
+Z Reading: 5738.00
+Cash Sales: 5161.00
+EFTPOS Sales: 577.00
+Total Customers (Traffic): 468
+Customers Served: NA
+Staff on Duty: -
+Cash Variance: 0
+Over/Short Reason: NONE
+Supervisor Confirmed: YES
+"""
+            input_file.write_text(text, encoding="utf-8")
+            raw_hash = gatekeeper.sha256_text(text)
+            state_path = tmp_path / "DATA" / "whatsapp_gatekeeper_state.json"
+            state_path.parent.mkdir(parents=True, exist_ok=True)
+            state_path.write_text(
+                json.dumps({"seen_hashes": {raw_hash: {"status": "rejected", "report_type": "sales_report"}}}),
+                encoding="utf-8",
+            )
+
+            with patch.object(gatekeeper, "DATA_DIR", tmp_path / "DATA"), patch.object(gatekeeper, "LOGS_DIR", tmp_path / "LOGS"), patch.object(gatekeeper, "RAW_INPUT_DIR", tmp_path / "RAW_INPUT" / "whatsapp"), patch.object(gatekeeper, "NORMALIZED_DIR", tmp_path / "SIGNALS" / "normalized"), patch.object(gatekeeper, "QUARANTINE_DIR", tmp_path / "SIGNALS" / "quarantine_duplicates"), patch.object(gatekeeper, "INVALID_DIR", tmp_path / "SIGNALS" / "quarantine_invalid"), patch.object(gatekeeper, "STATE_FILE", state_path):
+                result = ingest_file(input_file, strict=True)
+
+            self.assertEqual(result["status"], "accepted_with_warnings")
+            saved_state = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(saved_state["seen_hashes"][raw_hash]["status"], "accepted_with_warnings")
+
     def test_staff_parser_eliminates_unknowns_for_valid_sample(self) -> None:
         records = staff_parser.parse_staff_records(STAFF_SAMPLE.read_text(encoding="utf-8"))
         self.assertEqual(len(records), 1)
@@ -172,6 +205,12 @@ Total Amount: 100
         report_type, classifier_reason, _ = classify_report_type(MIXED_SALES_SAMPLE.read_text(encoding="utf-8"))
         self.assertEqual(report_type, "sales")
         self.assertEqual(classifier_reason, "section_best_score")
+
+        validation = validate_message(MIXED_SALES_SAMPLE.read_text(encoding="utf-8"))
+        self.assertTrue(validation.ok)
+        self.assertEqual(validation.lane, "accepted_with_warnings")
+        self.assertEqual(validation.normalized["branch"], "waigani")
+        self.assertEqual(validation.normalized["control"]["supervisor_confirmed"], "")
 
         parsed = sales_parser.parse_sales_report(MIXED_SALES_SAMPLE.read_text(encoding="utf-8"))
         self.assertEqual(parsed["customers"]["traffic"], 383)
@@ -297,6 +336,20 @@ Date: 01/04/26
         self.assertEqual(parsed["attendance"]["records"][0]["attendance_status"], "Present")
         self.assertEqual(parsed["attendance"]["records"][1]["attendance_status"], "Off Duty")
         self.assertEqual(parsed["attendance"]["records"][2]["attendance_status"], "On Leave")
+
+    def test_attendance_ignores_free_text_notes(self) -> None:
+        text = """STAFF ATTENDANCE REPORT
+Branch: Waigani
+Date: 01/04/26
+1. Alice: ✔
+2. Bob: Absent
+Supervisor confirmation: All material issues have been escalated.
+Notes: Present team stayed late for stock count.
+"""
+        result = validate_message(text)
+        self.assertTrue(result.ok)
+        self.assertEqual(len(result.normalized["attendance_records"]), 2)
+        self.assertFalse(any(row["staff_name"] == "Supervisor confirmation" for row in result.normalized["attendance_records"]))
 
     def test_true_legacy_supervisor_report_is_quarantined(self) -> None:
         legacy_text = """SUPERVISOR CONTROL REPORT
@@ -437,6 +490,8 @@ Supervisor Confirmed: YES
         self.assertEqual(envelope["validation"]["lane"], "accepted_with_warnings")
         self.assertTrue(envelope["validation"]["accepted_with_warnings"])
         self.assertGreater(envelope["validation"]["warning_count"], 0)
+        self.assertIn("inferred_field_count", envelope["validation"])
+        self.assertIn("confidence_score", envelope["validation"])
 
     def test_sales_parser_multitill_aggregation_precedence(self) -> None:
         explicit_text = """DAY-END SALES REPORT
@@ -477,6 +532,10 @@ Over/Short Reason: NONE
         z_fallback = sales_parser.parse_sales_report(z_fallback_text)
         self.assertEqual(z_fallback["totals"]["sales"], 250.0)
         self.assertEqual(z_fallback["totals"]["sales_source"], "z_reading_fallback")
+        self.assertIn("intelligence", z_fallback)
+        self.assertIn("warning_count", z_fallback["intelligence"])
+        self.assertIn("inferred_field_count", z_fallback["intelligence"])
+        self.assertEqual(z_fallback["intelligence"]["confidence_score"], None)
 
     def test_notes_kpis_are_extracted_and_malformed_tokens_flagged(self) -> None:
         text = """DAY-END SALES REPORT
@@ -499,6 +558,28 @@ Notes: sales per labor hour=135.00; sales per customer=12.30; conversion rate=10
         self.assertEqual(parsed["customers"]["reported_conversion_rate"], 104.0)
         self.assertTrue(any(flag.startswith("malformed_note:") for flag in parsed["flags"]))
 
+    def test_gatekeeper_accepts_flat_multirow_bale_summary_with_computed_totals(self) -> None:
+        text = """DAILY BALE SUMMARY
+Branch: Waigani
+Date: 02/04/26
+
+Item: OSH 45kg
+Qty: 228
+Amount: 2207.00
+
+Item: LTSK 45kg
+Qty: 190
+Amount: 1646.00
+"""
+        result = validate_message(text)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.lane, "accepted_with_warnings")
+        self.assertEqual(len(result.normalized["bales"]), 2)
+        self.assertEqual(result.normalized["totals"]["total_qty"], 418)
+        self.assertAlmostEqual(result.normalized["totals"]["total_amount"], 3853.0)
+        self.assertIn("intelligence", result.normalized)
+        self.assertGreater(result.normalized["intelligence"]["warning_count"], 0)
+
     def test_bale_summary_ignores_total_rows_when_flattening(self) -> None:
         text = """DAILY BALE SUMMARY
 Branch: Waigani
@@ -518,6 +599,57 @@ Status: Released
         parsed = bale_parser.parse_bale_summary(text)
         self.assertEqual(len(parsed["bales"]), 1)
         self.assertEqual(parsed["bales"][0]["item_token"], "mens_shorts")
+
+    def test_bale_summary_parses_multiple_flat_rows(self) -> None:
+        text = """DAILY BALE SUMMARY
+Branch: Waigani
+Date: 02/04/26
+
+Item: OSH 45kg
+Qty: 228
+Amount: 2207.00
+
+Item: LTSK 45kg
+Qty: 190
+Amount: 1646.00
+"""
+        parsed = bale_parser.parse_bale_summary(text)
+        self.assertEqual(len(parsed["bales"]), 2)
+        self.assertEqual(parsed["summary"]["parsed_bale_count"], 2)
+        self.assertEqual(parsed["summary"]["total_qty"], 418)
+        self.assertAlmostEqual(parsed["summary"]["total_amount"], 3853.0)
+        self.assertIn("intelligence", parsed)
+        self.assertEqual(parsed["intelligence"]["inferred_field_count"], 3)
+
+    def test_staff_performance_missing_volume_metrics_becomes_warning_lane(self) -> None:
+        text = """DAILY STAFF PERFORMANCE REPORT
+Branch: Waigani
+Date: 02/04/26
+
+1. Milford
+Section: Boys
+Arrangement: 5
+Display: 4
+Performance: 4
+"""
+        result = validate_message(text)
+        self.assertTrue(result.ok)
+        self.assertEqual(result.report_type, "staff_report")
+        self.assertEqual(result.lane, "accepted_with_warnings")
+        self.assertIsNone(result.normalized["staff_records"][0]["customers_assisted"])
+        self.assertIsNone(result.normalized["staff_records"][0]["items_moved"])
+
+    def test_attendance_parser_exposes_intelligence_metadata(self) -> None:
+        text = """STAFF ATTENDANCE REPORT
+Branch: Waigani
+Date: 01/04/26
+1. Alice: ✔
+2. Bob: Absent
+"""
+        parsed = attendance_parser.parse_attendance_report(text)
+        self.assertIn("intelligence", parsed)
+        self.assertEqual(parsed["intelligence"]["warning_count"], 0)
+        self.assertEqual(parsed["intelligence"]["validation_lane"], "accepted")
 
     def test_section_normalizer_cleans_adjacent_duplicate_tokens(self) -> None:
         self.assertEqual(normalize_section_name("Kids Boys"), "kids_boys")
@@ -553,6 +685,61 @@ Status: Released
         self.assertEqual(chosen[0].file_id, "newer")
         self.assertEqual(audit_rows[0]["count"], 2)
 
+    def test_process_replays_previously_rejected_file_when_now_valid(self) -> None:
+        text = """DAY-END SALES REPORT
+Branch: bena_road
+Date: 31/03/26
+Z Reading: 5738.00
+Cash Sales: 5161.00
+EFTPOS Sales: 577.00
+Total Customers (Traffic): 468
+Customers Served: NA
+Staff on Duty: -
+Cash Variance: 0
+Over/Short Reason: NONE
+Supervisor Confirmed: YES
+"""
+        validation = validate_message(text)
+        self.assertTrue(validation.ok)
+        msg = accepted_processor.AcceptedMessage(
+            txt_path=Path("warning.txt"),
+            meta_path=Path("warning.meta.json"),
+            text=text,
+            meta={"received_at": "2026-03-31T17:35:35+00:00"},
+            branch_slug="bena_road",
+            report_type="sales",
+            received_at="2026-03-31T17:35:35+00:00",
+            file_id="warning",
+            validation=validation,
+        )
+        state = {
+            "processed": {
+                "warning": {
+                    "file_id": "warning",
+                    "status": "rejected",
+                    "reasons": ["Field must be numeric: Customers Served"],
+                }
+            }
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            with patch.object(accepted_processor, "NORMALIZED_ROOT", tmp_path / "SIGNALS" / "normalized"), patch.object(
+                accepted_processor, "STAGING_ROOT", tmp_path / "RAW_INPUT" / "whatsapp" / "processed"
+            ), patch.object(accepted_processor, "WORKSPACE_ROOT", tmp_path), patch.object(
+                accepted_processor, "write_normalized_envelope", return_value=tmp_path / "dispatch.json"
+            ), patch.object(
+                accepted_processor, "copy_to_processed_staging",
+                return_value={"staged_txt_path": str(tmp_path / "staged.txt"), "staged_meta_path": str(tmp_path / "staged.meta.json")},
+            ), patch.object(
+                accepted_processor, "run_downstream_parser",
+                return_value={"executed": False, "status": "no_parser_configured", "command": None, "returncode": None, "stdout": "", "stderr": ""},
+            ), patch.object(accepted_processor, "save_state"):
+                processed = accepted_processor.process_one(msg, state, mark_processed_even_on_error=False)
+
+        self.assertTrue(processed)
+        self.assertEqual(state["processed"]["warning"]["validation_lane"], "accepted_with_warnings")
+
     def test_pipeline_audit_reports_missing_staff_attendance_branches(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -561,17 +748,49 @@ Status: Released
             attendance_text = """STAFF ATTENDANCE REPORT
 Branch: Waigani
 Date: 30/03/26
-1. Milford: ✔
+            1. Milford: ✔
 """
             (accepted_root / "attendance.txt").write_text(attendance_text, encoding="utf-8")
+            invalid_dir = tmp_path / "SIGNALS" / "quarantine_invalid"
+            invalid_dir.mkdir(parents=True, exist_ok=True)
+            (invalid_dir / "rejected.json").write_text(
+                json.dumps(
+                    {
+                        "status": "rejected",
+                        "report_type": "sales_report",
+                        "reasons": ["Field must be numeric: Staff on Duty"],
+                        "raw_text": """DAY-END SALES REPORT
+Branch: bena_road
+Date: 31/03/26
+Z Reading: 5738.00
+Cash Sales: 5161.00
+EFTPOS Sales: 577.00
+Total Customers (Traffic): 468
+Customers Served: 200
+Staff on Duty: team-a
+Cash Variance: 0
+Over/Short Reason: NONE
+Supervisor Confirmed: YES
+""",
+                    }
+                ),
+                encoding="utf-8",
+            )
 
-            with patch.object(pipeline_audit, "ROOT", tmp_path), patch.object(pipeline_audit, "REPORTS_DIR", tmp_path / "REPORTS"), patch.object(pipeline_audit, "DATA_DIR", tmp_path / "DATA"), patch.object(pipeline_audit, "ACCEPTED_ROOT", tmp_path / "RAW_INPUT" / "whatsapp" / "accepted"), patch.object(pipeline_audit, "PROCESSED_ROOT", tmp_path / "RAW_INPUT" / "whatsapp" / "processed"), patch.object(pipeline_audit, "NORMALIZED_DIR", tmp_path / "SIGNALS" / "normalized"), patch.object(pipeline_audit, "COLONY_MEMORY_DIR", tmp_path / "COLONY_MEMORY" / "staff_signals"):
+            with patch.object(pipeline_audit, "ROOT", tmp_path), patch.object(pipeline_audit, "REPORTS_DIR", tmp_path / "REPORTS"), patch.object(pipeline_audit, "DATA_DIR", tmp_path / "DATA"), patch.object(pipeline_audit, "ACCEPTED_ROOT", tmp_path / "RAW_INPUT" / "whatsapp" / "accepted"), patch.object(pipeline_audit, "PROCESSED_ROOT", tmp_path / "RAW_INPUT" / "whatsapp" / "processed"), patch.object(pipeline_audit, "NORMALIZED_DIR", tmp_path / "SIGNALS" / "normalized"), patch.object(pipeline_audit, "INVALID_DIR", invalid_dir), patch.object(pipeline_audit, "COLONY_MEMORY_DIR", tmp_path / "COLONY_MEMORY" / "staff_signals"):
                 report_path = pipeline_audit.generate_audit()
 
             self.assertTrue(report_path.exists())
             payload = json.loads((tmp_path / "DATA" / "whatsapp_pipeline_audit.json").read_text(encoding="utf-8"))
             self.assertEqual(payload["latest_staff_attendance_date"], "30/03/26")
             self.assertIn("bena_road", payload["missing_staff_attendance_branches"])
+            self.assertIn("daily_completeness_engine", payload)
+            self.assertIn("failure_memory_summary", payload)
+            self.assertIn("replay_audit", payload)
+            self.assertTrue((tmp_path / "DATA" / "whatsapp_completeness_matrix.json").exists())
+            self.assertTrue((tmp_path / "DATA" / "whatsapp_failure_memory.json").exists())
+            self.assertTrue((tmp_path / "DATA" / "whatsapp_replay_audit.json").exists())
+            self.assertGreaterEqual(len(payload["replay_audit"]["promoted_files"]), 1)
 
 
 if __name__ == "__main__":

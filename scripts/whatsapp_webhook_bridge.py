@@ -17,6 +17,10 @@ try:
     from scripts.utils_normalization import normalize_branch as shared_normalize_branch
 except ModuleNotFoundError:
     from utils_normalization import normalize_branch as shared_normalize_branch
+try:
+    from scripts.whatsapp_report_sections import REPORT_KEYWORDS, select_report_block, strong_signal_types
+except ModuleNotFoundError:
+    from whatsapp_report_sections import REPORT_KEYWORDS, select_report_block, strong_signal_types
 
 app = Flask(__name__)
 
@@ -60,13 +64,19 @@ CLASSIFIER_MAP: dict[str, str] = {
     "DAILY BALE SUMMARY": "bale_summary",
     "STAFF PERFORMANCE REPORT": "staff_performance",
     "DAILY STAFF PERFORMANCE REPORT": "staff_performance",
+    "STAFF ATTENDANCE REPORT": "staff_attendance",
+    "DAILY STAFF ATTENDANCE REPORT": "staff_attendance",
     "DAILY MONITORING REPORT": "monitoring",
     "MONITORING REPORT": "monitoring",
     "STRENGTH REPORT": "strength",
     "GAP REPORT": "gap",
     "PRICING REPORT": "pricing",
     "DAILY PRICING REPORT": "pricing",
-    "SUPERVISOR CONTROL REPORT": "supervisor_control",
+}
+
+LEGACY_SUPERVISOR_TITLES = {
+    "SUPERVISOR CONTROL REPORT",
+    "SUPERVISOR CONTROL SUMMARY",
 }
 
 REPORT_KEYWORDS: dict[str, tuple[str, ...]] = {
@@ -127,13 +137,13 @@ REPORT_KEYWORDS: dict[str, tuple[str, ...]] = {
         "calculator",
         "pricing clerk",
     ),
-    "supervisor_control": (
-        "supervisor control report",
-        "staffing issues",
-        "stock issues",
-        "pricing/system issues",
-        "supervisor confirmed",
-        "exceptions escalated",
+    "staff_attendance": (
+        "staff attendance report",
+        "attendance",
+        "present",
+        "absent",
+        "leave",
+        "off duty",
     ),
 }
 
@@ -301,10 +311,25 @@ def classifier_lookup_candidates(title: str) -> list[str]:
 
 
 def classify_report_type(text: str) -> tuple[str, str, str]:
+    selected, _, ambiguous = select_report_block(text)
     title = normalize_title_for_classifier(first_nonempty_line(text))
+
+    # Supervisor headers are content-sensitive during the migration:
+    # attendance-shaped payloads become staff_attendance, true legacy
+    # supervisor reports stay legacy_supervisor and get quarantined upstream.
+    if title in LEGACY_SUPERVISOR_TITLES and (selected is None or selected.raw_type == "legacy_supervisor"):
+        if selected is not None:
+            return selected.report_type, "supervisor_header_content_match", title
+        return "legacy_supervisor", "supervisor_header_unresolved", title
+
     for candidate in classifier_lookup_candidates(title):
         if candidate in CLASSIFIER_MAP:
             return CLASSIFIER_MAP[candidate], "first_line_exact", title
+
+    if selected is not None:
+        if ambiguous:
+            return "unknown", "ambiguous_section_selection", selected.header
+        return selected.report_type, "section_best_score", selected.header
 
     lowered = (text or "").lower()
     best_type = "unknown"
@@ -372,46 +397,10 @@ def is_trivial_message(text: str) -> bool:
 
 
 def detect_mixed_report_signals(text: str, primary_report_type: str | None = None) -> bool:
-    lowered = (text or "").lower()
-    matched_types: list[str] = []
-
-    for report_type, keywords in REPORT_KEYWORDS.items():
-        hits = sum(1 for keyword in keywords if keyword in lowered)
-        if hits >= 2:
-            matched_types.append(report_type)
-
-    matched = set(matched_types)
-
-    if len(matched) < 2:
-        return False
-
-    if primary_report_type == "bale_summary":
-        sales_markers = [
-            "z reading",
-            "cash sales",
-            "eftpos sales",
-            "customers served",
-            "total customers",
-            "traffic",
-            "main door",
-            "guest/customer serve",
-            "guest customer serve",
-        ]
-        supervisor_markers = [
-            "staffing issues",
-            "stock issues",
-            "pricing/system issues",
-            "supervisor confirmed",
-            "exceptions escalated",
-            "cash variance",
-        ]
-
-        has_sales = sum(1 for k in sales_markers if k in lowered) >= 2
-        has_supervisor = sum(1 for k in supervisor_markers if k in lowered) >= 2
-
-        return has_sales or has_supervisor
-
-    return True
+    strong_types = set(strong_signal_types(text))
+    if primary_report_type:
+        strong_types.discard(primary_report_type)
+    return len(strong_types) >= 1
 
 
 def build_quarantine_reason(
@@ -420,12 +409,15 @@ def build_quarantine_reason(
     report_kind: str,
     branch_slug: str | None,
 ) -> str | None:
+    selected, _, ambiguous = select_report_block(text)
     if is_trivial_message(text):
         return "noise_or_unclassified"
-    if detect_mixed_report_signals(text, primary_report_type=report_kind) and report_kind != "bale_summary":
-        return "mixed_report_signals"
+    if ambiguous:
+        return "ambiguous_report_selection"
     if report_kind == "unknown":
         return "missing_required_classifier"
+    if selected is not None and selected.raw_type == "legacy_supervisor" and selected.report_type != "staff_attendance":
+        return "legacy_supervisor_unsupported"
     if not has_report_structure(text):
         return "missing_required_structure"
     if not branch_slug:

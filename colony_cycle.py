@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -98,6 +99,52 @@ def extract_last_event(lines: list[str], marker: str) -> str:
 
 def count_recent_events(lines: list[str], marker: str) -> int:
     return sum(1 for line in lines if marker in line)
+
+
+def validate_wave4_warning_artifacts() -> dict[str, int]:
+    warning_intelligence_path = DATA_DIR / "warning_intelligence.json"
+    warning_pattern_audit_path = DATA_DIR / "warning_pattern_audit.json"
+
+    require_file(warning_intelligence_path, "Wave 4 warning intelligence")
+    require_file(warning_pattern_audit_path, "Wave 4 warning pattern audit")
+
+    intelligence_payload = json.loads(warning_intelligence_path.read_text(encoding="utf-8"))
+    if not isinstance(intelligence_payload, dict):
+        raise RuntimeError("Wave 4 validation failed: warning_intelligence.json is not a JSON object")
+
+    intelligence_count = 0
+    for pattern_id, entry in intelligence_payload.items():
+        if not isinstance(entry, dict):
+            raise RuntimeError(
+                f"Wave 4 validation failed: warning_intelligence entry for {pattern_id} is not a JSON object"
+            )
+        missing = [field for field in ("severity_score", "escalation_level", "escalation_reason") if field not in entry]
+        if missing:
+            raise RuntimeError(
+                f"Wave 4 validation failed: warning_intelligence entry for {pattern_id} missing {', '.join(missing)}"
+            )
+        intelligence_count += 1
+
+    audit_payload = json.loads(warning_pattern_audit_path.read_text(encoding="utf-8"))
+    if not isinstance(audit_payload, list):
+        raise RuntimeError("Wave 4 validation failed: warning_pattern_audit.json is not a JSON array")
+
+    audit_count = 0
+    for row in audit_payload:
+        if not isinstance(row, dict):
+            raise RuntimeError("Wave 4 validation failed: warning_pattern_audit row is not a JSON object")
+        pattern_id = str(row.get("pattern_id", "")).strip() or "unknown"
+        missing = [field for field in ("severity_score", "escalation_level") if field not in row]
+        if missing:
+            raise RuntimeError(
+                f"Wave 4 validation failed: warning_pattern_audit row for {pattern_id} missing {', '.join(missing)}"
+            )
+        audit_count += 1
+
+    return {
+        "warning_intelligence_pattern_count": intelligence_count,
+        "warning_pattern_audit_row_count": audit_count,
+    }
 
 
 def write_health(advisory_path: Path, fusion_path: Path) -> None:
@@ -285,12 +332,20 @@ def emit_staff_signals() -> None:
     print(f"{POST_PREFIX} Emitted {emitted_count} staff signal(s) to colony memory")
 
 
-def run_decision_signal_generator() -> None:
+def run_decision_signal_generator(advisory_path: Path, fusion_path: Path | None = None) -> None:
     generator = BASE_DIR / "scripts" / "generate_decision_signals.py"
     require_file(generator, "Decision signal generator")
 
     print(f"{POST_PREFIX} Running: decision signal generator")
-    result = run_command([sys.executable, str(generator)])
+    cmd = [
+        sys.executable,
+        str(generator),
+        "--advisory",
+        str(advisory_path),
+    ]
+    if fusion_path is not None:
+        cmd.extend(["--fusion", str(fusion_path)])
+    result = run_command(cmd)
     print_output(result)
 
     if result.returncode != 0:
@@ -375,12 +430,18 @@ def main() -> int:
         print(f"{POST_PREFIX} Running: staff signal emitter")
         emit_staff_signals()
 
-        run_decision_signal_generator()
-        run_reinforcement_stage()
-        run_decay_stage()
-
         advisory_path = run_staff_analyzer(ts)
         fusion_path = run_fusion_analyzer(ts)
+
+        run_decision_signal_generator(advisory_path, fusion_path)
+        run_reinforcement_stage()
+        run_decay_stage()
+        wave4_validation = validate_wave4_warning_artifacts()
+        log_event(
+            "WAVE4_VALIDATED "
+            f"warning_intelligence_pattern_count={wave4_validation['warning_intelligence_pattern_count']} "
+            f"warning_pattern_audit_row_count={wave4_validation['warning_pattern_audit_row_count']}"
+        )
 
         write_observability(advisory_path, fusion_path)
 

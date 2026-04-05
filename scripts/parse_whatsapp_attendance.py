@@ -15,6 +15,10 @@ try:
 except ModuleNotFoundError:
     from utils_normalization import normalize_branch as shared_normalize_branch
     from whatsapp_report_sections import extract_selected_report_text, iter_attendance_rows
+try:
+    from scripts.whatsapp_intelligence import build_confidence_metadata
+except ModuleNotFoundError:
+    from whatsapp_intelligence import build_confidence_metadata
 
 
 STATUS_MAP = {
@@ -147,6 +151,12 @@ def parse_attendance_report(text: str) -> dict[str, Any]:
         warnings.append("no_attendance_rows_parsed")
     if any(record["attendance_status"] == "Unknown" for record in records):
         warnings.append("unknown_attendance_status_present")
+    intelligence = build_confidence_metadata(
+        validation_lane="accepted_with_warnings" if warnings else "accepted",
+        warnings=warnings,
+        inferred_field_count=0,
+        confidence_score=None,
+    )
 
     return {
         "type": "staff_attendance",
@@ -163,6 +173,7 @@ def parse_attendance_report(text: str) -> dict[str, Any]:
             },
         },
         "warnings": warnings,
+        "intelligence": intelligence,
         "source_format": "whatsapp_staff_attendance",
         "raw_text_preview": normalize_spaces(selected_text)[:320],
     }

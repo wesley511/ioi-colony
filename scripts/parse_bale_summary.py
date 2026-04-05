@@ -17,6 +17,10 @@ try:
     from scripts.whatsapp_report_sections import extract_selected_report_text
 except ModuleNotFoundError:
     from whatsapp_report_sections import extract_selected_report_text
+try:
+    from scripts.whatsapp_intelligence import build_confidence_metadata
+except ModuleNotFoundError:
+    from whatsapp_intelligence import build_confidence_metadata
 
 def utc_today_iso() -> str:
     return datetime.now(timezone.utc).date().isoformat()
@@ -271,26 +275,53 @@ def extract_legacy_bale_blocks(text: str) -> list[dict[str, Any]]:
 
 
 def extract_flat_item_rows(text: str) -> list[dict[str, Any]]:
-    item_name = extract_line_value(text, "Item", "Item Name", "Item_Name")
-    qty = parse_int(extract_line_value(text, "Qty", "Total Qty", "Total_Qty"))
-    amount = parse_float(extract_line_value(text, "Amount", "Amt", "Total Amount", "Total_Amount"))
-    if not item_name or is_total_like_item(item_name) or qty is None or amount is None:
-        return []
-    avg_unit_price = round(amount / qty, 2) if qty > 0 else 0.0
-    return [
-        {
-            "bale_no": 0,
-            "item_name": normalize_item_name(item_name),
-            "item_token": canonical_item_token(item_name),
-            "qty": qty,
-            "amount": round(amount, 2),
-            "status": "",
-            "weight_kg": None,
-            "avg_unit_price": avg_unit_price,
-            "source_block_type": "flat",
-            "raw_block_preview": normalize_spaces(text)[:220],
-        }
-    ]
+    rows: list[dict[str, str]] = []
+    current: dict[str, str] = {}
+
+    def flush_current() -> None:
+        nonlocal current
+        if current:
+            rows.append(current)
+            current = {}
+
+    for raw_line in text.splitlines():
+        parsed = raw_line.split(":", 1)
+        if len(parsed) != 2:
+            continue
+        key = parsed[0].strip()
+        value = parsed[1].strip()
+        if not key:
+            continue
+        if key in {"Item", "Item Name", "Item_Name", "Bale ID"} and current:
+            flush_current()
+        current[key] = value
+
+    flush_current()
+
+    parsed_rows: list[dict[str, Any]] = []
+    for row in rows:
+        item_name = row.get("Item", "").strip() or row.get("Item Name", "").strip() or row.get("Item_Name", "").strip()
+        qty = parse_int(row.get("Qty") or row.get("Total Qty") or row.get("Total_Qty"))
+        amount = parse_float(row.get("Amount") or row.get("Amt") or row.get("Total Amount") or row.get("Total_Amount"))
+        if not item_name or is_total_like_item(item_name) or qty is None or amount is None:
+            continue
+        avg_unit_price = round(amount / qty, 2) if qty > 0 else 0.0
+        parsed_rows.append(
+            {
+                "bale_no": parse_int(row.get("Bale ID")) or 0,
+                "item_name": normalize_item_name(item_name),
+                "item_token": canonical_item_token(item_name),
+                "qty": qty,
+                "amount": round(amount, 2),
+                "status": parse_status(row.get("Status")),
+                "weight_kg": None,
+                "avg_unit_price": avg_unit_price,
+                "source_block_type": "flat",
+                "raw_block_preview": normalize_spaces("\n".join(f"{k}: {v}" for k, v in row.items()))[:220],
+            }
+        )
+
+    return parsed_rows
 
 
 def merge_bale_blocks(structured: list[dict[str, Any]], legacy: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -451,6 +482,9 @@ def parse_bale_summary(text: str) -> dict[str, Any]:
         total_qty=total_qty,
         total_amount=total_amount,
     )
+    inferred_markers = [
+        flag for flag in flags if flag in {"missing_total_bales", "missing_total_qty", "missing_total_amount"}
+    ]
 
     block_format = "unknown"
     if structured_blocks:
@@ -459,6 +493,12 @@ def parse_bale_summary(text: str) -> dict[str, Any]:
         block_format = "legacy"
     elif bales:
         block_format = "flat"
+    intelligence = build_confidence_metadata(
+        validation_lane="accepted_with_warnings" if flags else "accepted",
+        warnings=flags,
+        inferred_field_count=len(inferred_markers),
+        confidence_score=None,
+    )
 
     return {
         "type": "bale_release_summary",
@@ -479,6 +519,7 @@ def parse_bale_summary(text: str) -> dict[str, Any]:
         "bales": bales,
         "flags": flags,
         "confidence": confidence,
+        "intelligence": intelligence,
         "source_format": "whatsapp_bale_release_summary",
         "raw_text_preview": normalize_spaces(text)[:320],
     }
@@ -512,6 +553,9 @@ def main() -> int:
 
     try:
         parsed = parse_bale_summary(text)
+        if not parsed["bales"]:
+            print("ERROR: no bale rows parsed from WhatsApp summary", file=sys.stderr)
+            return 2
         save_yaml(parsed)
 
         print("\nSummary:")

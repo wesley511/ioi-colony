@@ -47,6 +47,7 @@ STATUS_PATTERNS: list[tuple[str, str]] = [
     (r"\bempty\b", "empty"),
     (r"\bvery\s+tight\b", "very_tight"),
     (r"\bpacked\b", "packed"),
+    (r"\bnormal\b", "moderate"),
     (r"\bnot\s+too\s+tight\b", "not_too_tight"),
     (r"\bpartly\s+tight\b", "partly_tight"),
     (r"\bpartly\s+loose\b", "partly_loose"),
@@ -162,6 +163,14 @@ def find_operations_file(branch: str, report_date: str) -> Path | None:
         if direct:
             return direct
 
+        root_candidates = [
+            SIGNALS_DIR / branch_path / f"{branch_path}_inventory_report_{report_date}.json",
+            SIGNALS_DIR / branch_path / f"{branch_path}_supervisor_report_{report_date}.json",
+        ]
+        direct_root = first_existing(root_candidates)
+        if direct_root:
+            return direct_root
+
     if raw_ops_dir.exists():
         matches = sorted(raw_ops_dir.glob("*supervisor*.*"))
         for match in matches:
@@ -177,6 +186,54 @@ def find_operations_file(branch: str, report_date: str) -> Path | None:
                     return match
 
     return None
+
+
+def find_supervisor_context_file(branch: str, report_date: str, exclude: Path | None = None) -> Path | None:
+    branch_slug = canonical_branch_slug(branch)
+    for branch_path in branch_path_candidates(branch_slug):
+        candidates = [
+            SIGNALS_DIR / branch_path / f"{branch_path}_supervisor_report_{report_date}.json",
+            SIGNALS_DIR / branch_path / report_date / f"{branch_path}_supervisor_report_{report_date}.json",
+        ]
+        for candidate in candidates:
+            if not candidate.exists():
+                continue
+            if exclude is not None and candidate.resolve() == exclude.resolve():
+                continue
+            return candidate
+    return None
+
+
+def append_supervisor_context_diagnostics(
+    diagnostics: list[Diagnostic],
+    raw_payload: dict[str, Any],
+    supervisor_path: Path | None,
+) -> None:
+    if supervisor_path is None or not supervisor_path.exists():
+        return
+
+    data = load_structured_file(supervisor_path)
+    if not isinstance(data, dict):
+        return
+
+    exceptions = data.get("exceptions")
+    if not isinstance(exceptions, list):
+        return
+
+    raw_payload.setdefault("supervisor_context", data)
+    for item in exceptions:
+        if not isinstance(item, dict):
+            continue
+        detail = str(item.get("details") or item.get("exception_type") or "supervisor exception").strip()
+        action = str(item.get("action_taken") or "").strip()
+        message = detail if not action else f"{detail}. Action taken: {action}."
+        diagnostics.append(
+            Diagnostic(
+                severity="low",
+                code="supervisor_control_exception",
+                message=message,
+            )
+        )
 
 
 def classify_status(text: str) -> str:
@@ -254,6 +311,33 @@ def infer_section_signals_from_structured_ops(data: dict[str, Any]) -> list[Sect
 
     for key in ("rail_status", "sections", "inventory_sections", "availability"):
         block = data.get(key)
+        if isinstance(block, list):
+            for row in block:
+                if not isinstance(row, dict):
+                    continue
+                raw_label_str = str(row.get("section") or row.get("name") or "").strip()
+                if not raw_label_str:
+                    continue
+                text = str(
+                    row.get("status")
+                    or row.get("availability")
+                    or row.get("rail_status")
+                    or row.get("note")
+                    or row.get("notes")
+                    or ""
+                )
+                status = classify_status(text)
+                signals.append(
+                    SectionSignal(
+                        section=slugify(raw_label_str),
+                        raw_label=raw_label_str,
+                        status=status,
+                        signal_strength=status_to_strength(status),
+                        evidence=text or None,
+                        notes=[],
+                    )
+                )
+            continue
         if not isinstance(block, dict):
             continue
 
@@ -406,6 +490,9 @@ def summarize_availability(
         text = source_path.read_text(encoding="utf-8", errors="ignore")
         raw_payload = {"raw_text_excerpt": text[:3000]}
         signals.extend(infer_section_signals_from_text(text))
+
+    supplemental_supervisor = find_supervisor_context_file(branch, report_date, exclude=source_path)
+    append_supervisor_context_diagnostics(diagnostics, raw_payload, supplemental_supervisor)
 
     merged_sections = merge_section_signals(signals)
 

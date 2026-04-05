@@ -3,6 +3,11 @@ import os
 import re
 from datetime import datetime, date
 
+try:
+    from scripts.opportunity_blackboard import ACTIVE_MARKER, rebuild_active_part, split_blackboard_sections, split_blocks
+except ModuleNotFoundError:
+    from opportunity_blackboard import ACTIVE_MARKER, rebuild_active_part, split_blackboard_sections, split_blocks
+
 BLACKBOARD_PATH = "OPPORTUNITIES.md"
 LOG_PATH = "LOGS/decay_worker.log"
 
@@ -31,33 +36,6 @@ def parse_iso_date(value: str) -> date | None:
         return datetime.strptime(value.strip(), "%Y-%m-%d").date()
     except ValueError:
         return None
-
-
-def split_blackboard_sections(content: str) -> tuple[str, str, str]:
-    marker = "## Active Opportunities"
-    if marker not in content:
-        return content, "", ""
-
-    before, after = content.split(marker, 1)
-
-    exploring_marker = "## Exploring Opportunities"
-    if exploring_marker in after:
-        active_part, rest = after.split(exploring_marker, 1)
-        return before, active_part, exploring_marker + rest
-
-    return before, after, ""
-
-
-def split_blocks(active_part: str) -> list[str]:
-    parts = active_part.split("### [")
-    if len(parts) <= 1:
-        return []
-
-    blocks = []
-    for part in parts[1:]:
-        block = "### [" + part
-        blocks.append(block)
-    return blocks
 
 
 def extract_title(block: str) -> str:
@@ -141,15 +119,6 @@ def process_block(block: str, today: date) -> tuple[str, str]:
     return updated_block, f"DECAY {title}"
 
 
-def rebuild_active_part(active_part: str, updated_blocks: list[str]) -> str:
-    leading_text = active_part.split("### [", 1)[0]
-    rebuilt = leading_text.rstrip("\n") + "\n\n"
-    rebuilt += "\n".join(block.rstrip() for block in updated_blocks)
-    if not rebuilt.endswith("\n"):
-        rebuilt += "\n"
-    return rebuilt
-
-
 def main() -> None:
     print("=== IOI Colony Decay Worker ===")
 
@@ -177,7 +146,7 @@ def main() -> None:
         updated_blocks.append(updated_block)
 
     rebuilt_active = rebuild_active_part(active_part, updated_blocks)
-    new_content = before + "## Active Opportunities" + rebuilt_active + after
+    new_content = before + ACTIVE_MARKER + rebuilt_active + after
     write_file(BLACKBOARD_PATH, new_content)
 
     print("=== Done ===")
@@ -185,4 +154,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

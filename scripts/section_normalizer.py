@@ -152,6 +152,18 @@ def _normalize_lookup_key(raw: str) -> str:
     return text
 
 
+def _dedupe_adjacent_tokens(raw: str) -> str:
+    tokens = [token for token in re.split(r"\s+", raw.strip()) if token]
+    deduped: list[str] = []
+    previous = ""
+    for token in tokens:
+        if token == previous:
+            continue
+        deduped.append(token)
+        previous = token
+    return " ".join(deduped)
+
+
 @lru_cache(maxsize=1)
 def _section_alias_index() -> dict[str, str]:
     index = {slugify(key): value for key, value in _STATIC_ALIAS_MAP.items()}
@@ -203,7 +215,13 @@ def normalize_section_name(raw: str) -> str:
     key = slugify(_normalize_lookup_key(raw))
     if key in _PLACEHOLDER_VALUES:
         return ""
-    return _section_alias_index().get(key, "")
+    resolved = _section_alias_index().get(key, "")
+    if resolved:
+        return resolved
+    deduped_key = slugify(_dedupe_adjacent_tokens(_normalize_lookup_key(raw)))
+    if deduped_key in _PLACEHOLDER_VALUES:
+        return ""
+    return _section_alias_index().get(deduped_key, "")
 
 
 def is_placeholder_section(raw: str) -> bool:

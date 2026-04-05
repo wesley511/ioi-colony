@@ -1,11 +1,11 @@
 # IOI Colony Anomaly Summary
 
-- generated_at: 2026-04-01T07:40:27.693157+00:00
+- generated_at: 2026-04-05T02:25:57.010085+00:00
 - anomaly_count: 2
 
 ## Metrics
 
-- active_count: 16
+- active_count: 41
 - archived_count: 0
 - priority_count: 2
 - recent_error_count: 3

@@ -12,6 +12,10 @@ try:
     from scripts.branch_resolution import legacy_branch_stem, resolve_branch_slug
 except ModuleNotFoundError:
     from branch_resolution import legacy_branch_stem, resolve_branch_slug
+try:
+    from scripts.section_normalizer import normalize_section_name
+except ModuleNotFoundError:
+    from section_normalizer import normalize_section_name
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -35,6 +39,7 @@ class DecisionSignal:
     description: str
     leverage_score: float
     risk_level: str
+    section: str | None = None
     status: str = "Active"
 
 
@@ -195,12 +200,20 @@ def build_signal_file_content(signal: DecisionSignal) -> str:
     else:
         signal_type = "advisory_signal"
 
+    section_lines = ""
+    if signal.section:
+        section_lines = (
+            f"section: {signal.section}\n"
+            f"section_canonical: {signal.section}\n"
+        )
+
     return (
         f"signal_id: {signal_id}\n"
         f"date: {signal_date}\n"
         f"source_type: advisory_report\n"
         f"source_name: {source_name}\n"
         f"branch_slug: {signal.branch_slug}\n"
+        f"{section_lines}"
         f"category: {category}\n"
         f"signal_type: {signal_type}\n"
         f"description: {signal.description}\n"
@@ -239,12 +252,13 @@ def build_signals_from_reports(
     # 1. Weak sections -> Performance Gap — Operations
     seen_sections: set[str] = set()
     for branch, section in parse_weak_sections(advisory_text):
-        key = f"{branch}:{section}"
+        canonical_section = normalize_section_name(section) or slugify(section)
+        key = f"{branch}:{canonical_section}"
         if key in seen_sections:
             continue
         seen_sections.add(key)
 
-        section_slug = slugify(section)
+        section_slug = slugify(canonical_section)
         branch_slug = slugify(branch)
 
         signals.append(
@@ -255,11 +269,12 @@ def build_signals_from_reports(
                 source=f"advisory_report:{advisory_path.name}",
                 date_identified=now_iso,
                 description=(
-                    f"{branch} shows a weak operational section: {section}. "
+                    f"{branch} shows a weak operational section: {canonical_section}. "
                     f"Recommendation in advisory report: improve display, support, and engagement."
                 ),
                 leverage_score=0.74,
                 risk_level="Medium",
+                section=canonical_section,
             )
         )
 

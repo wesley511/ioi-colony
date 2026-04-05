@@ -78,6 +78,21 @@ def infer_branch_slug_from_path(signal: dict) -> str:
     return resolve_branch_slug(signal, path=signal.get("_path"), candidates=[signal.get("branch"), signal.get("source_slug")])
 
 
+def stem_after_branch(signal: dict) -> str:
+    stem = Path(str(signal.get("_path", ""))).stem.lower()
+    branch_prefix = clean_token(
+        signal.get("branch_slug")
+        or signal.get("branch")
+        or signal.get("source_slug")
+        or signal.get("source_name")
+        or infer_branch_slug_from_path(signal)
+    )
+    prefix = f"{branch_prefix}_"
+    if branch_prefix and stem.startswith(prefix):
+        return stem[len(prefix):]
+    return stem
+
+
 def infer_staff_name_from_path(signal: dict) -> str:
     explicit = (signal.get("staff_name") or "").strip()
     if explicit:
@@ -85,6 +100,14 @@ def infer_staff_name_from_path(signal: dict) -> str:
 
     path = str(signal.get("_path", ""))
     name = Path(path).stem.lower()
+    remainder = stem_after_branch(signal)
+    branch_prefix = clean_token(
+        signal.get("branch_slug")
+        or signal.get("branch")
+        or signal.get("source_slug")
+        or signal.get("source_name")
+        or infer_branch_slug_from_path(signal)
+    )
 
     prefixes = [
         "staff-bena-road-",
@@ -102,6 +125,19 @@ def infer_staff_name_from_path(signal: dict) -> str:
             remainder = name[len(prefix):]
             remainder = re.sub(r"_\d{4}-\d{2}-\d{2}$", "", remainder)
             return remainder
+
+    if remainder.startswith("staff_") and "_strength_" in remainder:
+        staff_body = remainder.split("_strength_", 1)[0][len("staff_"):]
+        if branch_prefix and staff_body.startswith(f"{branch_prefix}_"):
+            staff_body = staff_body[len(branch_prefix) + 1 :]
+        return staff_body or "unknown_staff"
+
+    if remainder.startswith("branch_"):
+        return "branch_signal"
+
+    for marker in ("_gap_", "_strength_"):
+        if marker in remainder:
+            return remainder.split(marker, 1)[0] or "unknown_staff"
 
     return "unknown_staff"
 
@@ -129,8 +165,24 @@ def normalize_section_key(signal: dict) -> tuple[str, str]:
         or signal.get("section_canonical")
         or signal.get("section")
         or signal.get("raw_section")
-        or "unknown_section"
     )
+    if clean_token(str(raw_section or "")) in {"unknown", "unknown_section"}:
+        raw_section = None
+
+    if not raw_section:
+        stem = stem_after_branch(signal)
+        category = clean_token(str(signal.get("category") or ""))
+        if stem.startswith("branch_") or category == "branch_performance":
+            raw_section = "branch_performance"
+        elif stem.startswith("staff_") or category == "staff":
+            raw_section = "staff_performance"
+        else:
+            for marker in ("_gap_", "_strength_"):
+                if marker in stem:
+                    raw_section = stem.split(marker, 1)[0]
+                    break
+            else:
+                raw_section = "unknown_section"
 
     match = resolve_section_from_master_data(raw_section, branch_slug)
     if match:
@@ -162,6 +214,19 @@ def infer_signal_strength(signal: dict) -> float:
     return round(rating_component + movement_component + confidence_component, 2)
 
 
+def is_staff_observation_signal(signal: dict) -> bool:
+    signal_type = clean_token(str(signal.get("signal_type") or ""))
+    if signal_type in {"strong_performance", "performance_gap", "advisory_signal"}:
+        return False
+
+    required_fields = ("staff_id", "staff_name", "section")
+    if not all(str(signal.get(field) or "").strip() for field in required_fields):
+        return False
+
+    scored_fields = ("arrangement", "display", "performance", "items_moved")
+    return any(str(signal.get(field) or "").strip() for field in scored_fields)
+
+
 def load_staff_signals(signals_dir: Path = STAFF_SIGNALS_DIR) -> list[dict]:
     candidate_paths: list[Path] = []
     if NORMALIZED_STAFF_DIR.exists():
@@ -175,15 +240,28 @@ def load_staff_signals(signals_dir: Path = STAFF_SIGNALS_DIR) -> list[dict]:
         try:
             payload = parse_signal_file(path)
             payload.setdefault("source_file", str(path))
+            payload.setdefault("_path", str(path))
             return payload
         except Exception:
             return None
 
     results = []
-    for payload in dedupe_staff_signals(candidate_paths, _parser):
-        section = clean_token(payload.get("section_canonical") or payload.get("section") or payload.get("raw_section"))
+    seen_paths: set[str] = set()
+    unique_paths: list[Path] = []
+    for path in candidate_paths:
+        key = str(path)
+        if key in seen_paths:
+            continue
+        seen_paths.add(key)
+        unique_paths.append(path)
+
+    for payload in dedupe_staff_signals(unique_paths, _parser):
+        if not is_staff_observation_signal(payload):
+            continue
+        section, _section_type = normalize_section_key(payload)
         if section in {"unknown", "unknown_section"}:
             continue
+        payload.setdefault("section", section)
         results.append(payload)
     return results
 

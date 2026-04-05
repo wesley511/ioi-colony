@@ -61,15 +61,23 @@ def find_daily_sales_event(
     branch_slug = canonical_branch_slug(branch)
     for branch_path in branch_path_candidates(branch_slug):
         branch_dir = normalized_dir / branch_path / report_date
-        if not branch_dir.exists():
-            continue
-        candidates = sorted(branch_dir.glob("*daily_sales_report*.json"))
-        for path in candidates:
+        candidate_paths: list[Path] = []
+        if branch_dir.exists():
+            candidate_paths.extend(sorted(branch_dir.glob("*daily_sales_report*.json")))
+        candidate_paths.extend(
+            [
+                normalized_dir / branch_path / f"{branch_path}_daily_sales_report_{report_date}.json",
+                normalized_dir / branch_path / f"{branch_path}_sales_report_{report_date}.json",
+            ]
+        )
+        for path in candidate_paths:
+            if not path.exists():
+                continue
             try:
                 data = load_json(path)
             except Exception:
                 continue
-            if data.get("event_kind") != "daily_sales_report":
+            if data.get("event_kind") != "daily_sales_report" and data.get("signal_type") != "daily_sales_report":
                 continue
             if resolve_branch_slug(data, path=path, candidates=[data.get("branch")]) == branch_slug:
                 return data
@@ -129,24 +137,35 @@ def extract_sales_metrics(daily_sales_event: dict[str, Any] | None) -> dict[str,
     performance = sections.get("performance", {}) or {}
     supervisor = sections.get("supervisor", {}) or {}
 
+    gatekeeper_totals = daily_sales_event.get("totals", {}) or {}
+    gatekeeper_traffic = daily_sales_event.get("traffic", {}) or {}
+    gatekeeper_control = daily_sales_event.get("control", {}) or {}
+    total_sales = safe_float(financials.get("total_sales"))
+    if total_sales is None:
+        total_sales = round(
+            (safe_float(gatekeeper_totals.get("cash_sales")) or 0.0)
+            + (safe_float(gatekeeper_totals.get("eftpos_sales")) or 0.0),
+            2,
+        )
+
     return {
         "available": True,
         "branch": daily_sales_event.get("branch"),
-        "report_date": daily_sales_event.get("report_date"),
-        "cash": safe_float(financials.get("cash")),
-        "card": safe_float(financials.get("card")),
-        "z_reading": safe_float(financials.get("z_reading")),
-        "total_sales": safe_float(financials.get("total_sales")),
-        "balanced": financials.get("balanced"),
-        "foot_traffic": safe_float(customers.get("foot_traffic")),
-        "served_customers": safe_float(customers.get("served_customers")),
+        "report_date": daily_sales_event.get("report_date") or daily_sales_event.get("date"),
+        "cash": safe_float(financials.get("cash")) or safe_float(gatekeeper_totals.get("cash_sales")),
+        "card": safe_float(financials.get("card")) or safe_float(gatekeeper_totals.get("eftpos_sales")),
+        "z_reading": safe_float(financials.get("z_reading")) or safe_float(gatekeeper_totals.get("z_reading")),
+        "total_sales": total_sales,
+        "balanced": financials.get("balanced") or gatekeeper_control.get("supervisor_confirmed"),
+        "foot_traffic": safe_float(customers.get("foot_traffic")) or safe_float(gatekeeper_traffic.get("total_customers")),
+        "served_customers": safe_float(customers.get("served_customers")) or safe_float(gatekeeper_traffic.get("customers_served")),
         "sales_per_labor_hour": safe_float(performance.get("sales_per_labor_hour")),
         "sales_per_customer": safe_float(performance.get("sales_per_customer")),
         "conversion_rate_pct": safe_float(performance.get("conversion_rate_pct")),
         "staffing_issues": supervisor.get("staffing_issues"),
         "stock_issues_affecting_sales": supervisor.get("stock_issues_affecting_sales"),
         "pricing_or_system_issues": supervisor.get("pricing_or_system_issues"),
-        "cash_variance": supervisor.get("cash_variance"),
+        "cash_variance": supervisor.get("cash_variance") or safe_float(gatekeeper_totals.get("cash_variance")),
         "exceptions_escalated": supervisor.get("exceptions_escalated"),
         "labels": daily_sales_event.get("labels", []) or [],
     }

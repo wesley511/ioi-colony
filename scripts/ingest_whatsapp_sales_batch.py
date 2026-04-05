@@ -25,6 +25,13 @@ ACCEPTED_ROOT = ROOT / "RAW_INPUT" / "whatsapp" / "accepted"
 PROCESSED_ROOT = ROOT / "RAW_INPUT" / "whatsapp" / "processed"
 
 
+def canonical_report_type(value: object) -> str:
+    text = str(value or "").strip().lower()
+    if text == "sales_report":
+        return "sales"
+    return text
+
+
 @dataclass
 class SalesCandidate:
     txt_path: Path
@@ -46,6 +53,10 @@ def _parse_candidate(txt_path: Path) -> SalesCandidate | None:
     meta_path = txt_path.with_suffix(".meta.json")
     if not meta_path.exists():
         return None
+    meta = _load_meta(meta_path)
+    meta_report_type = canonical_report_type(meta.get("report_type"))
+    if meta_report_type and meta_report_type != "sales":
+        return None
     validation = validate_message(txt_path.read_text(encoding="utf-8", errors="replace"))
     if not validation.ok or validation.report_type != "sales_report":
         return None
@@ -54,7 +65,6 @@ def _parse_candidate(txt_path: Path) -> SalesCandidate | None:
     report_date = str(payload.get("date") or "").strip()
     if not branch or not report_date or branch == "unknown":
         return None
-    meta = _load_meta(meta_path)
     return SalesCandidate(
         txt_path=txt_path,
         meta_path=meta_path,

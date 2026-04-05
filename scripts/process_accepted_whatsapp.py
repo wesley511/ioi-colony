@@ -23,6 +23,10 @@ try:
     from scripts.utils_normalization import normalize_branch as shared_normalize_branch
 except ModuleNotFoundError:
     from utils_normalization import normalize_branch as shared_normalize_branch
+try:
+    from scripts.whatsapp_intelligence import build_confidence_metadata
+except ModuleNotFoundError:
+    from whatsapp_intelligence import build_confidence_metadata
 
 # -----------------------------------------------------------------------------
 # Paths / config
@@ -272,9 +276,12 @@ def discover_txt_files() -> list[Path]:
 
 
 def validation_report_type(validation: ValidationResult | None, msg: AcceptedMessage) -> str:
+    explicit_type = canonical_report_type(msg.report_type)
+    if explicit_type and explicit_type != "unknown":
+        return explicit_type
     if validation and validation.report_type:
         return canonical_report_type(validation.report_type)
-    return canonical_report_type(msg.report_type)
+    return explicit_type
 
 
 def validation_branch(validation: ValidationResult | None, msg: AcceptedMessage) -> str:
@@ -362,6 +369,12 @@ def build_normalized_envelope(msg: AcceptedMessage) -> dict[str, Any]:
     resolved_date = validation_date(msg.validation, msg)
     validation_lane = str(msg.validation.lane if msg.validation else "quarantine")
     validation_warnings = list(msg.validation.warnings if msg.validation else [])
+    intelligence = build_confidence_metadata(
+        validation_lane=validation_lane,
+        warnings=validation_warnings,
+        flags=((msg.validation.normalized or {}).get("flags") if msg.validation and msg.validation.normalized else None),
+        confidence_score=None,
+    )
     return {
         "kind": "whatsapp_accepted_dispatch",
         "schema_version": "1.0",
@@ -398,8 +411,9 @@ def build_normalized_envelope(msg: AcceptedMessage) -> dict[str, Any]:
             "warnings": validation_warnings,
             "lane": validation_lane,
             "accepted_with_warnings": validation_lane == "accepted_with_warnings",
-            "warning_count": len(validation_warnings),
+            **intelligence,
         },
+        "intelligence": intelligence,
         "meta": msg.meta,
     }
 
@@ -515,7 +529,8 @@ def copy_to_processed_staging(msg: AcceptedMessage) -> dict[str, str]:
 
 def reject_invalid_message(msg: AcceptedMessage, state: dict[str, Any]) -> bool:
     processed = state["processed"]
-    if msg.file_id in processed:
+    existing = processed.get(msg.file_id)
+    if existing and not record_needs_replay(existing):
         return False
 
     validation = msg.validation
@@ -542,9 +557,33 @@ def reject_invalid_message(msg: AcceptedMessage, state: dict[str, Any]) -> bool:
     return True
 
 
+def parser_result_indicates_empty_output(record: dict[str, Any]) -> bool:
+    parser = record.get("parser") or {}
+    stdout = str(parser.get("stdout") or "")
+    report_type = canonical_report_type(record.get("report_type"))
+    if report_type == "bale_summary":
+        return "Parsed bale count: 0" in stdout or "Total bales: 0" in stdout
+    if report_type == "staff_performance":
+        return "Parsed 0 staff records" in stdout or "Wrote 0 files" in stdout
+    return False
+
+
+def record_needs_replay(record: dict[str, Any]) -> bool:
+    if record.get("status") == "rejected":
+        return True
+    parser = record.get("parser") or {}
+    parser_status = parser.get("status")
+    if parser_status and parser_status not in {"ok", "no_parser_configured"}:
+        return True
+    if parser_status == "ok" and parser_result_indicates_empty_output(record):
+        return True
+    return False
+
+
 def process_one(msg: AcceptedMessage, state: dict[str, Any], mark_processed_even_on_error: bool) -> bool:
     processed = state["processed"]
-    if msg.file_id in processed:
+    existing = processed.get(msg.file_id)
+    if existing and not record_needs_replay(existing):
         return False
 
     if msg.validation and not msg.validation.ok:

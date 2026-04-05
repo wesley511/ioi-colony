@@ -17,6 +17,10 @@ try:
     from scripts.whatsapp_report_sections import extract_selected_report_text
 except ModuleNotFoundError:
     from whatsapp_report_sections import extract_selected_report_text
+try:
+    from scripts.whatsapp_intelligence import build_confidence_metadata
+except ModuleNotFoundError:
+    from whatsapp_intelligence import build_confidence_metadata
 
 def utc_today_iso() -> str:
     return datetime.now(timezone.utc).date().isoformat()
@@ -460,6 +464,17 @@ def parse_sales_report(text: str) -> dict[str, Any]:
         cash_variance=cash_variance_numeric,
     )
     flags.extend(note_warnings)
+    inferred_markers: list[str] = []
+    if total_sales_source != "explicit_total_sales":
+        inferred_markers.append(total_sales_source)
+    if staff_on_duty_source == "unique_cashiers":
+        inferred_markers.append("staff_on_duty_unique_cashiers")
+    intelligence = build_confidence_metadata(
+        validation_lane="accepted_with_warnings" if flags else "accepted",
+        warnings=flags,
+        inferred_field_count=len(set(inferred_markers)),
+        confidence_score=None,
+    )
 
     return {
         "type": "sales_day_end",
@@ -504,6 +519,7 @@ def parse_sales_report(text: str) -> dict[str, Any]:
         },
         "flags": flags,
         "confidence": confidence,
+        "intelligence": intelligence,
         "source_format": "whatsapp_day_end_sales",
         "raw_text_preview": normalize_spaces(sales_text)[:400],
     }

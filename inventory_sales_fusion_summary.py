@@ -187,6 +187,14 @@ def find_sales_file(branch: str, report_date: str) -> Path | None:
             if resolve_branch_slug(path=candidate, candidates=[candidate.stem]) == branch_slug:
                 return candidate
 
+        root_patterns = [
+            SIGNALS_DIR / branch_path / f"{branch_path}_sales_report_{report_date}.json",
+            SIGNALS_DIR / branch_path / f"{branch_path}_daily_sales_report_{report_date}.json",
+        ]
+        direct_root = first_existing(root_patterns)
+        if direct_root:
+            return direct_root
+
         raw_patterns = [
             ROOT / "RAW_INPUT" / report_date / "sales" / f"{branch_path}_sales_{report_date}.yaml",
             ROOT / "RAW_INPUT" / report_date / "sales" / f"{branch_path}_sales_{report_date}.yml",
@@ -238,6 +246,13 @@ def find_bale_release_file(branch: str, report_date: str) -> Path | None:
         for candidate in candidates:
             if resolve_branch_slug(path=candidate, candidates=[candidate.stem]) == branch_slug:
                 return candidate
+
+        root_patterns = [
+            SIGNALS_DIR / branch_path / f"{branch_path}_bale_report_{report_date}.json",
+        ]
+        direct_root = first_existing(root_patterns)
+        if direct_root:
+            return direct_root
     return None
 
 
@@ -253,6 +268,7 @@ def extract_sales_snapshot(path: Path | None) -> SalesSnapshot:
     totals = data.get("totals", {}) if isinstance(data.get("totals"), dict) else {}
     sales_block = data.get("sales", {}) if isinstance(data.get("sales"), dict) else {}
     customers = data.get("customers", {}) if isinstance(data.get("customers"), dict) else {}
+    traffic = data.get("traffic", {}) if isinstance(data.get("traffic"), dict) else {}
     performance = data.get("performance", {}) if isinstance(data.get("performance"), dict) else {}
     performance_metrics = (
         data.get("performance_metrics", {})
@@ -272,18 +288,24 @@ def extract_sales_snapshot(path: Path | None) -> SalesSnapshot:
 
     cash = (
         safe_float(totals.get("cash"))
+        or safe_float(totals.get("cash_sales"))
         or safe_float(sales_block.get("cash"))
         or safe_float(data.get("cash"))
+        or safe_float(data.get("cash_sales"))
     )
 
     card = (
         safe_float(totals.get("card"))
         or safe_float(totals.get("eftpos"))
+        or safe_float(totals.get("eftpos_sales"))
         or safe_float(sales_block.get("card"))
         or safe_float(sales_block.get("eftpos"))
         or safe_float(data.get("card"))
         or safe_float(data.get("eftpos_sales"))
     )
+
+    if total_sales is None and (cash is not None or card is not None):
+        total_sales = round((cash or 0.0) + (card or 0.0), 2)
 
     z_reading = (
         safe_float(totals.get("z_reading"))
@@ -291,10 +313,12 @@ def extract_sales_snapshot(path: Path | None) -> SalesSnapshot:
         or safe_float(data.get("z_reading"))
     )
 
-    traffic = (
+    traffic_count = (
         safe_int(customers.get("traffic"))
         or safe_int(customers.get("total_traffic"))
         or safe_int(customers.get("main_door"))
+        or safe_int(traffic.get("total_customers"))
+        or safe_int(traffic.get("customers_served"))
         or safe_int(data.get("traffic"))
     )
 
@@ -307,14 +331,14 @@ def extract_sales_snapshot(path: Path | None) -> SalesSnapshot:
 
     snapshot.available = any(
         value is not None
-        for value in [total_sales, cash, card, z_reading, traffic, conversion_rate_pct]
+        for value in [total_sales, cash, card, z_reading, traffic_count, conversion_rate_pct]
     )
     snapshot.source_file = str(path)
     snapshot.total_sales = total_sales
     snapshot.cash = cash
     snapshot.card = card
     snapshot.z_reading = z_reading
-    snapshot.traffic = traffic
+    snapshot.traffic = traffic_count
     snapshot.conversion_rate_pct = conversion_rate_pct
     snapshot.raw = data
     return snapshot
